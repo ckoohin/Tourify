@@ -14,6 +14,8 @@ import TourList from './pages/tour/TourList';
 import TourDetail from './pages/tour/TourDetail';
 import TourCreate from './pages/tour/TourCreate';
 import TourEdit from './pages/tour/TourEdit';
+import AttractionList from './pages/attraction/AttractionList';
+import ScheduleList from './pages/schedule/ScheduleList';
 import BookingList from './pages/booking/BookingList';
 import BookingCreate from './pages/booking/BookingCreate';
 import BookingDetail from './pages/booking/BookingDetail';
@@ -51,6 +53,12 @@ function App() {
             <Route path="/tours/create" element={<TourCreate />} />
             <Route path="/tours/:id" element={<TourDetail />} />
             <Route path="/tours/:id/edit" element={<TourEdit />} />
+
+            {/* Schedule Management  */}
+            <Route path="/schedules" element={<div><ScheduleList /></div>} />
+
+            {/* Location Management */}
+            <Route path="/attractions" element={<AttractionList />} />
             
             {/* Booking Management */}
             <Route path="/bookings" element={<BookingList />} />

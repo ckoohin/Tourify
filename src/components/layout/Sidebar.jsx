@@ -58,7 +58,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
               <i className="ri-map-2-line mr-3 text-lg"></i>
               <span>Danh sách Tour</span>
             </NavLink>
-            <NavLink to="/schedule" className={getNavLinkClass}>
+            <NavLink to="/schedules" className={getNavLinkClass}>
               <i className="ri-calendar-event-line mr-3 text-lg"></i>
               <span>Lịch khởi hành</span>
             </NavLink>
