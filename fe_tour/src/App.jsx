@@ -1,21 +1,33 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
+
 // Layouts
 import MainLayout from './components/layout/MainLayout';
 import AuthLayout from './components/layout/AuthLayout';
 
 // Pages
 import Login from './pages/auth/Login';
-import Dashboard from './pages/dashboard/Dashboard';
+import Dashboard from './pages/dashboard/Dashboard'; 
+import Register from './pages/auth/Register';
 import TourList from './pages/tour/TourList';
 import TourDetail from './pages/tour/TourDetail';
 import TourCreate from './pages/tour/TourCreate';
+import TourEdit from './pages/tour/TourEdit';
 import BookingList from './pages/booking/BookingList';
+import BookingCreate from './pages/booking/BookingCreate';
+import BookingDetail from './pages/booking/BookingDetail';
 import CustomerList from './pages/customer/CustomerList';
+import CustomerDetail from './pages/customer/CustomerDetail';
+import GuideList from './pages/guide/GuideList';
+import ProviderList from './pages/provider/ProviderList';
+import Reports from './pages/reports/Reports';
+import Settings from './pages/settings/Settings';
+import NotFound from './pages/NotFound.jsx';
+
 // ... import other pages
 
-// Protected Route
+// // Protected Route
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 function App() {
@@ -30,7 +42,7 @@ function App() {
           </Route>
 
           {/* Protected Routes */}
-          <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+          <Route element={<MainLayout />}>
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<Dashboard />} />
             

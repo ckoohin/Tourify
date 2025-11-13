@@ -3,56 +3,74 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+require('dotenv').config();
+
+const { testConnection } = require('./config/db');
+const { notFound, errorHandler } = require('./middleware/errorHandler');
+
+const authRoutes = require('./routes/authentication/auth');
+const tourCategoryRoutes = require('./routes/tours/tourCategoryRoutes');
+const staffRoutes = require('./routes/staff/staff');
 
 const app = express();
 
-// Security middleware
 app.use(helmet());
 
-// CORS
 app.use(cors({
   origin: process.env.FRONTEND_URL,
   credentials: true
 }));
+// app.use(cors({
+//   origin: process.env.CLIENT_URL || 'http://localhost:5173',
+//   credentials: true
+// }));
 
-// Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Rate limiting
 const limiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
+  windowMs: 10 * 60 * 1000,
   max: 100
 });
 app.use('/api', limiter);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/tour-categories', tourCategoryRoutes);
+app.use('/api/v1/staff', staffRoutes);
 
-// Routes
-app.use('/api/v1/auth', require('./routes/auth'));
-app.use('/api/v1/tours', require('./routes/tours'));
-app.use('/api/v1/bookings', require('./routes/bookings'));
-app.use('/api/v1/customers', require('./routes/customers'));
-app.use('/api/v1/guides', require('./routes/guides'));
-app.use('/api/v1/providers', require('./routes/providers'));
-app.use('/api/v1/payments', require('./routes/payments'));
-app.use('/api/v1/reports', require('./routes/reports'));
+// app.use('/api/v1/auth', require('./routes/authentication/auth'));
+// app.use('/api/v1/tours', require('./routes/tourRoutes'));
+// app.use('/api/v1/bookings', require('./routes/bookingRoutes'));
+// app.use('/api/v1/users', require('./routes/userRoutes'));
 
-// Health check
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', timestamp: new Date() });
-});
-
-// Error handler middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.statusCode || 500).json({
-    success: false,
-    error: err.message || 'Server Error'
+  res.json({
+    success: true,
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
   });
 });
+app.use(notFound);
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5000;
+
+const startServer = async () => {
+  try {
+    await testConnection();
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 module.exports = app;
