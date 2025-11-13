@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
+
 // Layouts
 import MainLayout from './components/layout/MainLayout';
 import AuthLayout from './components/layout/AuthLayout';
@@ -26,7 +27,7 @@ import NotFound from './pages/NotFound.jsx';
 
 // ... import other pages
 
-// Protected Route
+// // Protected Route
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 function App() {
@@ -41,7 +42,7 @@ function App() {
           </Route>
 
           {/* Protected Routes */}
-          <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+          <Route element={<MainLayout />}>
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<Dashboard />} />
             
