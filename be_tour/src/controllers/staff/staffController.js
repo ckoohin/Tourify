@@ -3,8 +3,9 @@ const { validationResult } = require('express-validator');
 
 exports.getAll = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+
     const { staff_type, status, search } = req.query;
 
     const filters = {};
@@ -16,12 +17,52 @@ exports.getAll = async (req, res, next) => {
 
     // Parse JSON fields
     result.data = result.data.map(staff => ({
-      ...staff,
-      languages: staff.languages ? JSON.parse(staff.languages) : [],
-      certifications: staff.certifications ? JSON.parse(staff.certifications) : [],
-      specializations: staff.specializations ? JSON.parse(staff.specializations) : [],
-      vehicle_types: staff.vehicle_types ? JSON.parse(staff.vehicle_types) : []
-    }));
+    ...staff,
+    languages: (() => {
+      if (!staff.languages) return [];
+      if (typeof staff.languages === 'string') {
+        try { 
+          return JSON.parse(staff.languages); 
+        } catch { 
+          return staff.languages.split(','); 
+        }
+      }
+      return Array.isArray(staff.languages) ? staff.languages : [];
+    })(),
+    certifications: (() => {
+      if (!staff.certifications) return [];
+      if (typeof staff.certifications === 'string') {
+        try { 
+          return JSON.parse(staff.certifications); 
+        } catch { 
+          return staff.certifications.split(','); 
+        }
+      }
+      return Array.isArray(staff.certifications) ? staff.certifications : [];
+    })(),
+    specializations: (() => {
+      if (!staff.specializations) return [];
+      if (typeof staff.specializations === 'string') {
+        try { 
+          return JSON.parse(staff.specializations); 
+        } catch { 
+          return staff.specializations.split(','); 
+        }
+      }
+      return Array.isArray(staff.specializations) ? staff.specializations : [];
+    })(),
+    vehicle_types: (() => {
+      if (!staff.vehicle_types) return [];
+      if (typeof staff.vehicle_types === 'string') {
+        try { 
+          return JSON.parse(staff.vehicle_types); 
+        } catch { 
+          return staff.vehicle_types.split(','); 
+        }
+      }
+      return Array.isArray(staff.vehicle_types) ? staff.vehicle_types : [];
+    })(),
+  }));
 
     res.json({
       success: true,
@@ -29,8 +70,21 @@ exports.getAll = async (req, res, next) => {
       pagination: result.pagination
     });
   } catch (error) {
+    console.error('Lỗi SQL:', error.message);
     next(error);
   }
+};
+
+const parseField = (field) => {
+  if (!field) return [];
+  if (typeof field === 'string') {
+    try {
+      return JSON.parse(field);      
+    } catch {
+      return field.split(',');      
+    }
+  }
+  return Array.isArray(field) ? field : [];
 };
 
 exports.getById = async (req, res, next) => {
@@ -46,10 +100,10 @@ exports.getById = async (req, res, next) => {
       });
     }
 
-    staff.languages = staff.languages ? JSON.parse(staff.languages) : [];
-    staff.certifications = staff.certifications ? JSON.parse(staff.certifications) : [];
-    staff.specializations = staff.specializations ? JSON.parse(staff.specializations) : [];
-    staff.vehicle_types = staff.vehicle_types ? JSON.parse(staff.vehicle_types) : [];
+    staff.languages = parseField(staff.languages);
+    staff.certifications = parseField(staff.certifications);
+    staff.specializations = parseField(staff.specializations);
+    staff.vehicle_types = parseField(staff.vehicle_types);
 
     const stats = await Staff.getStats(id);
 
@@ -102,10 +156,20 @@ exports.create = async (req, res, next) => {
     const newStaff = await Staff.findById(staffId);
 
     // Parse JSON fields
-    newStaff.languages = newStaff.languages ? JSON.parse(newStaff.languages) : [];
-    newStaff.certifications = newStaff.certifications ? JSON.parse(newStaff.certifications) : [];
-    newStaff.specializations = newStaff.specializations ? JSON.parse(newStaff.specializations) : [];
-    newStaff.vehicle_types = newStaff.vehicle_types ? JSON.parse(newStaff.vehicle_types) : [];
+    const parseJsonArray = (val) => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      try {
+        return JSON.parse(val);
+      } catch {
+        return val.split(',').map(v => v.trim());
+      }
+    };
+
+    newStaff.languages = parseJsonArray(newStaff.languages);
+    newStaff.certifications = parseJsonArray(newStaff.certifications);
+    newStaff.specializations = parseJsonArray(newStaff.specializations);
+    newStaff.vehicle_types = parseJsonArray(newStaff.vehicle_types);
 
     res.status(201).json({
       success: true,
@@ -152,10 +216,20 @@ exports.update = async (req, res, next) => {
     await Staff.update(id, staffData);
     const updatedStaff = await Staff.findById(id);
 
-    updatedStaff.languages = updatedStaff.languages ? JSON.parse(updatedStaff.languages) : [];
-    updatedStaff.certifications = updatedStaff.certifications ? JSON.parse(updatedStaff.certifications) : [];
-    updatedStaff.specializations = updatedStaff.specializations ? JSON.parse(updatedStaff.specializations) : [];
-    updatedStaff.vehicle_types = updatedStaff.vehicle_types ? JSON.parse(updatedStaff.vehicle_types) : [];
+    const parseJsonArray = (val) => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      try {
+        return JSON.parse(val);
+      } catch {
+        return val.split(',').map(v => v.trim());
+      }
+    };
+
+    updatedStaff.languages = parseJsonArray(updatedStaff.languages);
+    updatedStaff.certifications = parseJsonArray(updatedStaff.certifications);
+    updatedStaff.specializations = parseJsonArray(updatedStaff.specializations);
+    updatedStaff.vehicle_types = parseJsonArray(updatedStaff.vehicle_types);
 
     res.json({
       success: true,

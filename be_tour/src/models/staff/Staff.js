@@ -2,7 +2,10 @@ const { query } = require('../../config/db');
 
 class Staff {
   static async findAll(page = 1, limit = 10, filters = {}) {
+    page = Number(page) || 1;
+    limit = Number(limit) || 10;
     const offset = (page - 1) * limit;
+
     let whereClauses = [];
     let params = [];
 
@@ -25,7 +28,7 @@ class Staff {
     const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
     const countSql = `SELECT COUNT(*) as total FROM staff s ${whereClause}`;
-    const countResult = await query(countSql, params);
+    const countResult = await query(countSql, [...params]);
     const total = countResult[0].total;
 
     const sql = `
@@ -37,11 +40,17 @@ class Staff {
       LEFT JOIN users u ON s.user_id = u.id
       ${whereClause}
       ORDER BY s.created_at DESC
-      LIMIT ? OFFSET ?
+      LIMIT ${limit} OFFSET ${offset}
     `;
-    
-    params.push(limit, offset);
-    const staffList = await query(sql, params);
+
+    const listParams = [...params];
+
+    console.log("WHERE:", whereClause);
+    console.log("params:", params);
+    console.log("limit:", limit, "offset:", offset);
+    console.log("listParams:", listParams);
+
+    const staffList = await query(sql, listParams);
 
     return {
       data: staffList,

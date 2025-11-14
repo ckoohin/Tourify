@@ -41,9 +41,25 @@ router.post(
   authController.login
 );
 
+router.get('/verify', authController.verifyEmail);
 router.get('/me', authenticate, authController.getMe);
 router.put('/profile', authenticate, authController.updateProfile);
 router.put('/change-password', authenticate, authController.changePassword);
 router.post('/logout', authenticate, authController.logout);
 
 module.exports = router;
+// // === ROUTER ===
+// const authRouter = (req, res) => {
+//     const { url, method } = req;
+
+//     if (url === '/api/v1/auth/login' && method === 'POST') return login(req, res);
+//     if (url === '/api/v1/auth/register' && method === 'POST') return register(req, res);
+//     if (url === '/api/v1/auth/logout' && method === 'POST') return logout(req, res);
+//     if (url === '/api/v1/auth/forgot-password' && method === 'POST') return forgotPassword(req, res);
+//     if (url === '/api/v1/auth/reset-password' && method === 'POST') return resetPassword(req, res);
+//     if (url.startsWith('/api/v1/auth/verify-email') && method === 'GET') return verifyEmail(req, res);
+
+//     sendJson(res, 404, { message: 'Not Found' });
+// };
+
+// module.exports = authRouter;
