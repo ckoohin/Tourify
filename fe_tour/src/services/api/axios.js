@@ -25,9 +25,15 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/login';
     }
-    return Promise.reject(error);
+    const message = error.response?.data?.message || 'Đã xảy ra lỗi';
+    return Promise.reject({
+      message,
+      status: error.response?.status,
+      data: error.response?.data
+    });
   }
 );
 

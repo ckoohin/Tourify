@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { tourCategoryService } from '../../services/api/tourCategoryService';
+import tourCategoryService from '../../services/api/tourCategoryService';
 import toast from 'react-hot-toast';
 
 const TourCategoryModal = ({ category, onClose, onSuccess }) => {

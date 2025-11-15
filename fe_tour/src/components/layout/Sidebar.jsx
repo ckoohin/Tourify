@@ -84,6 +84,10 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
               <Map className="mr-3 w-5 h-5" />
               <span>Danh sách Tour</span>
             </NavLink>
+            <NavLink to="/tour-categories" className={getNavLinkClass}>
+              <Settings className="mr-3 w-5 h-5" />
+              <span>Danh mục Tour</span>
+            </NavLink>
             <NavLink to="/schedules" className={getNavLinkClass}>
               <CalendarDays className="mr-3 w-5 h-5" />
               <span>Lịch khởi hành</span>
@@ -124,9 +128,13 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
               Hệ thống
             </p>
-            <NavLink to="/guides" className={getNavLinkClass}>
+            <NavLink to="/staff" className={getNavLinkClass}>
               <User className="mr-3 w-5 h-5" />
-              <span>Hướng dẫn viên</span>
+              <span>Quản lí nhân sự</span>
+            </NavLink>
+            <NavLink to="/supplier" className={getNavLinkClass}>
+              <User className="mr-3 w-5 h-5" />
+              <span>Quản lí nhà cung cấp</span>
             </NavLink>
             <NavLink to="/reports" className={getNavLinkClass}>
               <LineChart className="mr-3 w-5 h-5" />
@@ -139,7 +147,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           </div>
         </nav>
 
-        {/* User Profile Summary */}
+        {/* User Profile Summary
         <div className="p-4 bg-slate-900/50 border-t border-slate-800 flex items-center">
           <img
             src="https://i.pravatar.cc/150?img=3"
@@ -157,7 +165,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           <button className="text-slate-400 hover:text-white transition-colors">
             <LogOut className="w-5 h-5" />
           </button>
-        </div>
+        </div> */}
       </aside>
     </>
   );

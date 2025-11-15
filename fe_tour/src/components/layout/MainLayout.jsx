@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 // Sửa lỗi: Chỉ định rõ ràng đuôi file .jsx
 import Sidebar from './Sidebar.jsx';
-import Header from './Header.jsx';
+import Navbar from './Navbar.jsx';
 
 // Đây là component "khung"
 export default function MainLayout() {
@@ -23,7 +23,7 @@ export default function MainLayout() {
       <div className="flex-1 flex flex-col overflow-hidden">
         
         {/* Truyền hàm toggle xuống Header */}
-        <Header toggleSidebar={toggleSidebar} />
+        <Navbar toggleSidebar={toggleSidebar} />
 
         {/* MAIN SCROLLABLE CONTENT */}
         {/* <Outlet> sẽ render trang con (ví dụ: Home.jsx) */}
