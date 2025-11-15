@@ -1,200 +1,271 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Plus, Loader2, AlertTriangle, Eye, Edit, Trash2, UserSearch } from 'lucide-react';
+import Pagination from '../../components/ui/Pagination';
+import StatusBadge from '../../components/ui/StatusBadge';
+import Modal from '../../components/ui/Modal';
+// import FilterBar from '../../components/ui/FilterBar'; // (Bạn có thể dùng FilterBar chung)
 
-// Dữ liệu giả lập cho danh sách HDV
-const mockGuides = [
-  {
-    id: '#HDV-001',
-    name: 'Nguyễn Tuấn Anh',
-    email: 'anhtuan@tourify.com',
-    phone: '0987.654.321',
-    avatar: 'https://i.pravatar.cc/150?img=7',
-    languages: 'Tiếng Anh, Tiếng Việt',
-    toursLed: 120,
-    rating: 4.8,
-    status: 'Sẵn sàng',
-  },
-  {
-    id: '#HDV-002',
-    name: 'Trần Thị Mai',
-    email: 'maitran@tourify.com',
-    phone: '0912.345.678',
-    avatar: 'https://i.pravatar.cc/150?img=8',
-    languages: 'Tiếng Việt',
-    toursLed: 85,
-    rating: 4.5,
-    status: 'Đang dẫn tour',
-  },
-  {
-    id: '#HDV-003',
-    name: 'Lê Minh C',
-    email: 'minhcle@tourify.com',
-    phone: '0933.222.111',
-    avatar: 'https://i.pravatar.cc/150?img=9',
-    languages: 'Tiếng Anh',
-    toursLed: 52,
-    rating: 4.2,
-    status: 'Nghỉ phép',
-  },
-  {
-    id: '#HDV-004',
-    name: 'Phạm Hoàng D',
-    email: 'hoangdpham@tourify.com',
-    phone: '0988.111.222',
-    avatar: 'https://i.pravatar.cc/150?img=10',
-    languages: 'Tiếng Việt',
-    toursLed: 10,
-    rating: 3.0,
-    status: 'Bị khóa',
-  },
-];
+// Component FilterBar nội bộ cho trang này
+const StaffFilterBar = ({ onFilter }) => {
+  const [search, setSearch] = useState('');
+  const [type, setType] = useState('all');
+  const [status, setStatus] = useState('all');
 
-// Hàm helper cho trạng thái
-const getStatusClass = (status) => {
-  switch (status) {
-    case 'Sẵn sàng':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'Đang dẫn tour':
-      return 'bg-blue-100 text-primary border-blue-200';
-    case 'Nghỉ phép':
-      return 'bg-slate-100 text-slate-700 border-slate-200';
-    case 'Bị khóa':
-      return 'bg-red-100 text-red-800 border-red-200';
-    default:
-      return 'bg-slate-100 text-slate-700 border-slate-200';
-  }
+  const handleApply = () => {
+    onFilter({ search, type, status });
+  };
+
+  return (
+    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+      {/* Tìm kiếm */}
+      <div className="flex-1">
+        <label className="text-xs font-medium text-slate-500">Tìm kiếm</label>
+        <div className="flex items-center bg-slate-50 border ... rounded-lg px-3 py-2 mt-1">
+          <UserSearch className="w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Tên, SĐT, Email..."
+            className="bg-transparent border-none outline-none ml-2 w-full text-sm"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+      
+      {/* Lọc theo Loại (từ SQL 'staff_type') */}
+      <div className="flex-1">
+        <label className="text-xs font-medium text-slate-500">Loại nhân sự</label>
+        <select value={type} onChange={(e) => setType(e.target.value)} className="input-class-tailwind w-full p-2 mt-1">
+          <option value="all">Tất cả loại</option>
+          <option value="tour_guide">Hướng dẫn viên</option>
+          <option value="tour_leader">Trưởng đoàn</option>
+          <option value="driver">Tài xế</option>
+          <option value="coordinator">Điều phối</option>
+          <option value="other">Khác</option>
+        </select>
+      </div>
+
+      {/* Lọc theo Trạng thái (từ SQL 'status') */}
+      <div className="flex-1">
+        <label className="text-xs font-medium text-slate-500">Trạng thái</label>
+        <select value={status} onChange={(e) => setStatus(e.target.value)} className="input-class-tailwind w-full p-2 mt-1">
+          <option value="all">Tất cả trạng thái</option>
+          <option value="active">Đang hoạt động</option>
+          <option value="inactive">Không hoạt động</option>
+          <option value="on_leave">Đang nghỉ phép</option>
+        </select>
+      </div>
+
+      <div className="self-end">
+        <button onClick={handleApply} className="px-4 py-2 bg-primary text-white ... mt-1">Lọc</button>
+      </div>
+    </div>
+  );
 };
 
+
 export default function GuideList() {
-  return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* PAGE HEADER & ACTIONS */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Quản lý Hướng dẫn viên</h1>
-          <p className="text-sm text-slate-500 mt-1">Danh sách đội ngũ hướng dẫn viên của công ty.</p>
-        </div>
-        <button className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-blue-600 shadow-sm shadow-blue-500/30 flex items-center transition-colors">
-          <i className="ri-user-add-line mr-2 text-lg"></i>
-          Thêm HDV mới
-        </button>
-      </div>
+  // State cho dữ liệu
+  const [staffList, setStaffList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // State cho phân trang và bộ lọc
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
+  const [filters, setFilters] = useState({ search: '', type: 'all', status: 'all' });
+  
+  // State cho Modal xóa
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
-      {/* FILTER BAR */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center">
-        <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 flex-1 focus-within:border-primary transition-colors w-full md:w-auto">
-          <i className="ri-search-line text-slate-400"></i>
-          <input type="text" placeholder="Tên, Email, SĐT..." className="bg-transparent border-none outline-none ml-2 w-full text-sm text-slate-700" />
-        </div>
-        
-        <select className="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 cursor-pointer w-full md:w-52">
-          <option value="">Tất cả Ngôn ngữ</option>
-          <option value="vi">Tiếng Việt</option>
-          <option value="en">Tiếng Anh</option>
-          <option value="fr">Tiếng Pháp</option>
-          <option value="kr">Tiếng Hàn</option>
-        </select>
-        
-        <select className="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 cursor-pointer w-full md:w-52">
-          <option value="">Tất cả Trạng thái</option>
-          <option value="available" className="text-green-600 font-medium">Sẵn sàng</option>
-          <option value="on-tour" className="text-blue-600">Đang dẫn tour</option>
-          <option value="on-leave" className="text-slate-500">Nghỉ phép</option>
-          <option value="locked" className="text-red-600">Bị khóa</option>
-        </select>
-      </div>
+  // API 1: Lấy danh sách nhân sự (GET /api/v1/staff)
+  useEffect(() => {
+    const fetchStaff = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Xây dựng params cho API
+        const params = new URLSearchParams({
+          page: pagination.currentPage,
+          limit: 15,
+          search: filters.search,
+          type: filters.type,
+          status: filters.status,
+        });
 
-      {/* GUIDE TABLE */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-semibold tracking-wider">
-              <tr>
-                <th className="px-6 py-4">Mã HDV</th>
-                <th className="px-6 py-4">Hướng dẫn viên</th>
-                <th className="px-6 py-4">Liên hệ</th>
-                <th className="px-6 py-4">Ngôn ngữ</th>
-                <th className="px-6 py-4">Số tour đã dẫn</th>
-                <th className="px-6 py-4">Đánh giá</th>
-                <th className="px-6 py-4">Trạng thái</th>
-                <th className="px-6 py-4 text-center">Hành động</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
-              
-              {mockGuides.map((guide) => (
-                <tr 
-                  key={guide.id} 
-                  className={`hover:bg-slate-50 transition-colors ${guide.status === 'Bị khóa' ? 'opacity-70 bg-red-50/30' : ''}`}
-                >
-                  <td className="px-6 py-4">
-                    <Link to={`/guides/${guide.id.replace('#HDV-', '')}`} className="font-medium text-primary hover:underline cursor-pointer">
-                      {guide.id}
+        // --- GỌI API THẬT ---
+        // const response = await fetch(`http://localhost:5000/api/v1/staff?${params.toString()}`);
+        // if (!response.ok) throw new Error('Không thể tải danh sách nhân sự');
+        // const data = await response.json();
+        
+        // (Xóa mock data khi kết nối BE)
+        const mockData = {
+          data: [
+            { id: 1, staff_code: 'HDV-001', full_name: 'Nguyễn Văn An', staff_type: 'tour_guide', phone: '0901234567', status: 'active' },
+            { id: 2, staff_code: 'DRV-001', full_name: 'Trần Thị Bê', staff_type: 'driver', phone: '0987654321', status: 'on_leave' },
+          ],
+          pagination: { currentPage: 1, totalPages: 1, totalItems: 2 }
+        };
+        await new Promise(res => setTimeout(res, 500)); // Giả lập chờ
+        
+        setStaffList(mockData.data);
+        setPagination(mockData.pagination);
+        
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStaff();
+  }, [pagination.currentPage, filters]); // Chạy lại khi đổi trang hoặc lọc
+
+  // Xử lý khi bộ lọc thay đổi
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setPagination(prev => ({ ...prev, currentPage: 1 })); // Quay về trang 1
+  };
+  
+  // Xử lý khi đổi trang
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, currentPage: newPage }));
+  };
+
+  // Xử lý Xóa
+  const handleDelete = (id) => {
+    setSelectedId(id);
+    setIsModalOpen(true);
+  };
+
+  // API 2: Xóa nhân sự (DELETE /api/v1/staff/:id)
+  const confirmDelete = async () => {
+    try {
+      // --- GỌI API THẬT ---
+      // const response = await fetch(`http://localhost:5000/api/v1/staff/${selectedId}`, {
+      //   method: 'DELETE',
+      // });
+      // if (!response.ok) throw new Error('Xóa thất bại');
+
+      console.log('Đã xóa (API):', selectedId);
+      setIsModalOpen(false);
+      // Tải lại dữ liệu trang hiện tại
+      setLoading(true); // Bắt fetchStaff chạy lại
+      fetchStaff(pagination.currentPage, filters); 
+      
+    } catch (err) {
+      alert(err.message);
+      setIsModalOpen(false);
+    }
+  };
+  
+  // Ánh xạ 'status' từ DB sang 'level' của StatusBadge
+  const statusMap = {
+    active: { level: 'success', text: 'Đang hoạt động' },
+    inactive: { level: 'info', text: 'Không hoạt động' },
+    on_leave: { level: 'warning', text: 'Đang nghỉ phép' },
+  };
+
+  // Render nội dung chính (Loading, Error, Data)
+  const renderContent = () => {
+    if (loading) {
+      return <div className="flex h-64 items-center justify-center"><Loader2 className="w-12 h-12 text-primary animate-spin" /></div>;
+    }
+    if (error) {
+      return <div className="text-center p-10"><AlertTriangle /> {error}</div>;
+    }
+    if (staffList.length === 0) {
+      return <div className="text-center p-10">Không tìm thấy nhân sự.</div>;
+    }
+
+    // Render Bảng (Table)
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-slate-50 ...">
+            <tr>
+              <th className="px-5 py-3">Tên nhân sự</th>
+              <th className="px-5 py-3">Loại</th>
+              <th className="px-5 py-3">Liên hệ</th>
+              <th className="px-5 py-3">Trạng thái</th>
+              <th className="px-5 py-3">Hành động</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 text-sm">
+            {staffList.map((staff) => {
+              const currentStatus = statusMap[staff.status] || { level: 'info', text: staff.status };
+              return (
+                <tr key={staff.id} className="hover:bg-slate-50/50">
+                  <td className="px-5 py-4">
+                    <Link to={`/guides/${staff.id}`} className="font-medium text-slate-800 hover:text-primary ...">
+                      {staff.full_name}
                     </Link>
+                    <div className="text-xs text-slate-400 mt-1">{staff.staff_code}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <img src={guide.avatar} alt="Avatar" className={`w-9 h-9 rounded-full object-cover ${guide.status === 'Bị khóa' ? 'grayscale' : ''}`} />
-                      <div>
-                        <div className="font-medium text-slate-700">{guide.name}</div>
-                        <div className="text-xs text-slate-500">{guide.email}</div>
-                      </div>
+                  <td className="px-5 py-4 text-slate-600">{staff.staff_type}</td>
+                  <td className="px-5 py-4 text-slate-600">{staff.phone}</td>
+                  <td className="px-5 py-4">
+                    <StatusBadge level={currentStatus.level} text={currentStatus.text} />
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex gap-2">
+                      <Link to={`/guides/${staff.id}`} title="Xem" className="..."><Eye className="w-4 h-4" /></Link>
+                      <Link to={`/guides/edit/${staff.id}`} title="Sửa" className="..."><Edit className="w-4 h-4" /></Link>
+                      <button onClick={() => handleDelete(staff.id)} title="Xóa" className="..."><Trash2 className="w-4 h-4" /></button>
                     </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-slate-700">{guide.phone}</div>
-                  </td>
-                  <td className="px-6 py-4 text-slate-600">{guide.languages}</td>
-                  <td className="px-6 py-4 text-slate-600 font-medium text-center">{guide.toursLed}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1 font-medium text-amber-500">
-                      <i className="ri-star-fill"></i> {guide.rating}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusClass(guide.status)}`}>
-                      {guide.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center space-x-2">
-                    <Link 
-                      to={`/guides/${guide.id.replace('#HDV-', '')}`}
-                      className="px-3 py-1 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-medium rounded-md transition-colors"
-                    >
-                      Xem
-                    </Link>
-                    {guide.status !== 'Bị khóa' ? (
-                      <button className="px-3 py-1 bg-white border border-slate-200 text-red-500 hover:bg-red-50 text-xs font-medium rounded-md transition-colors">
-                        Khóa
-                      </button>
-                    ) : (
-                      <button className="px-3 py-1 bg-white border border-slate-200 text-green-600 hover:bg-green-50 text-xs font-medium rounded-md transition-colors">
-                        Mở khóa
-                      </button>
-                    )}
                   </td>
                 </tr>
-              ))}
-
-            </tbody>
-          </table>
-        </div>
-        
-        {/* PAGINATION */}
-        <div className="flex items-center justify-between border-t border-slate-200 p-4">
-          <p className="text-sm text-slate-500">
-            Hiển thị <span className="font-medium text-slate-800">1</span> đến <span className="font-medium text-slate-800">4</span> trong tổng số <span className="font-medium text-slate-800">25</span> hướng dẫn viên
-          </p>
-          <div className="flex gap-2">
-            <button className="px-3 py-1 border border-slate-200 rounded-md text-slate-500 hover:bg-slate-50 disabled:opacity-50" disabled>Trước</button>
-            <button className="px-3 py-1 bg-primary text-white rounded-md">1</button>
-            <button className="px-3 py-1 border border-slate-200 rounded-md text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors">2</button>
-            <button className="px-3 py-1 border border-slate-200 rounded-md text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors">3</button>
-            <button className="px-3 py-1 border border-slate-200 rounded-md text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors">Sau</button>
-          </div>
-        </div>
-
+              );
+            })}
+          </tbody>
+        </table>
       </div>
+    );
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Header trang */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-slate-800">Quản lý Nhân sự</h1>
+        <Link 
+          to="/guides/create" 
+          className="px-4 py-2 bg-primary text-white ... flex items-center"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Thêm Nhân sự
+        </Link>
+      </div>
+      
+      {/* Thanh Lọc */}
+      <StaffFilterBar onFilter={handleFilterChange} />
+      
+      {/* Bảng Dữ liệu */}
+      <div className="bg-white rounded-2xl border ... overflow-hidden">
+        {renderContent()}
+      </div>
+
+      {/* Phân trang */}
+      {!loading && !error && staffList.length > 0 && (
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          totalItems={pagination.totalItems}
+          onPageChange={handlePageChange}
+        />
+      )}
+      
+      {/* Modal Xóa */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Xác nhận Xóa Nhân sự"
+        confirmLevel="danger"
+      >
+        <p>Bạn có chắc chắn muốn xóa nhân sự này không? Hành động này không thể hoàn tác.</p>
+      </Modal>
     </div>
   );
 }

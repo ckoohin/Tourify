@@ -80,6 +80,10 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
               Quản lý Tour
             </p>
+            <NavLink to="/tourCategory" className={getNavLinkClass}>
+              <Settings className="mr-3 w-5 h-5" />
+              <span>Danh mục Tour</span>
+            </NavLink>
             <NavLink to="/tours" className={getNavLinkClass}>
               <Map className="mr-3 w-5 h-5" />
               <span>Danh sách Tour</span>
@@ -126,38 +130,14 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             </p>
             <NavLink to="/guides" className={getNavLinkClass}>
               <User className="mr-3 w-5 h-5" />
-              <span>Hướng dẫn viên</span>
+              <span>Quản lí nhân sự</span>
             </NavLink>
             <NavLink to="/reports" className={getNavLinkClass}>
               <LineChart className="mr-3 w-5 h-5" />
               <span>Báo cáo doanh thu</span>
             </NavLink>
-            <NavLink to="/settings" className={getNavLinkClass}>
-              <Settings className="mr-3 w-5 h-5" />
-              <span>Cài đặt</span>
-            </NavLink>
           </div>
         </nav>
-
-        {/* User Profile Summary */}
-        <div className="p-4 bg-slate-900/50 border-t border-slate-800 flex items-center">
-          <img
-            src="https://i.pravatar.cc/150?img=3"
-            alt="Admin"
-            className="w-10 h-10 rounded-full border-2 border-primary"
-          />
-          <div className="ml-3 flex-1 overflow-hidden">
-            <p className="text-sm font-medium text-white truncate">
-              Admin Quản Trị
-            </p>
-            <p className="text-xs text-slate-500 truncate">
-              admin@tourify.com
-            </p>
-          </div>
-          <button className="text-slate-400 hover:text-white transition-colors">
-            <LogOut className="w-5 h-5" />
-          </button>
-        </div>
       </aside>
     </>
   );

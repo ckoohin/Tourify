@@ -51,5 +51,4 @@
     "@routes": "src/routes",
     "@utils": "src/utils"
   }
-
 }
