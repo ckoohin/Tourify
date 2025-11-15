@@ -73,10 +73,10 @@ function App() {
             <Route path="/schedules/:id" element={<ScheduleDetail />} />
 
             {/* Attraction Management*/}
-            <Route path="/attractions" element={<TourList />} />
-            <Route path="/attractions/create" element={<TourCreate />} />
-            <Route path="/attractions/:id" element={<TourDetail />} />
-            <Route path="/attractions/:id/edit" element={<TourEdit />} />
+            <Route path="/attractions" element={<AttractionList />} />
+            <Route path="/attractions/create" element={<AttractionCreate />} />
+            <Route path="/attractions/:id" element={<AttractionDetail />} />
+            <Route path="/attractions/:id/edit" element={<AttractionEdit />} />
             
             {/* Booking Management */}
             <Route path="/bookings" element={<BookingList />} />
