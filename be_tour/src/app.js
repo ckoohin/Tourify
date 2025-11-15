@@ -12,6 +12,7 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 const authRoutes = require('./routes/authentication/auth');
 const tourCategoryRoutes = require('./routes/tours/tourCategoryRoutes');
 const staffRoutes = require('./routes/staff/staff');
+const supplierRoutes = require("./routes/suppliers/supplier.js");
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api', limiter);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/tour-categories', tourCategoryRoutes);
 app.use('/api/v1/staff', staffRoutes);
+app.use("/api/v1/supplier", supplierRoutes);
 
 // app.use('/api/v1/auth', require('./routes/authentication/auth'));
 // app.use('/api/v1/tours', require('./routes/tourRoutes'));
