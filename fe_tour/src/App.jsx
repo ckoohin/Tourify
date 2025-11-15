@@ -40,11 +40,13 @@ import NotFound from './pages/NotFound.jsx';
 
 // // Protected Route
 import ProtectedRoute from './components/common/ProtectedRoute';
+import { AuthProvider } from './hooks/useAuth.js';
 
 function App() {
   return (
     <>
       <BrowserRouter>
+        <AuthProvider>
         <Routes>
           {/* Auth Routes */}
           <Route element={<AuthLayout />}>
@@ -53,7 +55,7 @@ function App() {
           </Route>
 
           {/* Protected Routes */}
-          <Route element={<MainLayout />}>
+          <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<Dashboard />} />
             
@@ -106,6 +108,7 @@ function App() {
           {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </AuthProvider>
       </BrowserRouter>
 
       <Toaster position="top-right" />
