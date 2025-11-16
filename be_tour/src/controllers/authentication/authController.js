@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../../models/authentication/User');
 const { validationResult } = require('express-validator');
+const crypto = require("crypto");
+const { sendEmail } = require("../../services/emailService");
 
 const generateToken = (userId) => {
   return jwt.sign(
@@ -40,6 +42,18 @@ exports.register = async (req, res, next) => {
     });
 
     const newUser = await User.findById(userId);
+
+    const verificationToken = crypto.randomBytes(40).toString("hex");
+
+    await User.saveVerificationToken(userId, verificationToken);
+
+    const verifyLink = `http://localhost:5000/auth/verify?token=${verificationToken}`;
+    const html = `
+      <h2>Xin chào ${name}</h2>
+      <p>Vui lòng nhấn nút bên dưới để xác thực tài khoản:</p>
+      <a href="${verifyLink}" style="padding:10px 20px; background:#4CAF50; color:#fff; text-decoration:none;">Xác thực tài khoản</a>
+    `;
+    await sendEmail(email, 'Xác thực tài khoản Tourify', html);
 
     const token = generateToken(userId);
 
@@ -207,6 +221,46 @@ exports.changePassword = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Token không hợp lệ."
+      });
+    }
+
+    const user = await User.findByVerificationToken(token);
+
+    if (!user) {
+      return res.status(400).send(`
+        <h2>Token không hợp lệ hoặc đã hết hạn</h2>
+        <p>Vui lòng thử đăng ký lại.</p>
+      `);
+    }
+
+    if (user.is_active === 0) {
+      return res.status(400).send(`
+        <h2>Vui lòng xác thực email trước khi đăng nhập</h2>
+      `);
+    }
+
+    await User.verifyEmail(user.id);
+
+    res.send(`
+      <h2>Xác thực tài khoản thành công!</h2>
+      <p>Bây giờ bạn có thể đăng nhập vào ứng dụng.</p>
+    `);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Lỗi hệ thống."
+    });
   }
 };
 

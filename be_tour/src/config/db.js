@@ -31,10 +31,23 @@ const testConnection = async () => {
 
 const query = async (sql, params) => {
     try {
+        console.log("\n===== DEBUG SQL EXECUTION =====");
+        console.log("SQL:", sql);
+        console.log("PARAMS:", params);
+        console.log("PLACEHOLDERS:", (sql.match(/\?/g) || []).length);
+        console.log("PARAM COUNT:", params?.length || 0);
+        console.log("================================\n");
+
         const [results] = await pool.execute(sql, params);
         return results;
     } catch (error) {
-        console.error("Database query error:", error);
+        console.error("\n===== SQL ERROR DEBUG =====");
+        console.error("SQL:", sql);
+        console.error("PARAMS:", params);
+        console.error("PLACEHOLDERS:", (sql.match(/\?/g) || []).length);
+        console.error("PARAM COUNT:", params?.length || 0);
+        console.error("ERROR:", error);
+        console.error("================================\n");
         throw error;
     }
 };

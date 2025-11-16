@@ -1,3 +1,4 @@
+require("module-alias/register");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -11,7 +12,7 @@ const { notFound, errorHandler } = require("./middleware/errorHandler");
 const authRoutes = require("./routes/authentication/auth");
 const tourCategoryRoutes = require("./routes/tours/tourCategoryRoutes");
 const staffRoutes = require("./routes/staff/staff");
-const supplierRoutes = require("./routes/suppliers/supplierRoutes.js");
+const supplierRoutes = require("./routes/suppliers/supplier.js");
 
 const app = express();
 
@@ -39,13 +40,10 @@ const limiter = rateLimit({
     windowMs: 10 * 60 * 1000,
     max: 100,
 });
-
 app.use("/api", limiter);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/tour-categories", tourCategoryRoutes);
 app.use("/api/v1/staff", staffRoutes);
-
-// Route nhà cung cấp
 app.use("/api/v1/supplier", supplierRoutes);
 
 // app.use('/api/v1/auth', require('./routes/authentication/auth'));

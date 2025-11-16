@@ -1,4 +1,4 @@
-const { query } = require('../../config/db');
+const { pool, query } = require('../../config/db');
 const bcrypt = require('bcryptjs');
 
 class User {
@@ -25,16 +25,16 @@ class User {
   }
 
   static async create(userData) {
-    const { name, email, password, phone, role_id = 1 } = userData;
+    const { name, email, password, role_id = 1 } = userData;
     
     const hashedPassword = await bcrypt.hash(password, 10);
     
     const sql = `
-      INSERT INTO users (name, email, password, phone, role_id, status, is_active)
-      VALUES (?, ?, ?, ?, ?, 1, 1)
+      INSERT INTO users (name, email, password, role_id, status, is_active)
+      VALUES (?, ?, ?, ?, 1, 0)
     `;
     
-    const result = await query(sql, [name, email, hashedPassword, phone, role_id]);
+    const result = await query(sql, [name, email, hashedPassword, role_id]);
     return result.insertId;
   }
 
@@ -137,6 +137,39 @@ class User {
         totalPages: Math.ceil(total / limit)
       }
     };
+  }
+
+  static async saveVerificationToken(userId, token) {
+    const sql = `
+      UPDATE users 
+      SET verification_token = ?, verification_token_expires = DATE_ADD(NOW(), INTERVAL 24 HOUR)
+      WHERE id = ?
+    `;
+    const [result] = await pool.execute(sql, [token, userId]);
+    return result.affectedRows > 0;
+  }
+
+  static async findByVerificationToken(token) {
+    const sql = `
+      SELECT * FROM users 
+      WHERE verification_token = ? 
+        AND verification_token_expires > NOW()
+      LIMIT 1
+    `;
+    const [rows] = await pool.execute(sql, [token]);
+    return rows[0];
+  }
+
+  static async verifyEmail(userId) {
+    const sql = `
+      UPDATE users
+      SET email_verified_at = NOW(),
+          verification_token = NULL,
+          verification_token_expires = NULL
+      WHERE id = ?
+    `;
+    const [result] = await pool.execute(sql, [userId]);
+    return result.affectedRows > 0;
   }
 }
 

@@ -4,7 +4,7 @@ const {
     create,
     update,
     deleteSupplier,
-} = require("../../models/suppliers/supplier.js");
+} = require("../../models/suppliers/Supplier.js");
 const { validationResult } = require("express-validator");
 
 async function getAllSuppliers(req, res, next) {
