@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
+const path = require("path");
 
 const { testConnection } = require("./config/db");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
@@ -13,8 +14,13 @@ const authRoutes = require("./routes/authentication/auth");
 const tourCategoryRoutes = require("./routes/tours/tourCategoryRoutes");
 const staffRoutes = require("./routes/staff/staff");
 const supplierRoutes = require("./routes/suppliers/supplier.js");
+const tourRoutes = require("./routes/tours/tourRoutes.js");
+const tourImageRoutes = require("./routes/tours/tourImageRoutes.js");
 
 const app = express();
+
+// Khai báo file tĩnh: img, css, js...
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use(helmet());
 
@@ -45,6 +51,8 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/tour-categories", tourCategoryRoutes);
 app.use("/api/v1/staff", staffRoutes);
 app.use("/api/v1/supplier", supplierRoutes);
+app.use("/api/v1/tours", tourRoutes);
+app.use("/api/v1/tours-image", tourImageRoutes);
 
 // app.use('/api/v1/auth', require('./routes/authentication/auth'));
 // app.use('/api/v1/tours', require('./routes/tourRoutes'));
