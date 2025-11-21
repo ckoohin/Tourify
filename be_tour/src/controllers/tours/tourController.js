@@ -5,43 +5,158 @@ const {
     create,
     update,
     deleteTour,
+    getAllByKeyWord,
 } = require("../../models/tours/Tour.js");
 
 async function getAllTours(req, res, next) {
     try {
-        const tours = await getAll();
+        const rows = await getAll();
+        const toursById = {};
+        const versionsByTour = {};
 
-        const toursEdit = tours.map((row) => {
-            const images = row.images
-                ? row.images.split(";").map((imgStr) => {
-                      const [
-                          id,
-                          image_url,
-                          title,
-                          description,
-                          display_order,
-                          is_featured,
-                      ] = imgStr.split("|");
-                      return {
-                          id,
-                          image_url,
-                          title,
-                          description,
-                          display_order,
-                          is_featured,
-                      };
-                  })
-                : [];
+        rows.forEach((row) => {
+            const tourId = row.tour_id;
+            const imageId = row.tourImg_id;
+            const versionId = row.id;
+            const priceId = row.tourPrice_id;
 
-            return {
-                ...row,
-                images,
-            };
+            if (!toursById[tourId]) {
+                toursById[tourId] = {
+                    id: tourId,
+                    name: row.name,
+                    slug: row.slug,
+                    images: [],
+                    versions: [],
+                };
+
+                versionsByTour[tourId] = {};
+            }
+
+            const tour = toursById[tourId];
+            const versionMap = versionsByTour[tourId];
+
+            if (imageId) {
+                const imageExists = tour.images.some(
+                    (img) => img.id === imageId
+                );
+
+                if (!imageExists) {
+                    tour.images.push({
+                        id: imageId,
+                        url: row.image_url,
+                    });
+                }
+            }
+
+            if (versionId && !versionMap[versionId]) {
+                versionMap[versionId] = {
+                    id: versionId,
+                    name: row.tourVersion_name,
+                    prices: [],
+                };
+
+                tour.versions.push(versionMap[versionId]);
+            }
+
+            if (priceId) {
+                const priceExists = versionMap[versionId].prices.some(
+                    (price) => price.id === priceId
+                );
+
+                if (!priceExists) {
+                    versionMap[versionId].prices.push({
+                        id: priceId,
+                        price: row.price,
+                    });
+                }
+            }
         });
+
+        const tours = Object.values(toursById);
+
+        console.log(tours);
 
         return res.json({
             success: true,
-            data: { toursEdit },
+            data: { tours },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function getAllToursByKeyWord(req, res, next) {
+    try {
+        const keyword = req.query.keyword || "";
+        const rows = await getAllByKeyWord(keyword);
+        const toursById = {};
+        const versionsByTour = {};
+
+        rows.forEach((row) => {
+            const tourId = row.tour_id;
+            const imageId = row.tourImg_id;
+            const versionId = row.id;
+            const priceId = row.tourPrice_id;
+
+            if (!toursById[tourId]) {
+                toursById[tourId] = {
+                    id: tourId,
+                    name: row.name,
+                    slug: row.slug,
+                    images: [],
+                    versions: [],
+                };
+
+                versionsByTour[tourId] = {};
+            }
+
+            const tour = toursById[tourId];
+            const versionMap = versionsByTour[tourId];
+
+            if (imageId) {
+                const imageExists = tour.images.some(
+                    (img) => img.id === imageId
+                );
+
+                if (!imageExists) {
+                    tour.images.push({
+                        id: imageId,
+                        url: row.image_url,
+                    });
+                }
+            }
+
+            if (versionId && !versionMap[versionId]) {
+                versionMap[versionId] = {
+                    id: versionId,
+                    name: row.tourVersion_name,
+                    prices: [],
+                };
+
+                tour.versions.push(versionMap[versionId]);
+            }
+
+            if (priceId) {
+                const priceExists = versionMap[versionId].prices.some(
+                    (price) => price.id === priceId
+                );
+
+                if (!priceExists) {
+                    versionMap[versionId].prices.push({
+                        id: priceId,
+                        price: row.price,
+                    });
+                }
+            }
+        });
+
+        const tours = Object.values(toursById);
+
+        console.log(tours);
+
+        return res.json({
+            success: true,
+            data: { tours },
         });
     } catch (error) {
         next(error);
@@ -147,4 +262,5 @@ module.exports = {
     createTour: createTour,
     updateTour: updateTour,
     deleteTourFromController: deleteTourFromController,
+    getAllToursByKeyWord: getAllToursByKeyWord,
 };

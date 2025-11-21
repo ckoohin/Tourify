@@ -5,36 +5,54 @@ async function getAll() {
         let params = [];
         const sql = `
         SELECT 
-            tours.id AS tour_id,
-            tours.code,
-            tours.name,
-            tours.slug,
-            tours.category_id,
-            tours.description,
-            tours.highlights,
-            tours.duration_days,
-            tours.duration_nights,
-            tours.departure_location,
-            tours.destination,
-            tours.min_group_size,
-            tours.max_group_size,
-            tours.is_customizable,
-            tours.qr_code,
-            tours.booking_url,
-            tours.status,
-            GROUP_CONCAT(
-                CONCAT(
-                    tour_images.id, '|',
-                    tour_images.image_url, '|',
-                    tour_images.title, '|',
-                    tour_images.description, '|',
-                    tour_images.display_order, '|',
-                    tour_images.is_featured
-                ) SEPARATOR ';'
-            ) AS images
-        FROM tours
-        LEFT JOIN tour_images ON tours.id = tour_images.tour_id
-        GROUP BY tours.id
+            t.id AS tour_id,
+            t.name,
+            t.slug,
+            t.description,
+            t.highlights,
+            t.duration_days,
+            t.duration_nights,
+            ti.id as tourImg_id,
+            ti.image_url,
+            tv.id,
+            tv.name as tourVersion_name,
+            tp.id as tourPrice_id,
+            tp.price
+        FROM tours t
+        LEFT JOIN tour_images as ti ON t.id = ti.tour_id
+        LEFT JOIN tour_versions tv ON tv.tour_id = t.id
+        LEFT JOIN tour_prices tp ON tp.tour_version_id = tv.id;
+        `;
+        const tours = await query(sql, params);
+        return tours;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function getAllByKeyWord(keyword) {
+    try {
+        let params = [`%${keyword}%`, `%${keyword}%`];
+        const sql = `
+        SELECT 
+            t.id AS tour_id,
+            t.name,
+            t.slug,
+            t.description,
+            t.highlights,
+            t.duration_days,
+            t.duration_nights,
+            ti.id as tourImg_id,
+            ti.image_url,
+            tv.id,
+            tv.name as tourVersion_name,
+            tp.id as tourPrice_id,
+            tp.price
+        FROM tours t
+        LEFT JOIN tour_images as ti ON t.id = ti.tour_id
+        LEFT JOIN tour_versions tv ON tv.tour_id = t.id
+        LEFT JOIN tour_prices tp ON tp.tour_version_id = tv.id
+        WHERE t.name LIKE ? OR t.description LIKE ?
         `;
         const tours = await query(sql, params);
         return tours;
@@ -174,4 +192,5 @@ module.exports = {
     create: create,
     update: update,
     deleteTour: deleteTour,
+    getAllByKeyWord: getAllByKeyWord,
 };

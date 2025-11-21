@@ -16,6 +16,8 @@ const staffRoutes = require("./routes/staff/staff");
 const supplierRoutes = require("./routes/suppliers/supplier.js");
 const tourRoutes = require("./routes/tours/tourRoutes.js");
 const tourImageRoutes = require("./routes/tours/tourImageRoutes.js");
+const tourVersionRoutes = require("./routes/tours/tourVersionRoutes.js");
+const tourPriceRoutes = require("./routes/tours/tourPriceRoutes.js");
 
 const app = express();
 
@@ -53,6 +55,8 @@ app.use("/api/v1/staff", staffRoutes);
 app.use("/api/v1/supplier", supplierRoutes);
 app.use("/api/v1/tours", tourRoutes);
 app.use("/api/v1/tours-image", tourImageRoutes);
+app.use("/api/v1/tours-version", tourVersionRoutes);
+app.use("/api/v1/tours-price", tourPriceRoutes);
 
 // app.use('/api/v1/auth', require('./routes/authentication/auth'));
 // app.use('/api/v1/tours', require('./routes/tourRoutes'));

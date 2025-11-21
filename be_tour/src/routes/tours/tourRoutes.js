@@ -9,8 +9,10 @@ const {
     createTour,
     updateTour,
     deleteTourFromController,
+    getAllToursByKeyWord,
 } = require("../../controllers/tours/tourController.js");
 
+router.get("/search/", getAllToursByKeyWord);
 router.get("/:id", getTourById);
 router.get("/", getAllTours);
 
