@@ -1,24 +1,26 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import TourForm from '../../components/tours/TourForm';
 
-/**
- * Đây là trang Thêm Tour mới (Placeholder)
- * Chỉ để link từ trang TourList không bị lỗi 404
- */
-export default function TourCreate() {
+const TourCreatePage = () => {
+  const navigate = useNavigate();
+
+  // Callback khi tạo thành công
+  const handleCreateSuccess = (newTour) => {
+    alert('Tạo mới thành công! Chuyển sang trang chỉnh sửa để thêm ảnh.');
+    // ID của tour mới tạo (kiểm tra log xem là id hay insertId)
+    const newId = newTour.id || newTour.insertId; 
+    navigate(`/tours/edit/${newId}`);
+  };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
-        <Link to="/tours" className="text-slate-500 hover:text-primary">
-          <i className="ri-arrow-left-line text-2xl"></i>
-        </Link>
-        <h1 className="text-2xl font-bold text-slate-800">Tạo Tour mới</h1>
-      </div>
-
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-700">Form tạo tour...</h2>
-        <p className="text-slate-500 mt-2">Nội dung form tạo tour sẽ được xây dựng ở đây.</p>
-      </div>
+    <div className="p-6 max-w-5xl mx-auto">
+      <h1 className="text-2xl font-bold text-slate-800 mb-2">Tạo Tour Mới</h1>
+      <p className="text-slate-500 text-sm mb-6">Vui lòng điền thông tin cơ bản. Bạn có thể thêm ảnh và giá sau khi tạo.</p>
+      
+      <TourForm onSaveSuccess={handleCreateSuccess} />
     </div>
   );
-}
+};
+
+export default TourCreatePage;
