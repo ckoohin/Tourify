@@ -1,38 +1,38 @@
+const { validationResult } = require("express-validator");
 const {
     getAll,
     getById,
     create,
     update,
-    deleteSupplier,
-} = require("../../models/suppliers/Supplier.js");
-const { validationResult } = require("express-validator");
+    deleteTourPrice,
+} = require("../../models/tours/TourPrice.js");
 
-async function getAllSuppliers(req, res, next) {
+async function getAllTourPrices(req, res, next) {
     try {
-        const suppliers = await getAll();
+        const tourPrices = await getAll();
         return res.json({
             success: true,
-            data: { suppliers },
+            data: { tourPrices },
         });
     } catch (error) {
         next(error);
     }
 }
 
-async function getSupplierById(req, res, next) {
+async function getTourPriceById(req, res, next) {
     try {
         const { id } = req.params;
-        const supplier = await getById(id);
+        const tourPrice = await getById(id);
         return res.json({
             success: true,
-            data: { supplier },
+            data: { tourPrice },
         });
     } catch (error) {
         next(error);
     }
 }
 
-async function createSupplier(req, res, next) {
+async function createTourPrice(req, res, next) {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -43,21 +43,21 @@ async function createSupplier(req, res, next) {
             });
         }
 
-        const supplierId = await create(req.body);
+        const tourPriceId = await create(req.body);
 
-        const newSupplier = await getById(supplierId);
+        const newTourPrice = await getById(tourPriceId);
 
         res.status(201).json({
             success: true,
-            message: "Tạo nhà cung cấp thành công",
-            data: { supplier: newSupplier },
+            message: "Tạo tourPrice thành công",
+            data: { tourPrice: newTourPrice },
         });
     } catch (error) {
         next(error);
     }
 }
 
-async function updateSupplier(req, res, next) {
+async function updateTourPrice(req, res, next) {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -73,17 +73,16 @@ async function updateSupplier(req, res, next) {
         const result = await update(req.body, id);
 
         if (result) {
-            const updatedSupplier = await getById(id);
+            const updatedTourPrice = await getById(id);
             res.status(201).json({
                 success: true,
-                message: "Cập nhật nhà cung cấp thành công",
-                data: { updatedSupplier: updatedSupplier },
+                message: "Cập nhật tourPrice thành công",
+                data: { updatedTourPrice: updatedTourPrice },
             });
         } else {
             res.status(500).json({
                 success: false,
-                message:
-                    "Cập nhật nhà cung cấp thất bại, vui lòng kiểm tra lại",
+                message: "Cập nhật tourPrice thất bại, vui lòng kiểm tra lại",
             });
         }
     } catch (error) {
@@ -91,21 +90,21 @@ async function updateSupplier(req, res, next) {
     }
 }
 
-async function deleteSupplierFromController(req, res, next) {
+async function deleteTourPriceFromController(req, res, next) {
     try {
         const { id } = req.params;
 
-        const result = await deleteSupplier(id);
+        const result = await deleteTourPrice(id);
 
         if (result) {
             res.status(201).json({
                 success: true,
-                message: "Xóa nhà cung cấp thành công",
+                message: "Xóa tourPrice thành công",
             });
         } else {
             res.status(500).json({
                 success: false,
-                message: "Xóa nhà cung cấp thất bại, vui lòng kiểm tra lại",
+                message: "Xóa tourPrice thất bại, vui lòng kiểm tra lại",
             });
         }
     } catch (error) {
@@ -114,9 +113,9 @@ async function deleteSupplierFromController(req, res, next) {
 }
 
 module.exports = {
-    getAllSuppliers: getAllSuppliers,
-    getSupplierById: getSupplierById,
-    createSupplier: createSupplier,
-    updateSupplier: updateSupplier,
-    deleteSupplierFromController: deleteSupplierFromController,
+    getAllTourPrices: getAllTourPrices,
+    getTourPriceById: getTourPriceById,
+    createTourPrice: createTourPrice,
+    updateTourPrice: updateTourPrice,
+    deleteTourPriceFromController: deleteTourPriceFromController,
 };
