@@ -1,82 +1,134 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Edit, Trash2, MapPin, Clock, Users, Eye } from 'lucide-react';
+// Import Component StatusBadge
+import StatusBadge from '../ui/StatusBadge'; 
 
-/**
- * Đây là component UI có thể tái sử dụng cho 1 thẻ Tour.
- * Nó nhận 'props' (dữ liệu) từ component cha (TourList.jsx).
- */
-export default function TourCard({ tour }) {
-  // Định dạng lại giá
-  const formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tour.price);
+const TourCard = ({ tour, onDelete }) => {
+  const mainImage = tour.images && tour.images.length > 0 
+    ? tour.images[0].url 
+    : 'https://placehold.co/600x400/e2e8f0/94a3b8?text=No+Image';
 
-  // Map trạng thái sang màu sắc Tailwind
-  const statusColors = {
-    'Đang mở bán': 'bg-green-500',
-    'Sắp hết chỗ': 'bg-amber-500',
-    'Bản nháp': 'bg-slate-500',
-    'Đã đóng': 'bg-red-500',
+  const getDisplayPrice = () => {
+    if (!tour.versions || tour.versions.length === 0) return 'Chưa cập nhật';
+    let minPrice = Infinity;
+    tour.versions.forEach(ver => {
+      if (ver.prices) {
+        ver.prices.forEach(p => {
+          if (Number(p.price) < minPrice) minPrice = Number(p.price);
+        });
+      }
+    });
+    if (minPrice === Infinity) return 'Liên hệ';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(minPrice);
   };
 
-  // Map danh mục sang màu sắc
-  const categoryColors = {
-    'Du lịch Biển': 'text-blue-600 bg-blue-50',
-    'Núi rừng': 'text-green-600 bg-green-50',
-    'Nghỉ dưỡng': 'text-purple-600 bg-purple-50',
-    'Du lịch sinh thái': 'text-emerald-600 bg-emerald-50',
-    'Du lịch văn hóa': 'text-orange-600 bg-orange-50',
-    'Chưa phân loại': 'text-slate-600 bg-slate-100',
+  // Hàm helper để map trạng thái tour sang props của StatusBadge
+  const getStatusConfig = (status) => {
+    switch (status) {
+      case 'active':
+        return { level: 'success', text: 'Mở bán' };
+      case 'draft':
+        return { level: 'warning', text: 'Nháp' }; // Dùng warning cho nháp để dễ nhìn
+      case 'inactive':
+        return { level: 'danger', text: 'Ngừng KD' };
+      case 'archived':
+        return { level: 'info', text: 'Lưu trữ' };
+      default:
+        return { level: 'info', text: 'Khác' };
+    }
   };
-  
+
+  const statusConfig = getStatusConfig(tour.status);
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all overflow-hidden group flex flex-col">
-      <div className="relative h-48 overflow-hidden">
-        <img 
-          src={tour.imageUrl || 'https://i.imgur.com/g0P3YfQ.jpeg'} 
-          alt={tour.title} 
-          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-        />
-        {tour.status && (
-          <span className={`absolute top-3 right-3 ${statusColors[tour.status] || 'bg-gray-500'} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm`}>
-            {tour.status}
-          </span>
-        )}
-      </div>
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group h-full">
       
-      <div className="p-5 flex-1 flex flex-col">
-        <div className="flex items-center gap-2 mb-2">
-          <span className={`text-xs font-medium ${categoryColors[tour.category] || 'text-gray-600 bg-gray-100'} px-2 py-0.5 rounded`}>
-            {tour.category || 'Khác'}
-          </span>
-          <span className="text-xs text-slate-400 flex items-center">
-            <i className="ri-time-line mr-1"></i> {tour.duration}
-          </span>
-        </div>
-        
-        <h3 className="text-lg font-bold text-slate-800 line-clamp-2 mb-1 group-hover:text-primary transition-colors">
-          <Link to={`/tours/${tour.id}`}>
-            {tour.title}
-          </Link>
-        </h3>
-        
-        <p className="text-sm text-slate-500 mb-4 line-clamp-2 flex-1">
-          {tour.description}
-        </p>
+      {/* 1. Image Section */}
+      <Link to={`/tours/${tour.id}`} className="relative aspect-[4/3] overflow-hidden block cursor-pointer">
+        <img 
+          src={mainImage} 
+          alt={tour.name} 
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          onError={(e) => {e.target.src = 'https://placehold.co/600x400/e2e8f0/94a3b8?text=Error'}}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-auto">
-          <div>
-            <p className="text-xs text-slate-400">Giá từ</p>
-            <p className="text-lg font-bold text-primary">{formattedPrice}</p>
+        {/* --- SỬ DỤNG STATUS BADGE TẠI ĐÂY --- */}
+        <div className="absolute top-3 right-3">
+          <StatusBadge 
+            level={statusConfig.level} 
+            text={statusConfig.text} 
+            className="shadow-sm backdrop-blur-md bg-opacity-90" // Thêm class tùy chỉnh nếu cần
+          />
+        </div>
+
+        {/* Code Badge */}
+        <div className="absolute top-3 left-3">
+           <span className="bg-white/90 backdrop-blur-sm text-slate-700 text-xs font-mono font-bold px-2 py-1 rounded shadow-sm">
+             {tour.code}
+           </span>
+        </div>
+
+        {/* Price Tag */}
+        <div className="absolute bottom-3 left-3 text-white">
+           <p className="text-xs opacity-90 font-light">Giá từ</p>
+           <p className="text-lg font-bold text-yellow-400">{getDisplayPrice()}</p>
+        </div>
+      </Link>
+
+      {/* 2. Content Section */}
+      <div className="p-5 flex-1 flex flex-col">
+        <h3 className="font-bold text-lg text-slate-800 line-clamp-2 mb-3 group-hover:text-blue-600 transition-colors">
+          <Link to={`/tours/${tour.id}`}>{tour.name}</Link>
+        </h3>
+
+        <div className="grid grid-cols-2 gap-y-2 text-xs text-slate-500 mb-4">
+          <div className="flex items-center gap-1.5">
+            <Clock size={14} className="text-blue-500"/>
+            <span>{tour.duration_days}N{tour.duration_nights}Đ</span>
           </div>
-          <div className="flex gap-2">
-            <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors" title="Chỉnh sửa">
-              <i className="ri-edit-line"></i>
-            </button>
-            <button className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors" title="Xóa">
-              <i className="ri-delete-bin-line"></i>
-            </button>
+          <div className="flex items-center gap-1.5">
+            <Users size={14} className="text-blue-500"/>
+            <span>{tour.min_group_size} - {tour.max_group_size} khách</span>
           </div>
+          <div className="col-span-2 flex items-center gap-1.5">
+             <MapPin size={14} className="text-red-500 shrink-0"/>
+             <span className="truncate">{tour.departure_location} → {tour.destination}</span>
+          </div>
+        </div>
+
+        <div className="flex-1"></div>
+
+        {/* 3. Action Footer */}
+        <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+          <div className="flex gap-3">
+             <Link 
+              to={`/tours/${tour.id}`} 
+              className="text-sm font-medium text-slate-600 hover:text-blue-600 flex items-center gap-1 transition-colors"
+            >
+              <Eye size={16} /> Xem
+            </Link>
+            
+            <Link 
+              to={`/tours/edit/${tour.id}`} 
+              className="text-sm font-medium text-slate-600 hover:text-amber-600 flex items-center gap-1 transition-colors"
+            >
+              <Edit size={16} /> Sửa
+            </Link>
+          </div>
+          
+          <button 
+            onClick={() => onDelete(tour.id)}
+            className="text-slate-400 hover:text-red-500 p-1.5 hover:bg-red-50 rounded-full transition-colors"
+            title="Xóa tour"
+          >
+            <Trash2 size={18} />
+          </button>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default TourCard;

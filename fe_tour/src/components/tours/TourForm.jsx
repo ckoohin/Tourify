@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Save } from 'lucide-react';
-import tourService from '../../services/api/tourService';
-import tourCategoryService from '../../services/api/tourCategoryService';
 import { useNavigate } from 'react-router-dom';
 
-// Nếu bạn muốn tách form ảnh ra riêng, có thể tạo ImageManager.jsx và import vào đây
-// import ImageManager from './ImageManager';
+// SỬA 1: Kiểm tra lại đường dẫn import service cho đúng với cấu trúc thư mục của bạn
+// Nếu file nằm ngay trong src/services thì bỏ /api đi
+import tourService from '../../services/api/tourService';
+import tourCategoryService from '../../services/api/tourCategoryService'; 
+
+// Nếu bạn chưa có file tourCategoryService riêng, bạn có thể dùng tourService.getCategories
+// import tourService from '../../services/tourService';
 
 const TourForm = ({ tourId, initialData }) => {
   const isEdit = !!tourId;
@@ -27,18 +30,24 @@ const TourForm = ({ tourId, initialData }) => {
     min_group_size: 1,
     max_group_size: 20,
     status: 'draft',
-    created_by: 1 // TODO: Lấy từ AuthContext user.id
+    created_by: 1 
   });
 
   useEffect(() => {
     // 1. Load danh mục để chọn
     const fetchCategories = async () => {
         try {
-            const res = await tourCategoryService.getAll({ is_active: 1 });
+            // SỬA 2: Gọi getAll() không tham số để tránh lỗi "Ambiguous column" ở Backend
+            const res = await tourCategoryService.getAll();
+            
             if (res.success && res.data?.categories) {
-                setCategories(res.data.categories);
+                // Tự lọc danh mục active ở phía Frontend
+                const activeCats = res.data.categories.filter(c => c.is_active === 1);
+                setCategories(activeCats);
             }
-        } catch (err) { console.error(err); }
+        } catch (err) { 
+            console.error("Lỗi tải danh mục:", err); 
+        }
     };
     fetchCategories();
 
@@ -59,16 +68,21 @@ const TourForm = ({ tourId, initialData }) => {
       let res;
       if (isEdit) {
         res = await tourService.updateTour(tourId, formData);
-        alert('Cập nhật thành công!');
       } else {
         res = await tourService.createTour(formData);
-        alert('Tạo mới thành công!');
-        // Sau khi tạo xong, chuyển hướng về danh sách hoặc trang edit để thêm ảnh
-        navigate('/tours'); 
+      }
+      
+      if (res.success) {
+        alert(isEdit ? 'Cập nhật thành công!' : 'Tạo mới thành công!');
+        // Nếu tạo mới -> chuyển về danh sách hoặc trang edit
+        if (!isEdit) {
+            navigate('/tours'); 
+        }
       }
     } catch (error) {
       console.error(error);
-      alert('Lỗi: ' + (error.response?.data?.message || error.message));
+      const msg = error.response?.data?.message || error.message || 'Có lỗi xảy ra';
+      alert('Lỗi: ' + msg);
     }
   };
 
@@ -86,6 +100,7 @@ const TourForm = ({ tourId, initialData }) => {
             onChange={handleChange} 
             required 
             className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+            placeholder="Ví dụ: Đà Nẵng - Hội An"
           />
         </div>
 
@@ -98,6 +113,7 @@ const TourForm = ({ tourId, initialData }) => {
             onChange={handleChange} 
             required 
             className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+            placeholder="DN-001"
           />
         </div>
 
@@ -110,6 +126,7 @@ const TourForm = ({ tourId, initialData }) => {
             onChange={handleChange} 
             required 
             className="w-full border rounded-lg px-3 py-2 bg-slate-50"
+            placeholder="da-nang-hoi-an"
           />
         </div>
 
