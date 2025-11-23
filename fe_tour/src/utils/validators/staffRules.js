@@ -1,4 +1,5 @@
-
+import { isValidPhone } from "./supplierRules";
+import { isValidEmail } from "./supplierRules";
 export const validateStaff = (data) => {
   const errors = {};
 

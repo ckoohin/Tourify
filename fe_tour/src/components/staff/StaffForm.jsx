@@ -58,38 +58,58 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const validationErrors = validateStaff(formData);
     if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        alert("Vui lòng kiểm tra lại thông tin nhập liệu!");
-        return;
+      setErrors(validationErrors);
+      alert("Vui lòng kiểm tra lại thông tin nhập liệu!");
+      return;
     }
 
     setLoading(true);
 
     const payload = {
-        ...formData,
-        languages: formData.languages.split(',').map(s => s.trim()).filter(Boolean),
-        certifications: formData.certifications.split(',').map(s => s.trim()).filter(Boolean),
-        specializations: formData.specializations.split(',').map(s => s.trim()).filter(Boolean),
-        vehicle_types: formData.vehicle_types.split(',').map(s => s.trim()).filter(Boolean),
+      ...formData,
+      languages: formData.languages.split(',').map(s => s.trim()).filter(Boolean),
+      certifications: formData.certifications.split(',').map(s => s.trim()).filter(Boolean),
+      specializations: formData.specializations.split(',').map(s => s.trim()).filter(Boolean),
+      vehicle_types: formData.vehicle_types.split(',').map(s => s.trim()).filter(Boolean),
     };
 
     try {
+      let result;
       if (isEdit) {
-        await staffService.update(staffId, payload);
+        result = await staffService.update(staffId, payload);
         alert("Cập nhật thành công!");
       } else {
-        await staffService.create(payload);
+        result = await staffService.create(payload);
         alert("Tạo nhân viên thành công!");
       }
-      if (onSuccess) onSuccess();
+
+      if (onSuccess) onSuccess(result);
+
       if (onClose) onClose();
+
     } catch (error) {
       console.error(error);
-      const msg = error.response?.data?.message || error.message;
-      alert("Lỗi: " + msg);
+
+      if (error.response?.data) {
+        const { message, data } = error.response.data;
+
+        if (data?.errors) {
+          const fieldErrors = {};
+          data.errors.forEach(e => {
+            fieldErrors[e.path] = e.msg;
+          });
+          setErrors(fieldErrors);
+          alert(message || "Dữ liệu không hợp lệ!");
+        } else {
+          alert(message || "Đã xảy ra lỗi!");
+        }
+      } else {
+        alert("Lỗi: " + error.message);
+      }
+
     } finally {
       setLoading(false);
     }
