@@ -1,13 +1,20 @@
 const { validationResult } = require('express-validator');
-const { errorResponse } = require('../utils/apiResponse');
+const ApiResponse = require('../utils/apiResponse');
 
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return errorResponse(res, 400, 'Validation error', errors.array());
+    const formattedErrors = errors.array().map(err => ({
+      field: err.path,
+      message: err.msg
+    }));
+    return ApiResponse.error(res, {
+      message: 'Dữ liệu không hợp lệ',
+      statusCode: 400,
+      errors: formattedErrors
+    });
   }
   next();
 };
 
 module.exports = validate;
-

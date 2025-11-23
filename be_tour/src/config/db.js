@@ -16,7 +16,6 @@ const pool = mysql.createPool({
     timezone: "+07:00",
 });
 
-// Hàm để kết nối và test kết nối db
 const testConnection = async () => {
     try {
         const connection = await pool.getConnection();

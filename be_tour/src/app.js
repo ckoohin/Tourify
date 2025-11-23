@@ -11,6 +11,9 @@ const { testConnection } = require("./config/db");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const authRoutes = require("./routes/authentication/auth");
+const roleRoutes = require('./routes/authentication/roleRoutes');
+const permissionRoutes = require('./routes/authentication/permissionRoutes');
+const permissionRoleRoutes = require('./routes/authentication/permissionRoleRoutes');
 const tourCategoryRoutes = require("./routes/tours/tourCategoryRoutes");
 const staffRoutes = require("./routes/staff/staff");
 const supplierRoutes = require("./routes/suppliers/supplier.js");
@@ -21,7 +24,6 @@ const tourPriceRoutes = require("./routes/tours/tourPriceRoutes.js");
 
 const app = express();
 
-// Khai báo file tĩnh: img, css, js...
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(helmet());
@@ -32,10 +34,6 @@ app.use(
         credentials: true,
     })
 );
-// app.use(cors({
-//   origin: process.env.CLIENT_URL || 'http://localhost:5173',
-//   credentials: true
-// }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -57,11 +55,9 @@ app.use("/api/v1/tours", tourRoutes);
 app.use("/api/v1/tours-image", tourImageRoutes);
 app.use("/api/v1/tours-version", tourVersionRoutes);
 app.use("/api/v1/tours-price", tourPriceRoutes);
-
-// app.use('/api/v1/auth', require('./routes/authentication/auth'));
-// app.use('/api/v1/tours', require('./routes/tourRoutes'));
-// app.use('/api/v1/bookings', require('./routes/bookingRoutes'));
-// app.use('/api/v1/users', require('./routes/userRoutes'));
+app.use('/api/v1/roles', roleRoutes);
+app.use('/api/v1/permissions', permissionRoutes);
+app.use('/api/v1/permission-roles', permissionRoleRoutes);
 
 app.get("/health", (req, res) => {
     res.json({
