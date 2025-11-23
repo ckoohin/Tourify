@@ -16,7 +16,6 @@ export default function MainLayout() {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       
-      {/* Truyền state và hàm toggle xuống Sidebar */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       {/* Vùng nội dung chính */}
@@ -28,7 +27,7 @@ export default function MainLayout() {
         {/* MAIN SCROLLABLE CONTENT */}
         {/* <Outlet> sẽ render trang con (ví dụ: Home.jsx) */}
         <main className="flex-1 overflow-y-auto p-6 bg-slate-50">
-          <Outlet /> {/* Đây là nơi nội dung của Home.jsx sẽ hiển thị */}
+          <Outlet /> 
         </main>
       </div>
     </div>

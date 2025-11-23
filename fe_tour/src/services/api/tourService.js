@@ -1,24 +1,36 @@
-import api from './axios';
+import api from '../api/axios'; // Đảm bảo đường dẫn đúng tới file axios.js
 
-export const tourService = {
-  // Get all tours
-  getTours: (params) => api.get('/tours', { params }),
+const tourService = {
+  // --- TOUR ---
+  getTours: (params = {}) => {
+    if (params.keyword) {
+      return api.get('/tours/search/', { params: { keyword: params.keyword } });
+    }
+    return api.get('/tours', { params });
+  },
   
-  // Get tour by ID
   getTourById: (id) => api.get(`/tours/${id}`),
-  
-  // Create tour
   createTour: (data) => api.post('/tours', data),
-  
-  // Update tour
   updateTour: (id, data) => api.put(`/tours/${id}`, data),
-  
-  // Delete tour
   deleteTour: (id) => api.delete(`/tours/${id}`),
-  
-  // Clone tour
-  cloneTour: (id) => api.post(`/tours/${id}/clone`),
-  
-  // Get tour departures
-  getDepartures: (tourId) => api.get(`/tours/${tourId}/departures`),
+
+  // --- DANH MỤC ---
+  getCategories: (params = {}) => api.get('/tour-categories', { params }),
+
+  // --- ẢNH ---
+  uploadTourImage: (formData) => api.post('/tours-image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+
+  // --- VERSION ---
+  createVersion: (data) => api.post('/tours-version', data),
+  updateVersion: (id, data) => api.put(`/tours-version/${id}`, data),
+  deleteVersion: (id) => api.delete(`/tours-version/${id}`),
+
+  // --- GIÁ ---
+  createPrice: (data) => api.post('/tours-price', data),
+  updatePrice: (id, data) => api.put(`/tours-price/${id}`, data),
+  deletePrice: (id) => api.delete(`/tours-price/${id}`),
 };
+
+export default tourService;

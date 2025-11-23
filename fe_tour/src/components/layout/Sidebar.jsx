@@ -15,8 +15,6 @@ import {
   LogOut,
 } from 'lucide-react';
 
-// Chúng ta sẽ dùng NavLink để tự động có class "active"
-// Chúng ta cũng sẽ nhận props để xử lý việc đóng/mở trên di động
 export default function Sidebar({ isOpen, toggleSidebar }) {
   const baseLinkClass =
     'flex items-center px-3 py-2.5 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group';
@@ -61,8 +59,6 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           </button>
         </div>
 
-        {/* Navigation Menu (Sử dụng NavLink) */}
-        {/* Đã thêm class ẩn thanh cuộn vào đây */}
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
           {/* Menu Group: Tổng quan */}
           <div className="mb-4">
@@ -84,7 +80,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
               <Map className="mr-3 w-5 h-5" />
               <span>Danh sách Tour</span>
             </NavLink>
-            <NavLink to="/tour-categories" className={getNavLinkClass}>
+            <NavLink to="/categories" className={getNavLinkClass}>
               <Settings className="mr-3 w-5 h-5" />
               <span>Danh mục Tour</span>
             </NavLink>
@@ -132,7 +128,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
               <User className="mr-3 w-5 h-5" />
               <span>Quản lí nhân sự</span>
             </NavLink>
-            <NavLink to="/supplier" className={getNavLinkClass}>
+            <NavLink to="/providers" className={getNavLinkClass}>
               <User className="mr-3 w-5 h-5" />
               <span>Quản lí nhà cung cấp</span>
             </NavLink>
@@ -146,26 +142,6 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             </NavLink>
           </div>
         </nav>
-
-        {/* User Profile Summary
-        <div className="p-4 bg-slate-900/50 border-t border-slate-800 flex items-center">
-          <img
-            src="https://i.pravatar.cc/150?img=3"
-            alt="Admin"
-            className="w-10 h-10 rounded-full border-2 border-primary"
-          />
-          <div className="ml-3 flex-1 overflow-hidden">
-            <p className="text-sm font-medium text-white truncate">
-              Admin Quản Trị
-            </p>
-            <p className="text-xs text-slate-500 truncate">
-              admin@tourify.com
-            </p>
-          </div>
-          <button className="text-slate-400 hover:text-white transition-colors">
-            <LogOut className="w-5 h-5" />
-          </button>
-        </div> */}
       </aside>
     </>
   );
