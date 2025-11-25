@@ -3,36 +3,36 @@ const {
     getById,
     create,
     update,
-    deleteSupplier,
-} = require("../../models/suppliers/supplier.js");
+    deleteCustomer,
+} = require("../../models/customers/Customer.js");
 const { validationResult } = require("express-validator");
 
-async function getAllSuppliers(req, res, next) {
+async function getAllCustomers(req, res, next) {
     try {
-        const suppliers = await getAll();
+        const customers = await getAll();
         return res.json({
             success: true,
-            data: { suppliers },
+            data: { customers },
         });
     } catch (error) {
         next(error);
     }
 }
 
-async function getSupplierById(req, res, next) {
+async function getCustomerById(req, res, next) {
     try {
         const { id } = req.params;
-        const supplier = await getById(id);
+        const customer = await getById(id);
         return res.json({
             success: true,
-            data: { supplier },
+            data: { customer },
         });
     } catch (error) {
         next(error);
     }
 }
 
-async function createSupplier(req, res, next) {
+async function createCustomer(req, res, next) {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -43,21 +43,21 @@ async function createSupplier(req, res, next) {
             });
         }
 
-        const supplierId = await create(req.body);
+        const customerId = await create(req.body);
 
-        const newSupplier = await getById(supplierId);
+        const newCustomer = await getById(customerId);
 
         res.status(201).json({
             success: true,
-            message: "Tạo nhà cung cấp thành công",
-            data: { supplier: newSupplier },
+            message: "Tạo thông tin khách hàng thành công",
+            data: { customer: newCustomer },
         });
     } catch (error) {
         next(error);
     }
 }
 
-async function updateSupplier(req, res, next) {
+async function updateCustomer(req, res, next) {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -73,17 +73,17 @@ async function updateSupplier(req, res, next) {
         const result = await update(req.body, id);
 
         if (result) {
-            const updatedSupplier = await getById(id);
+            const updatedCustomer = await getById(id);
             res.status(201).json({
                 success: true,
-                message: "Cập nhật nhà cung cấp thành công",
-                data: { updatedSupplier: updatedSupplier },
+                message: "Cập nhật thông tin khách hàng thành công",
+                data: { updatedCustomer: updatedCustomer },
             });
         } else {
             res.status(500).json({
                 success: false,
                 message:
-                    "Cập nhật nhà cung cấp thất bại, vui lòng kiểm tra lại",
+                    "Cập nhật thông tin khách hàng thất bại, vui lòng kiểm tra lại",
             });
         }
     } catch (error) {
@@ -91,21 +91,22 @@ async function updateSupplier(req, res, next) {
     }
 }
 
-async function deleteSupplierFromController(req, res, next) {
+async function deleteCustomerFromController(req, res, next) {
     try {
         const { id } = req.params;
 
-        const result = await deleteSupplier(id);
+        const result = await deleteCustomer(id);
 
         if (result) {
             res.status(201).json({
                 success: true,
-                message: "Xóa nhà cung cấp thành công",
+                message: "Xóa thông tin khách hàng thành công",
             });
         } else {
             res.status(500).json({
                 success: false,
-                message: "Xóa nhà cung cấp thất bại, vui lòng kiểm tra lại",
+                message:
+                    "Xóa thông tin khách hàng thất bại, vui lòng kiểm tra lại",
             });
         }
     } catch (error) {
@@ -114,9 +115,9 @@ async function deleteSupplierFromController(req, res, next) {
 }
 
 module.exports = {
-    getAllSuppliers: getAllSuppliers,
-    getSupplierById: getSupplierById,
-    createSupplier: createSupplier,
-    updateSupplier: updateSupplier,
-    deleteSupplierFromController: deleteSupplierFromController,
+    getAllCustomers: getAllCustomers,
+    getCustomerById: getCustomerById,
+    createCustomer: createCustomer,
+    updateCustomer: updateCustomer,
+    deleteCustomerFromController: deleteCustomerFromController,
 };

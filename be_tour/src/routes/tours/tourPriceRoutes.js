@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { body } = require("express-validator");
-const { authenticate, authorize } = require("../../middleware/authMiddleware");
+const { authenticate } = require("../../middleware/authMiddleware");
+const { authorize } = require("../../middleware/authorize");
 
 const {
     getAllTourPrices,
@@ -11,13 +12,19 @@ const {
     deleteTourPriceFromController,
 } = require("../../controllers/tours/tourPriceController.js");
 
-router.get("/:id", getTourPriceById);
-router.get("/", getAllTourPrices);
+router.get(
+    "/:id",
+    authenticate,
+    authorize("toursPrice.manage"),
+    getTourPriceById
+);
+
+router.get("/", authenticate, authorize("toursPrice.manage"), getAllTourPrices);
 
 router.post(
     "/",
-    // authenticate,
-    // authorize("admin", "manager"),
+    authenticate,
+    authorize("toursPrice.manage"),
     [
         body("tour_version_id")
             .trim()
@@ -78,8 +85,8 @@ router.post(
 
 router.put(
     "/:id",
-    // authenticate,
-    // authorize("admin", "manager"),
+    authenticate,
+    authorize("toursPrice.manage"),
     [
         body("tour_version_id")
             .trim()
@@ -140,8 +147,8 @@ router.put(
 
 router.delete(
     "/:id",
-    // authenticate,
-    // authorize("admin"),
+    authenticate,
+    authorize("toursPrice.manage"),
     deleteTourPriceFromController
 );
 
