@@ -1,0 +1,69 @@
+/* Style CƠ BẢN */
+.my-toast-base {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background-color: #334155; /* slate-700 */
+  color: #fff;
+}
+
+/* Style SUCCESS */
+.my-toast-success {
+  background-color: #ecfdf5 !important; /* emerald-50 */
+  color: #047857 !important;            /* emerald-700 */
+  border: 1px solid #a7f3d0;            /* emerald-200 */
+}
+
+/* Style ERROR */
+.my-toast-error {
+  background-color: #fef2f2 !important; /* red-50 */
+  color: #b91c1c !important;            /* red-700 */
+  border: 1px solid #fecaca;            /* red-200 */
+}
+
+/* Style LOADING */
+.my-toast-loading {
+  background-color: #fff !important;
+  color: #64748b !important;
+  border: 1px solid #e2e8f0;
+}
+
+/* --- THÊM MỚI: Style CONFIRM (Xác nhận xóa) --- */
+.my-toast-confirm {
+  background-color: #fffbeb !important; /* amber-50 */
+  color: #92400e !important;            /* amber-800 */
+  border: 1px solid #fde68a;            /* amber-200 */
+  /* Nếu toast có chứa nút bấm, thêm flex để căn chỉnh */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Tùy chọn: Style cho nút bấm bên trong toast confirm */
+.my-toast-confirm button {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+/* Nút đồng ý xóa */
+.my-toast-confirm .btn-confirm {
+  background-color: #ef4444; /* red-500 */
+  color: white;
+}
+.my-toast-confirm .btn-confirm:hover {
+  background-color: #dc2626; /* red-600 */
+}
+
+/* Nút hủy */
+.my-toast-confirm .btn-cancel {
+  background-color: transparent;
+  border: 1px solid #d97706; /* amber-600 */
+  color: #d97706;
+}
+.my-toast-confirm .btn-cancel:hover {
+  background-color: #fff7ed; /* orange-50 */
+}

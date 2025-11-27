@@ -57,7 +57,7 @@ app.use("/api/v1/tours-version", tourVersionRoutes);
 app.use("/api/v1/tours-price", tourPriceRoutes);
 app.use('/api/v1/roles', roleRoutes);
 app.use('/api/v1/permissions', permissionRoutes);
-app.use('/api/v1/permission-roles', permissionRoleRoutes);
+app.use('/api/v1', permissionRoleRoutes);
 
 app.get("/health", (req, res) => {
     res.json({

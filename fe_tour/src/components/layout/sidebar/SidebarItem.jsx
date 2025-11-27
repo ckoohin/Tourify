@@ -1,74 +1,88 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, Circle } from 'lucide-react';
 
-const SidebarItem = ({ item, isOpen, isExpanded, onToggle }) => {
+const SidebarItem = ({ item, isExpanded, onToggle }) => {
   const location = useLocation();
-  const { title, path, icon, children } = item;
+  const hasChildren = item.children && item.children.length > 0;
 
-  const baseLinkClass = 'flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group relative text-sm font-medium w-full';
-  const inactiveClass = 'text-slate-400 hover:text-white hover:bg-slate-800/50';
-  const activeClass = 'bg-primary text-white shadow-lg shadow-primary/20';
-  const activeParentClass = 'text-blue-400 bg-slate-800/30';
+  const baseClass = "flex items-center justify-between px-4 py-3 mx-2 mb-1 rounded-xl cursor-pointer transition-all duration-200 select-none group border border-transparent";
   
-  const subLinkClass = 'flex items-center pl-10 pr-3 py-2 text-sm text-slate-400 hover:text-white transition-colors border-l border-slate-800 ml-4 hover:border-slate-600';
-  const activeSubLinkClass = 'text-white border-primary font-medium';
+  const activeParentClass = "bg-slate-800/80 text-white font-medium border-slate-700/50 shadow-sm";
+  
+  const inactiveParentClass = "text-slate-400 hover:bg-slate-800 hover:text-white hover:border-slate-700/50 hover:shadow-sm hover:translate-x-1";
 
-  const isActiveParent = children 
-    ? children.some(child => location.pathname.startsWith(child.path))
-    : false;
+  const isChildActive = hasChildren && item.children.some(child => 
+    location.pathname === child.path
+  );
 
-  if (children) {
+  // --- TRƯỜNG HỢP 1: CHỨC NĂNG CHA CÓ CON ---
+  if (hasChildren) {
     return (
       <div className="mb-1">
-        <button
-          onClick={() => onToggle(title)}
-          className={`${baseLinkClass} justify-between ${isActiveParent ? activeParentClass : inactiveClass}`}
+        <div
+          onClick={onToggle}
+          className={`${baseClass} ${isExpanded || isChildActive ? activeParentClass : inactiveParentClass}`}
         >
-          <div className="flex items-center">
-            <span className={`${isActiveParent ? 'text-blue-400' : 'text-slate-500 group-hover:text-white'}`}>
-              {icon}
-            </span>
-            <span className="ml-3">{title}</span>
+          <div className="flex items-center gap-3">
+            {/* Icon đổi màu khi active hoặc hover group */}
+            <item.icon size={20} className={`transition-colors duration-200 ${isExpanded || isChildActive ? "text-blue-500" : "text-slate-500 group-hover:text-blue-400"}`} />
+            <span className="text-[15px]">{item.label}</span>
           </div>
-          {isExpanded ? <ChevronDown className="w-4 h-4 opacity-50" /> : <ChevronRight className="w-4 h-4 opacity-50" />}
-        </button>
+          {/* Mũi tên xoay nhẹ khi hover */}
+          <div className="text-slate-500 group-hover:text-white transition-colors">
+            {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </div>
+        </div>
 
-        {/* Submenu List Animation */}
-        <div 
-          className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-96 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}
+        {/* Khu vực menu con (Animation trượt) */}
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+            isExpanded ? 'max-h-[500px] opacity-100 mt-1' : 'max-h-0 opacity-0'
+          }`}
         >
-          {children.map((child, index) => (
-            <NavLink
-              key={index}
-              to={child.path}
-              className={({ isActive }) => 
-                `${subLinkClass} ${isActive ? activeSubLinkClass : ''}`
-              }
-            >
-              {child.title}
-            </NavLink>
-          ))}
+          <div className="ml-4 pl-4 border-l border-slate-700/50 space-y-1">
+            {item.children.map((child, idx) => (
+              <NavLink
+                key={idx}
+                to={child.path}
+                className={({ isActive }) =>
+                  `flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? 'bg-blue-600 text-white font-medium shadow-md shadow-blue-900/30 translate-x-1'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800 hover:translate-x-1'
+                  }`
+                }
+              >
+                <Circle 
+                  size={6} 
+                  className={`transition-colors duration-200 ${location.pathname === child.path ? "fill-white text-white" : "fill-slate-600 text-slate-600 group-hover:fill-slate-400"}`} 
+                />
+                {child.label}
+              </NavLink>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
+  // --- TRƯỜNG HỢP 2: CHỨC NĂNG ĐƠN (KHÔNG CÓ CON) ---
   return (
     <NavLink
-      to={path}
+      to={item.path}
       className={({ isActive }) =>
-        `${baseLinkClass} ${isActive ? activeClass : inactiveClass}`
+        `${baseClass} ${
+          isActive 
+            ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30 font-medium' 
+            : inactiveParentClass
+        }`
       }
     >
-      {({ isActive }) => (
-        <>
-          <span className={`${isActive ? 'text-white' : 'text-slate-500 group-hover:text-white'} transition-colors`}>
-            {icon}
-          </span>
-          <span className="ml-3">{title}</span>
-        </>
-      )}
+      <div className="flex items-center gap-3">
+        <item.icon size={20} className="transition-transform duration-200 group-hover:scale-110" />
+        <span className="text-[15px]">{item.label}</span>
+      </div>
     </NavLink>
   );
 };

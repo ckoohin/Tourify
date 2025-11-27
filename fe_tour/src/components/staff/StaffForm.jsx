@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Save, X, AlertCircle } from 'lucide-react';
+import { Save, AlertCircle } from 'lucide-react';
 import staffService from '../../services/api/staffService';
-// Import hàm validate vừa tạo
 import { validateStaff } from '../../utils/validators/staffRules';
+import toast from 'react-hot-toast';
 
-const StaffForm = ({ staffId, initialData, onClose, onSuccess }) => {
+const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false }) => {
   const isEdit = !!staffId;
   const [loading, setLoading] = useState(false);
-  // State lưu lỗi
   const [errors, setErrors] = useState({});
 
   const [formData, setFormData] = useState({
@@ -29,153 +28,264 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess }) => {
     vehicle_types: ''
   });
 
+  // --- FILL DỮ LIỆU KHI EDIT ---
   useEffect(() => {
     if (initialData) {
-      setFormData({
+      const arrayToString = (arr) => {
+        if (!arr) return '';
+        if (Array.isArray(arr)) return arr.join(', ');
+        try {
+            const parsed = JSON.parse(arr);
+            return Array.isArray(parsed) ? parsed.join(', ') : arr;
+        } catch (e) {
+            return arr || ''; 
+        }
+      };
+
+      setFormData(prev => ({
+        ...prev,
         ...initialData,
-        languages: Array.isArray(initialData.languages) ? initialData.languages.join(', ') : '',
-        certifications: Array.isArray(initialData.certifications) ? initialData.certifications.join(', ') : '',
-        specializations: Array.isArray(initialData.specializations) ? initialData.specializations.join(', ') : '',
-        vehicle_types: Array.isArray(initialData.vehicle_types) ? initialData.vehicle_types.join(', ') : '',
-        birthday: initialData.birthday ? initialData.birthday.split('T')[0] : ''
-      });
+        birthday: initialData.birthday ? initialData.birthday.split('T')[0] : '',
+        languages: arrayToString(initialData.languages),
+        certifications: arrayToString(initialData.certifications),
+        specializations: arrayToString(initialData.specializations),
+        vehicle_types: arrayToString(initialData.vehicle_types),
+        driver_license_number: initialData.driver_license_number || '',
+        driver_license_class: initialData.driver_license_class || '',
+        email: initialData.email || '',
+        id_number: initialData.id_number || '',
+        address: initialData.address || '',
+        staff_code: initialData.staff_code || '',
+      }));
     }
   }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    // Cập nhật data mới
     const newData = { ...formData, [name]: value };
     setFormData(newData);
-
-    const allErrors = validateStaff(newData);
-    setErrors(prev => ({
-        ...prev,
-        [name]: allErrors[name] 
-    }));
+    
+    // Xóa lỗi realtime khi người dùng nhập
+    if (errors[name]) {
+        setErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors[name];
+            return newErrors;
+        });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // 1. LỌC DỮ LIỆU ĐỂ VALIDATE CHÍNH XÁC
+    // Tạo bản sao để validate, loại bỏ các trường không cần thiết dựa trên loại nhân viên
+    let dataToValidate = { ...formData };
+    
+    if (formData.staff_type !== 'driver') {
+        delete dataToValidate.driver_license_number;
+        delete dataToValidate.driver_license_class;
+        delete dataToValidate.vehicle_types;
+    } else {
+        // Nếu là tài xế thì có thể không bắt buộc ngoại ngữ (tùy logic validator của bạn)
+        // Nhưng nếu validator bắt buộc thì cứ để nguyên
+    }
 
-    const validationErrors = validateStaff(formData);
+    // 2. GỌI HÀM VALIDATE
+    const validationErrors = validateStaff(dataToValidate);
+    
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      alert("Vui lòng kiểm tra lại thông tin nhập liệu!");
-      return;
+        setErrors(validationErrors);
+        // Gom lỗi lại thành thông báo
+        const errorMsg = Object.values(validationErrors).join('\n- ');
+        toast.error(`Vui lòng kiểm tra lại thông tin:\n- ${errorMsg}`, { duration: 5000 });
+        return;
     }
 
     setLoading(true);
-
+    const toastId = toast.loading('Đang xử lý...');
+    
+    // 3. CHUẨN HÓA PAYLOAD GỬI VỀ SERVER
     const payload = {
-      ...formData,
-      languages: formData.languages.split(',').map(s => s.trim()).filter(Boolean),
-      certifications: formData.certifications.split(',').map(s => s.trim()).filter(Boolean),
-      specializations: formData.specializations.split(',').map(s => s.trim()).filter(Boolean),
-      vehicle_types: formData.vehicle_types.split(',').map(s => s.trim()).filter(Boolean),
+        ...formData,
+        // Chuyển chuỗi thành mảng cho các trường tag
+        languages: formData.languages ? formData.languages.split(',').map(s => s.trim()).filter(Boolean) : [],
+        certifications: formData.certifications ? formData.certifications.split(',').map(s => s.trim()).filter(Boolean) : [],
+        specializations: formData.specializations ? formData.specializations.split(',').map(s => s.trim()).filter(Boolean) : [],
+        vehicle_types: formData.vehicle_types ? formData.vehicle_types.split(',').map(s => s.trim()).filter(Boolean) : [],
     };
+
+    // Xóa sạch dữ liệu rác nếu chuyển đổi loại nhân viên
+    if (payload.staff_type !== 'driver') {
+        payload.driver_license_number = null;
+        payload.driver_license_class = null;
+        payload.vehicle_types = [];
+    }
 
     try {
       let result;
       if (isEdit) {
         result = await staffService.update(staffId, payload);
-        alert("Cập nhật thành công!");
+        toast.success("Cập nhật hồ sơ thành công!", { id: toastId });
       } else {
         result = await staffService.create(payload);
-        alert("Tạo nhân viên thành công!");
+        toast.success("Thêm mới nhân viên thành công!", { id: toastId });
       }
-
-      if (onSuccess) onSuccess(result);
-
+      
+      // Callback
+      if (onSuccess) onSuccess(result.data || result);
       if (onClose) onClose();
 
     } catch (error) {
       console.error(error);
-
-      if (error.response?.data) {
-        const { message, data } = error.response.data;
-
-        if (data?.errors) {
-          const fieldErrors = {};
-          data.errors.forEach(e => {
-            fieldErrors[e.path] = e.msg;
-          });
-          setErrors(fieldErrors);
-          alert(message || "Dữ liệu không hợp lệ!");
-        } else {
-          alert(message || "Đã xảy ra lỗi!");
-        }
+      // Tắt loading và hiện lỗi
+      toast.dismiss(toastId);
+      
+      const resData = error.response?.data;
+      if (resData?.errors && Array.isArray(resData.errors)) {
+          const msg = resData.errors.map(e => e.msg || e.message).join('\n');
+          toast.error(`Lỗi dữ liệu:\n${msg}`);
       } else {
-        alert("Lỗi: " + error.message);
+          toast.error(resData?.message || error.message || "Có lỗi hệ thống xảy ra");
       }
-
     } finally {
       setLoading(false);
     }
   };
 
+  // --- HELPER UI ---
   const ErrorText = ({ name }) => errors[name] && (
-    <p className="text-xs text-red-500 mt-1 flex items-center gap-1 animate-pulse">
-        <AlertCircle size={10} /> {errors[name]}
+    <p className="text-xs text-red-600 mt-1 flex items-center gap-1 font-medium animate-pulse">
+        <AlertCircle size={12} /> {errors[name]}
     </p>
   );
 
+  const getInputClass = (fieldName) => {
+    const base = "w-full border rounded-lg px-3 py-2.5 outline-none transition-all text-sm";
+    if (errors[fieldName]) {
+        return `${base} border-red-500 bg-red-50 text-red-900 placeholder-red-300 focus:ring-2 focus:ring-red-200`;
+    }
+    return `${base} border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100`;
+  };
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow border border-slate-200 max-w-4xl mx-auto">
-       <h2 className="text-xl font-bold mb-6 text-slate-800">{isEdit ? 'Cập nhật Hồ sơ' : 'Thêm Nhân sự Mới'}</h2>
+    <div className={`bg-white ${isInModal ? '' : 'p-6 rounded-xl shadow-sm border border-slate-200 max-w-4xl mx-auto'}`}>
+       {!isInModal && <h2 className="text-xl font-bold mb-6 text-slate-800">{isEdit ? 'Cập nhật Hồ sơ' : 'Thêm Nhân sự Mới'}</h2>}
        
        <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* Nhóm thông tin cơ bản */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <div className="col-span-2 md:col-span-1">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Họ và tên <span className="text-red-500">*</span></label>
-                <input 
-                    name="full_name" 
-                    value={formData.full_name} 
-                    onChange={handleChange} 
-                    className={`w-full border rounded px-3 py-2 ${errors.full_name ? 'border-red-500 bg-red-50' : ''}`} 
-                />
-                <ErrorText name="full_name" />
-             </div>
+          {/* --- NHÓM 1: ĐỊNH DANH & VAI TRÒ --- */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Loại nhân viên <span className="text-red-500">*</span></label>
-                <select name="staff_type" value={formData.staff_type} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-white">
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Mã nhân viên <span className="text-red-500">*</span></label>
+                <input 
+                    name="staff_code" 
+                    value={formData.staff_code} 
+                    onChange={handleChange} 
+                    placeholder="VD: NV001"
+                    className={getInputClass('staff_code')} 
+                />
+                <ErrorText name="staff_code" />
+             </div>
+
+             <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Vai trò <span className="text-red-500">*</span></label>
+                <select name="staff_type" value={formData.staff_type} onChange={handleChange} className="w-full border rounded-lg px-3 py-2.5 bg-white border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm">
                     <option value="tour_guide">Hướng dẫn viên (Guide)</option>
                     <option value="tour_leader">Trưởng đoàn (Leader)</option>
                     <option value="driver">Tài xế (Driver)</option>
                     <option value="coordinator">Điều hành</option>
                 </select>
              </div>
+
+             <div className="col-span-1 md:col-span-2">
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Họ và tên <span className="text-red-500">*</span></label>
+                <input 
+                    name="full_name" 
+                    value={formData.full_name} 
+                    onChange={handleChange} 
+                    className={getInputClass('full_name')} 
+                    placeholder="Nguyễn Văn A"
+                />
+                <ErrorText name="full_name" />
+             </div>
+          </div>
+
+          {/* --- NHÓM 2: LIÊN HỆ & CÁ NHÂN --- */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Số điện thoại <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Điện thoại <span className="text-red-500">*</span></label>
                 <input 
                     name="phone" 
                     value={formData.phone} 
                     onChange={handleChange} 
-                    className={`w-full border rounded px-3 py-2 ${errors.phone ? 'border-red-500 bg-red-50' : ''}`} 
+                    className={getInputClass('phone')} 
                 />
                 <ErrorText name="phone" />
              </div>
-             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+
+             <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Email <span className="text-red-500">*</span></label>
                 <input 
                     name="email" 
                     value={formData.email} 
                     onChange={handleChange} 
-                    className={`w-full border rounded px-3 py-2 ${errors.email ? 'border-red-500 bg-red-50' : ''}`} 
+                    className={getInputClass('email')} 
                 />
                 <ErrorText name="email" />
              </div>
+
+             <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Ngày sinh <span className="text-red-500">*</span></label>
+                <input 
+                    type="date" 
+                    name="birthday" 
+                    value={formData.birthday} 
+                    onChange={handleChange} 
+                    className={getInputClass('birthday')} 
+                />
+                <ErrorText name="birthday" />
+             </div>
+             
+             <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Giới tính</label>
+                <select name="gender" value={formData.gender} onChange={handleChange} className="w-full border rounded-lg px-3 py-2.5 bg-white border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm">
+                    <option value="male">Nam</option>
+                    <option value="female">Nữ</option>
+                    <option value="other">Khác</option>
+                </select>
+             </div>
+
+             <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">CCCD / CMND <span className="text-red-500">*</span></label>
+                <input 
+                    name="id_number" 
+                    value={formData.id_number} 
+                    onChange={handleChange} 
+                    className={getInputClass('id_number')} 
+                />
+                <ErrorText name="id_number" />
+             </div>
           </div>
 
-          {/* Nhóm thông tin chuyên môn (Thay đổi theo loại nhân viên) */}
-          <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 transition-all duration-300">
-             <h3 className="font-semibold text-slate-700 mb-4 border-b pb-2">Thông tin chuyên môn</h3>
+          <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Địa chỉ <span className="text-red-500">*</span></label>
+                <input 
+                    name="address" 
+                    value={formData.address} 
+                    onChange={handleChange} 
+                    className={getInputClass('address')} 
+                />
+                <ErrorText name="address" />
+          </div>
+
+          {/* --- NHÓM 3: THÔNG TIN CHUYÊN MÔN (Điều kiện hiển thị) --- */}
+          <div className="p-5 bg-slate-50 rounded-lg border border-slate-200">
+             <h3 className="font-bold text-slate-800 mb-4 border-b pb-2 text-sm uppercase">Thông tin chuyên môn</h3>
              
              {formData.staff_type === 'driver' ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                // Form cho Tài xế
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Hạng bằng lái <span className="text-red-500">*</span></label>
                         <input 
@@ -183,7 +293,7 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess }) => {
                             value={formData.driver_license_class} 
                             onChange={handleChange} 
                             placeholder="B2, C, D..." 
-                            className={`w-full border rounded px-3 py-2 ${errors.driver_license_class ? 'border-red-500' : ''}`} 
+                            className={getInputClass('driver_license_class')} 
                         />
                         <ErrorText name="driver_license_class" />
                     </div>
@@ -193,25 +303,36 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess }) => {
                             name="driver_license_number" 
                             value={formData.driver_license_number} 
                             onChange={handleChange} 
-                            className={`w-full border rounded px-3 py-2 ${errors.driver_license_number ? 'border-red-500' : ''}`} 
+                            className={getInputClass('driver_license_number')} 
                         />
                         <ErrorText name="driver_license_number" />
                     </div>
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Loại xe chạy được</label>
-                        <input name="vehicle_types" value={formData.vehicle_types} onChange={handleChange} placeholder="16 chỗ, 29 chỗ..." className="w-full border rounded px-3 py-2" />
+                        <input 
+                            name="vehicle_types" 
+                            value={formData.vehicle_types} 
+                            onChange={handleChange} 
+                            placeholder="16 chỗ, 29 chỗ..." 
+                            className={getInputClass('vehicle_types')} 
+                        />
+                        <ErrorText name="vehicle_types" />
                     </div>
                 </div>
              ) : (
-                <div className="grid grid-cols-1 gap-4">
+                // Form cho HDV / Khác
+                <div className="grid grid-cols-1 gap-5">
                     <div>
-                        <label className="block text-xs font-bold text-slate-500 mb-1">Ngoại ngữ (cách nhau dấu phẩy)</label>
+                        <label className="block text-xs font-bold text-slate-500 mb-1">
+                            Ngoại ngữ (cách nhau dấu phẩy) 
+                            {['tour_guide', 'tour_leader'].includes(formData.staff_type) && <span className="text-red-500">*</span>}
+                        </label>
                         <input 
                             name="languages" 
                             value={formData.languages} 
                             onChange={handleChange} 
                             placeholder="Anh, Trung, Nhật..." 
-                            className={`w-full border rounded px-3 py-2 ${errors.languages ? 'border-orange-300 bg-orange-50' : ''}`} 
+                            className={getInputClass('languages')} 
                         />
                         <ErrorText name="languages" />
                     </div>
@@ -222,7 +343,7 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess }) => {
                             value={formData.certifications} 
                             onChange={handleChange} 
                             placeholder="Thẻ HDV Quốc tế..." 
-                            className={`w-full border rounded px-3 py-2 ${errors.certifications ? 'border-orange-300 bg-orange-50' : ''}`} 
+                            className={getInputClass('certifications')} 
                         />
                         <ErrorText name="certifications" />
                     </div>
@@ -231,42 +352,35 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess }) => {
              
              <div className="mt-4">
                 <label className="block text-xs font-bold text-slate-500 mb-1">Chuyên môn / Thế mạnh</label>
-                <input name="specializations" value={formData.specializations} onChange={handleChange} placeholder="Tour biển đảo, Tour mạo hiểm..." className="w-full border rounded px-3 py-2" />
+                <input 
+                    name="specializations" 
+                    value={formData.specializations} 
+                    onChange={handleChange} 
+                    placeholder="Tour biển đảo, Tour mạo hiểm..." 
+                    className={getInputClass('specializations')} 
+                />
+                <ErrorText name="specializations" />
              </div>
           </div>
 
-          {/* Nhóm thông tin bổ sung */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Ngày sinh</label>
-                <input type="date" name="birthday" value={formData.birthday} onChange={handleChange} className="w-full border rounded px-3 py-2" />
-             </div>
-             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Giới tính</label>
-                <select name="gender" value={formData.gender} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-white">
-                    <option value="male">Nam</option>
-                    <option value="female">Nữ</option>
-                    <option value="other">Khác</option>
-                </select>
-             </div>
-             <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Trạng thái</label>
-                <select name="status" value={formData.status} onChange={handleChange} className="w-full border rounded px-3 py-2 bg-white">
-                    <option value="active">Đang làm việc</option>
-                    <option value="on_leave">Nghỉ phép</option>
-                    <option value="inactive">Đã nghỉ việc</option>
-                </select>
-             </div>
+          {/* --- TRẠNG THÁI --- */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Trạng thái làm việc</label>
+            <select name="status" value={formData.status} onChange={handleChange} className="w-full border rounded-lg px-3 py-2.5 bg-white border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm">
+                <option value="active">🟢 Đang làm việc</option>
+                <option value="on_leave">🟡 Nghỉ phép</option>
+                <option value="inactive">🔴 Đã nghỉ việc</option>
+            </select>
           </div>
 
-          <div className="flex justify-end pt-4 gap-3 border-t border-slate-100">
+          <div className="flex justify-end pt-6 gap-3 border-t border-slate-100">
              {onClose && (
-                <button type="button" onClick={onClose} className="px-4 py-2 bg-slate-100 text-slate-600 rounded hover:bg-slate-200 transition-colors">Hủy</button>
+                <button type="button" onClick={onClose} className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors shadow-sm">Hủy bỏ</button>
              )}
              <button 
                 type="submit" 
                 disabled={loading} 
-                className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2 transition-colors disabled:opacity-70"
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-all shadow-md shadow-blue-600/20 disabled:opacity-70 font-bold"
              >
                 {loading ? 'Đang xử lý...' : <><Save size={18} /> Lưu Nhân Viên</>}
              </button>
