@@ -15,7 +15,6 @@ exports.getAll = async (req, res, next) => {
 
     const result = await Staff.findAll(page, limit, filters);
 
-    // Parse JSON fields
     result.data = result.data.map(staff => ({
     ...staff,
     languages: (() => {

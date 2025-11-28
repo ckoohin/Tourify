@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { body } = require("express-validator");
-const { authenticate, authorize } = require("../../middleware/authMiddleware");
+const { authenticate } = require("../../middleware/authMiddleware");
+const { authorize } = require("../../middleware/authorize");
 const { createImg } = require("../../controllers/tours/tourImageController.js");
 const { upload } = require("../../services/tourService.js");
 // router.get("/:id", getTourById);
@@ -9,8 +10,8 @@ const { upload } = require("../../services/tourService.js");
 
 router.post(
     "/",
-    // authenticate,
-    // authorize("admin", "manager"),
+    authenticate,
+    authorize("toursImage.manage"),
     upload.single("img"),
     [
         body("tour_id")

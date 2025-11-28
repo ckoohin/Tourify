@@ -3,36 +3,36 @@ const {
     getById,
     create,
     update,
-    deleteBooking,
-} = require("../../models/bookings/Booking.js");
+    deleteCustomer,
+} = require("../../models/authentication/Customer.js");
 const { validationResult } = require("express-validator");
 
-async function getAllBookings(req, res, next) {
+async function getAllCustomers(req, res, next) {
     try {
-        const bookings = await getAll();
+        const customers = await getAll();
         return res.json({
             success: true,
-            data: { bookings },
+            data: { customers },
         });
     } catch (error) {
         next(error);
     }
 }
 
-async function getBookingById(req, res, next) {
+async function getCustomerById(req, res, next) {
     try {
         const { id } = req.params;
-        const booking = await getById(id);
+        const customer = await getById(id);
         return res.json({
             success: true,
-            data: { booking },
+            data: { customer },
         });
     } catch (error) {
         next(error);
     }
 }
 
-async function createBooking(req, res, next) {
+async function createCustomer(req, res, next) {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -43,21 +43,21 @@ async function createBooking(req, res, next) {
             });
         }
 
-        const bookingId = await create(req.body);
+        const customerId = await create(req.body);
 
-        const newBooking = await getById(bookingId);
+        const newCustomer = await getById(customerId);
 
         res.status(201).json({
             success: true,
-            message: "Tạo thông tin booking thành công",
-            data: { booking: newBooking },
+            message: "Tạo thông tin khách hàng thành công",
+            data: { customer: newCustomer },
         });
     } catch (error) {
         next(error);
     }
 }
 
-async function updateBooking(req, res, next) {
+async function updateCustomer(req, res, next) {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -73,17 +73,17 @@ async function updateBooking(req, res, next) {
         const result = await update(req.body, id);
 
         if (result) {
-            const updatedBooking = await getById(id);
+            const updatedCustomer = await getById(id);
             res.status(201).json({
                 success: true,
-                message: "Cập nhật thông tin booking thành công",
-                data: { updatedBooking },
+                message: "Cập nhật thông tin khách hàng thành công",
+                data: { updatedCustomer: updatedCustomer },
             });
         } else {
             res.status(500).json({
                 success: false,
                 message:
-                    "Cập nhật thông tin booking thất bại, vui lòng kiểm tra lại",
+                    "Cập nhật thông tin khách hàng thất bại, vui lòng kiểm tra lại",
             });
         }
     } catch (error) {
@@ -91,22 +91,22 @@ async function updateBooking(req, res, next) {
     }
 }
 
-async function deleteBookingFromController(req, res, next) {
+async function deleteCustomerFromController(req, res, next) {
     try {
         const { id } = req.params;
 
-        const result = await deleteBooking(id);
+        const result = await deleteCustomer(id);
 
         if (result) {
             res.status(201).json({
                 success: true,
-                message: "Xóa thông tin booking thành công",
+                message: "Xóa thông tin khách hàng thành công",
             });
         } else {
             res.status(500).json({
                 success: false,
                 message:
-                    "Xóa thông tin booking thất bại, vui lòng kiểm tra lại",
+                    "Xóa thông tin khách hàng thất bại, vui lòng kiểm tra lại",
             });
         }
     } catch (error) {
@@ -115,9 +115,9 @@ async function deleteBookingFromController(req, res, next) {
 }
 
 module.exports = {
-    getAllBookings: getAllBookings,
-    getBookingById: getBookingById,
-    createBooking: createBooking,
-    updateBooking: updateBooking,
-    deleteBookingFromController: deleteBookingFromController,
+    getAllCustomers: getAllCustomers,
+    getCustomerById: getCustomerById,
+    createCustomer: createCustomer,
+    updateCustomer: updateCustomer,
+    deleteCustomerFromController: deleteCustomerFromController,
 };
