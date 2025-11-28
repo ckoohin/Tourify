@@ -9,24 +9,25 @@ export const AuthProvider = ({ children }) => {
   const [permissions, setPermissions] = useState([]); 
   const [loading, setLoading] = useState(true);
 
-  // Hàm lấy quyền mới nhất từ Server
   const fetchUserPermissions = async (roleId) => {
     try {
       if (!roleId) return;
       const res = await permissionService.getPermissionsByRole(roleId);
       
-      if (res.success && res.data?.permissions && Array.isArray(res.data.permissions)) {
-        const perms = res.data.permissions.map(p => p.slug);
-        console.log("Danh sách quyền thực tế:", perms);
-        setPermissions(perms);
-        localStorage.setItem('user_permissions', JSON.stringify(perms));
-      } else {
-        setPermissions([]);
-        localStorage.removeItem('user_permissions');
+      if (res.success && res.data) {
+        const { role, permissions: permsData } = res.data;
+
+        if (Array.isArray(permsData)) {
+          const perms = permsData.map(p => p.slug);
+          setPermissions(perms);
+          localStorage.setItem('user_permissions', JSON.stringify(perms));
+        }
+        if (role && role.slug) {
+          setUser(prev => ({ ...prev, role: role, role_slug: role.slug }));
+        }
       }
     } catch (error) {
       console.error("Lỗi lấy quyền:", error);
-      setPermissions([]);
     }
   };
 
@@ -39,10 +40,7 @@ export const AuthProvider = ({ children }) => {
           
           if (currentUser?.role_id) {
              const cachedPerms = localStorage.getItem('user_permissions');
-             if (cachedPerms) {
-                setPermissions(JSON.parse(cachedPerms));
-             }
-             // Luôn fetch lại để đảm bảo đồng bộ mới nhất
+             if (cachedPerms) setPermissions(JSON.parse(cachedPerms));
              await fetchUserPermissions(currentUser.role_id);
           }
         }
@@ -56,6 +54,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
+    localStorage.removeItem('current_role_slug');
+    localStorage.removeItem('user_permissions');
+
     const response = await authService.login(email, password);
     if (response.success && response.data.user) {
         const userData = response.data.user;
@@ -68,44 +69,30 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    authService.logout(); 
-    
-    // 2. Xóa state user về null NGAY LẬP TỨC
-    setUser(null); 
-    
-    // 3. Xóa sạch localStorage để tránh lưu cache user cũ
-    localStorage.removeItem('user');
-    localStorage.removeItem('token'); // Nếu bạn có lưu token riêng
-    localStorage.clear(); // Biện pháp mạnh nhất: Xóa tất cả
-
+    await authService.logout();
+    setUser(null);
+    setPermissions([]);
+    localStorage.clear();
   };
 
-  // --- CHECK QUYỀN (PERMISSION-FIRST) ---
   const hasPermission = (requiredPerms) => {
-    // 1. Menu Public -> Cho qua
     if (!requiredPerms || requiredPerms.length === 0) return true; 
-    
-    // 2. Chưa tải được quyền -> Chặn
     if (!permissions || permissions.length === 0) return false;
-    
-    // 3. Logic OR: Chỉ cần có 1 trong các quyền yêu cầu là được phép
     return requiredPerms.some(perm => permissions.includes(perm));
   };
-
   const getUserRole = () => {
     if (!user) return 'guest';
+    if (user.role && user.role.slug) return user.role.slug;
+    if (user.role_slug) return user.role_slug;
+
+    const roleMap = {
+      1: 'admin',
+      4: 'guide',
+      6: 'supplier'
+    };
     
-    if (user.role && user.role.slug) {
-      return user.role.slug;
-    }
-
-    if (user.role_slug) {
-      return user.role_slug;
-    }
-
-    if (typeof user.role === 'string') {
-      return user.role;
-    }
+    const mappedRole = roleMap[user.role_id];
+    if (mappedRole) return mappedRole;
 
     return 'guest';
   };
@@ -124,8 +111,8 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     hasPermission,
-    getUserRole, 
-    refreshPermissions 
+    getUserRole,
+    refreshPermissions
   };
 
   return (

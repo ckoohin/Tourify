@@ -3,7 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import { Mail, Lock, ArrowRight, Loader2, LogIn } from 'lucide-react';
-import InputField from '../../components/common/InputField'; // Import component vừa tạo
+import InputField from '../../components/common/InputField'; 
 
 const Login = () => {
   const navigate = useNavigate();

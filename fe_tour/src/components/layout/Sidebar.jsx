@@ -2,12 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { X, Globe2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { SIDEBAR_CONFIG, ROLES } from '../config/sidebarConfig';
+import { SIDEBAR_CONFIG, ROLES } from '../../components/config/sidebarConfig';
 import SidebarItem from './sidebar/SidebarItem';
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
-  // Lấy getUserRole từ AuthContext thay vì tự viết lại
-  const { user, hasPermission } = useAuth();
+  const { user, hasPermission, getUserRole } = useAuth();
   
   const [expandedItems, setExpandedItems] = useState({});
 
@@ -18,54 +17,41 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
     }));
   };
 
-  const getUserRole = () => {
-    if (!user) return 'guest';
-    
-
-    if (user.role && user.role.slug) {
-      return user.role.slug;
-    }
-
-
-    if (user.role_slug) {
-      return user.role_slug;
-    }
-
-    if (typeof user.role === 'string') {
-      return user.role;
-    }
-
-    return 'guest';
-  };
-
-
   const currentRole = getUserRole();
 
   const menuItems = useMemo(() => {
     const filterMenu = (items) => {
       return items.reduce((acc, item) => {
+        let validChildren = [];
+        if (item.children && item.children.length > 0) {
+          validChildren = filterMenu(item.children);
+        }
+
         let isVisible = false;
+
         if (item.permissions && item.permissions.length > 0) {
-          if (hasPermission(item.permissions)) {
-            isVisible = true;
-          }
+           if (hasPermission(item.permissions)) {
+             isVisible = true;
+           }
         } 
         else {
-          if (!item.allowedRoles || item.allowedRoles.includes(currentRole)) {
-            isVisible = true;
-          }
+           if (item.allowedRoles && item.allowedRoles.length > 0) {
+             if (item.allowedRoles.includes(currentRole)) {
+               isVisible = true;
+             }
+           } else {
+             isVisible = true;
+           }
         }
 
-        if (!isVisible) return acc;
-
-        if (item.children && item.children.length > 0) {
-          const validChildren = filterMenu(item.children);
-          if (validChildren.length > 0) {
-             acc.push({ ...item, children: validChildren });
-          }
-        } else {
-          acc.push(item);
+        if (validChildren.length > 0) {
+           acc.push({ ...item, children: validChildren });
+        } else if (isVisible) {
+           if (!item.children || item.children.length === 0 || item.path) {
+              acc.push(item);
+           }
         }
+
         return acc;
       }, []);
     };
@@ -75,7 +61,6 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
 
   return (
     <>
-      {/* Mobile Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden transition-opacity"
@@ -83,7 +68,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar Container */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#0f172a] flex flex-col transition-transform duration-300 ease-in-out md:static md:translate-x-0 border-r border-slate-800 shadow-2xl
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
@@ -97,7 +82,6 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
             <div>
               <h1 className="text-white text-lg font-bold tracking-tight group-hover:text-blue-400 transition-colors duration-300">Tourify</h1>
               <span className="text-xs text-slate-400 font-medium px-1.5 py-0.5 rounded bg-slate-800 uppercase tracking-wider">
-                {/* Hiển thị tên Role lấy động từ DB */}
                 {currentRole !== 'guest' ? currentRole.toUpperCase() : 'GUEST'}
               </span>
             </div>
@@ -107,7 +91,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
           </button>
         </div>
 
-        {/* Menu */}
+        {/* Menu List */}
         <nav className="flex-1 overflow-y-auto py-6 px-2 space-y-1 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {menuItems.length > 0 ? (
             menuItems.map((item, index) => (

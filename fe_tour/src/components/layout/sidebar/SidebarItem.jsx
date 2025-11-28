@@ -16,7 +16,6 @@ const SidebarItem = ({ item, isExpanded, onToggle }) => {
     location.pathname === child.path
   );
 
-  // --- TRƯỜNG HỢP 1: CHỨC NĂNG CHA CÓ CON ---
   if (hasChildren) {
     return (
       <div className="mb-1">
@@ -25,17 +24,14 @@ const SidebarItem = ({ item, isExpanded, onToggle }) => {
           className={`${baseClass} ${isExpanded || isChildActive ? activeParentClass : inactiveParentClass}`}
         >
           <div className="flex items-center gap-3">
-            {/* Icon đổi màu khi active hoặc hover group */}
             <item.icon size={20} className={`transition-colors duration-200 ${isExpanded || isChildActive ? "text-blue-500" : "text-slate-500 group-hover:text-blue-400"}`} />
             <span className="text-[15px]">{item.label}</span>
           </div>
-          {/* Mũi tên xoay nhẹ khi hover */}
           <div className="text-slate-500 group-hover:text-white transition-colors">
             {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </div>
         </div>
 
-        {/* Khu vực menu con (Animation trượt) */}
         <div
           className={`overflow-hidden transition-all duration-300 ease-in-out ${
             isExpanded ? 'max-h-[500px] opacity-100 mt-1' : 'max-h-0 opacity-0'
@@ -66,8 +62,6 @@ const SidebarItem = ({ item, isExpanded, onToggle }) => {
       </div>
     );
   }
-
-  // --- TRƯỜNG HỢP 2: CHỨC NĂNG ĐƠN (KHÔNG CÓ CON) ---
   return (
     <NavLink
       to={item.path}

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
-// --- THAY ĐỔI: Import từ file rules ---
-// (Lưu ý: Kiểm tra lại đường dẫn tương đối ../ hay ../../ tùy vị trí file Modal của bạn)
 import { generateSlug } from '../../utils/validators/roleRules'; 
 
 const RoleModal = ({ isOpen, onClose, onSubmit, initialData }) => {
@@ -22,10 +20,8 @@ const RoleModal = ({ isOpen, onClose, onSubmit, initialData }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // --- SỬ DỤNG HÀM ĐÃ IMPORT ---
     const slug = generateSlug(formData.name);
 
-    // Gửi dữ liệu kèm slug lên server
     onSubmit({ 
       ...formData, 
       slug: slug 
@@ -34,7 +30,6 @@ const RoleModal = ({ isOpen, onClose, onSubmit, initialData }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      {/* ... Phần giao diện giữ nguyên không đổi ... */}
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
           <h3 className="font-bold text-lg text-slate-800">{initialData ? 'Cập nhật Vai trò' : 'Tạo Vai trò Mới'}</h3>

@@ -9,10 +9,8 @@ export function useRoles() {
   const [searchQuery, setSearchQuery] = useState('');
   const itemsPerPage = 10;
 
-  // Hàm lấy quyền của 1 role (để hiển thị số lượng quyền)
   const getRolePermissions = async (roleId) => {
     try {
-      // FIX: Xóa /api/v1 (Axios đã tự thêm)
       const res = await ApiHelper.get(`/roles/${roleId}/permissions`);
       
       if (res.success && res.data?.permissions && Array.isArray(res.data.permissions)) {

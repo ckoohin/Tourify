@@ -27,16 +27,7 @@ router.delete(
 router.get(
   '/roles/:roleId/permissions',
   authenticate,
-  (req, res, next) => {
-    const currentUserRoleId = req.user.role_id; 
-    const requestedRoleId = parseInt(req.params.roleId);
-
-    if (currentUserRoleId === requestedRoleId) {
-      return next();
-    }
-
-    return authorize('roles.view')(req, res, next);
-  },
+  authorize('roles.view'),
   permissionRoleValidator.getPermissions,
   validate,
   permissionRoleController.getRolePermissions

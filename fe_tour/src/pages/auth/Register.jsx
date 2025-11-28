@@ -28,8 +28,6 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate cơ bản
     if (formData.password !== formData.confirmPassword) {
       toast.error('Mật khẩu xác nhận không khớp');
       return;
@@ -46,10 +44,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // Tách confirmPassword ra, chỉ gửi các data cần thiết
       const { confirmPassword, ...registerData } = formData;
-      
-      // Gọi hàm register từ AuthContext (đã bao gồm field 'role')
       await register(registerData);
       
       toast.success("Đăng ký thành công! Vui lòng kiểm tra email.");
@@ -62,7 +57,6 @@ const Register = () => {
       const resData = err.response?.data;
       const serverMessage = resData?.message || "";
 
-      // --- XỬ LÝ ĐẶC BIỆT: LỖI 500 EMAIL ---
       if (status === 500 && (serverMessage === 'Could not send email' || serverMessage.includes('email'))) {
           toast.success("Đăng ký tài khoản thành công!");
           toast("Hệ thống email đang bảo trì, bạn có thể đăng nhập ngay.", {
@@ -74,7 +68,6 @@ const Register = () => {
           return;
       }
 
-      // --- XỬ LÝ LỖI KHÁC ---
       let errorMessage = 'Đăng ký thất bại';
       if (resData?.errors && Array.isArray(resData.errors)) {
          errorMessage = resData.errors.map(e => `- ${e.msg || e.message}`).join('\n');
@@ -104,8 +97,6 @@ const Register = () => {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-4">
-          
-          {/* --- PHẦN CHỌN VAI TRÒ (CHỈ CÒN GUIDE & SUPPLIER) --- */}
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
               <Briefcase size={20} />
@@ -120,7 +111,6 @@ const Register = () => {
               <option value="guide">Hướng dẫn viên (Tour Guide)</option>
               <option value="supplier">Nhà cung cấp (Supplier)</option>
             </select>
-            {/* Custom arrow icon for select */}
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />

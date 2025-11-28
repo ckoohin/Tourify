@@ -75,10 +75,10 @@ export const SIDEBAR_CONFIG = [
     label: 'Quản lý Khách hàng',
     icon: Users,
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['customers.view', 'customers.history'],
+    permissions: ['customer.manage', 'customers.history'],
     children: [
-      { label: 'Lịch sử giao dịch nội bộ', path: '/customers', permissions: ['customers.history'] },
-      { label: 'Danh sách khách theo tour', path: '/customers', permissions: ['customers.view'] },
+      { label: 'Danh sách khách hàng', path: '/customers', permissions: ['customer.manage'] },
+      { label: 'Lịch sử giao dịch nội bộ', path: '/customers/transactions', permissions: ['customers.history'] },     
       { label: 'Ghi nhận yêu cầu đặc biệt', path: '/admin/customers/requests', permissions: ['customers.requests'] }
     ]
   },
@@ -95,7 +95,7 @@ export const SIDEBAR_CONFIG = [
     ]
   },
   {
-    label: 'Quản lý Nhân sự (HDV)',
+    label: 'Quản lý Nhân sự',
     icon: UserCog,
     allowedRoles: [ROLES.ADMIN],
     permissions: ['staff.manage', 'staff.schedules'],
@@ -108,9 +108,9 @@ export const SIDEBAR_CONFIG = [
     label: 'Quản lý Nhà cung cấp',
     icon: Building2,
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['suppliers.view'],
+    permissions: ['suppliers.manage'],
     children: [
-      { label: 'Danh sách đối tác', path: '/providers', permissions: ['suppliers.view'] },
+      { label: 'Danh sách đối tác', path: '/providers', permissions: ['suppliers.manage'] },
       { label: 'Đánh giá chất lượng', path: '/admin/suppliers/ratings', permissions: ['suppliers.ratings'] },
       { label: 'Quản lý hợp đồng', path: '/admin/suppliers/contracts', permissions: ['suppliers.contracts'] }
     ]

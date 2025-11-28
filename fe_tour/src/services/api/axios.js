@@ -7,7 +7,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -19,15 +19,25 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor
+
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    if (response.config.responseType === 'blob') {
+        return response.data;
+    }
+    return response.data;
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+    
+    if (error.config?.responseType === 'blob') {
+        return Promise.reject({ message: "Lỗi khi tải file (Có thể do server lỗi hoặc không có quyền)" });
+    }
+
     const message = error.response?.data?.message || 'Đã xảy ra lỗi';
     return Promise.reject({
       message,

@@ -3,7 +3,7 @@ import { Plus, Loader2, Briefcase, User as UserIcon } from 'lucide-react';
 import staffService from '../../services/api/staffService';
 import StaffTable from '../../components/staff/StaffTable';
 import StaffFilter from '../../components/staff/StaffFilter';
-import Pagination from '../../components/ui/Pagination';
+import Pagination from '../../components/ui/Pagination'; 
 import Modal from '../../components/ui/Modal'; 
 import StaffForm from '../../components/staff/StaffForm';
 import StaffSchedule from '../../components/staff/StaffSchedule'; 
@@ -16,14 +16,15 @@ const StaffList = () => {
   
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0); 
+  
   const ITEMS_PER_PAGE = 10;
 
-  // --- STATE CHO MODAL ---
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState('create'); // 'create' | 'edit'
+  const [modalMode, setModalMode] = useState('create'); 
   const [selectedStaffId, setSelectedStaffId] = useState(null);
-  const [selectedStaffData, setSelectedStaffData] = useState(null); // Data cho form
-  const [stats, setStats] = useState(null); // Thống kê (Rating, Total tours)
+  const [selectedStaffData, setSelectedStaffData] = useState(null); 
+  const [stats, setStats] = useState(null); 
   const [isFetchingDetail, setIsFetchingDetail] = useState(false);
 
   const fetchStaff = async () => {
@@ -37,8 +38,14 @@ const StaffList = () => {
       const res = await staffService.getAll(params);
       if (res.success) {
         setStaffList(res.data);
+        
         if (res.pagination) {
             setTotalPages(res.pagination.totalPages);
+            setTotalItems(res.pagination.total || res.pagination.totalItems || 0);
+        } else if (res.total) {
+
+            setTotalItems(res.total);
+            setTotalPages(Math.ceil(res.total / ITEMS_PER_PAGE));
         }
       }
     } catch (error) {
@@ -53,7 +60,6 @@ const StaffList = () => {
     fetchStaff();
   }, [filters, currentPage]);
 
-  // --- HÀM MỞ MODAL CREATE ---
   const handleOpenCreate = () => {
     setModalMode('create');
     setSelectedStaffId(null);
@@ -62,20 +68,13 @@ const StaffList = () => {
     setIsModalOpen(true);
   };
 
-  // --- HÀM MỞ MODAL EDIT (ĐÃ SỬA LỖI 404) ---
   const handleOpenEdit = async (staff) => {
-    // Kiểm tra dữ liệu đầu vào
-    if (!staff || !staff.id) {
-        toast.error("Lỗi: Không tìm thấy ID nhân viên");
-        return;
-    }
-
-    // Mở modal và set trạng thái loading
+    if (!staff || !staff.id) return;
     setModalMode('edit');
     setSelectedStaffId(staff.id);
     setIsModalOpen(true);
     setIsFetchingDetail(true);
-    setStats(null); // Reset stats cũ
+    setStats(null); 
 
     try {
         const res = await staffService.getById(staff.id);
@@ -84,18 +83,8 @@ const StaffList = () => {
             setStats(res.data.stats);
         }
     } catch (error) {
-        console.error("API Error:", error);
-        
-        // Xử lý trường hợp nhân viên bị xóa (404)
-        if (error.response && error.response.status === 404) {
-            toast.error("Nhân viên này không còn tồn tại hoặc đã bị xóa.");
-            setIsModalOpen(false); // Đóng modal
-            fetchStaff(); // Tải lại danh sách mới nhất
-        } else {
-            const msg = error.response?.data?.message || "Không thể tải chi tiết nhân viên";
-            toast.error(msg);
-            setIsModalOpen(false);
-        }
+        toast.error("Lỗi tải chi tiết nhân viên");
+        setIsModalOpen(false);
     } finally {
         setIsFetchingDetail(false);
     }
@@ -103,7 +92,6 @@ const StaffList = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    // Delay clear data để tránh giật UI khi modal đang đóng
     setTimeout(() => {
         setSelectedStaffId(null);
         setSelectedStaffData(null);
@@ -111,43 +99,12 @@ const StaffList = () => {
   };
 
   const handleDelete = (id) => {
-    toast((t) => (
-      <div className="flex items-center justify-between w-full gap-2">
-        <span className="text-sm">Bạn có chắc chắn muốn xóa nhân viên này?</span>
-        <div className="flex gap-2 shrink-0">
-          <button
-            className="btn-confirm"
-            onClick={async () => {
-              toast.dismiss(t.id); 
-              try {
-                await staffService.delete(id);
-                toast.success("Đã xóa nhân viên");
-                fetchStaff(); 
-              } catch (error) {
-                toast.error("Không thể xóa: " + (error.response?.data?.message || error.message));
-              }
-            }}
-          >
-            Xóa
-          </button>
-          <button
-            className="btn-cancel"
-            onClick={() => toast.dismiss(t.id)}
-          >
-            Hủy
-          </button>
-        </div>
-      </div>
-    ), {
-      className: 'my-toast-confirm',
-      position: 'top-center',
-      duration: 5000,
-    });
+    if(window.confirm("Bạn có chắc chắn muốn xóa?")) {
+    }
   };
 
   return (
     <div className="p-6 max-w-[1600px] mx-auto min-h-screen">
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
             <h1 className="text-2xl font-bold text-slate-800">Quản lý Nhân sự</h1>
@@ -161,33 +118,30 @@ const StaffList = () => {
         </button>
       </div>
 
-      {/* Filter */}
       <StaffFilter filters={filters} onChange={(newFilters) => { setFilters(newFilters); setCurrentPage(1); }} />
 
-      {/* Table */}
       {loading ? (
          <div className="flex justify-center p-12"><Loader2 className="animate-spin w-8 h-8 text-blue-600"/></div>
       ) : (
          <>
             <StaffTable staffList={staffList} onDelete={handleDelete} onEdit={handleOpenEdit} />
             
-            <div className="mt-6">
+            <div className="mt-6 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
                 <Pagination 
                     currentPage={currentPage} 
                     totalPages={totalPages} 
                     onPageChange={setCurrentPage} 
-                    totalItems={0} 
+                    totalItems={totalItems} 
+                    itemsPerPage={ITEMS_PER_PAGE}
                 />
             </div>
          </>
       )}
 
-      {/* --- MODAL XỬ LÝ CREATE / EDIT --- */}
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title={modalMode === 'create' ? "Thêm Nhân sự Mới" : "Chỉnh sửa hồ sơ nhân sự"}
-        // Nếu Edit thì cần modal rộng để chứa cả lịch (max-w-6xl), nếu Create thì nhỏ hơn (max-w-4xl)
         maxWidth={modalMode === 'edit' ? 'max-w-6xl' : 'max-w-4xl'}
       >
         {isFetchingDetail ? (
@@ -196,7 +150,6 @@ const StaffList = () => {
             </div>
         ) : (
             <>
-                {/* Header Stats (Chỉ hiện khi Edit và có dữ liệu) */}
                 {modalMode === 'edit' && selectedStaffData && (
                     <div className="flex justify-between items-end mb-6 px-1 border-b border-slate-100 pb-4">
                         <div>
@@ -225,18 +178,13 @@ const StaffList = () => {
                     </div>
                 )}
 
-                {/* Nội dung chính */}
                 {modalMode === 'edit' ? (
-                    // --- Giao diện Edit: Chia 2 cột (Form + Lịch) ---
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2">
                             <StaffForm 
                                 staffId={selectedStaffId} 
                                 initialData={selectedStaffData} 
-                                onSuccess={() => {
-                                    fetchStaff(); // Reload list nhưng không đóng modal
-                                    // Toast đã được gọi bên trong StaffForm
-                                }}
+                                onSuccess={() => { fetchStaff(); }}
                                 onClose={handleCloseModal}
                                 isInModal={true} 
                             />
@@ -248,15 +196,10 @@ const StaffList = () => {
                         </div>
                     </div>
                 ) : (
-                    // --- Giao diện Create: Chỉ hiện Form ---
                     <StaffForm 
                         onSuccess={(result) => {
-                            // result trả về từ StaffForm thường là object: { id: ..., name: ... } hoặc { data: { ... } }
-                            // Cần lấy chính xác ID để chuyển sang edit
                             const newStaff = result.data || result;
-                            
                             if (window.confirm("Tạo thành công! Bạn có muốn thêm lịch làm việc ngay không?")) {
-                                // Chuyển sang mode edit ngay lập tức
                                 handleOpenEdit(newStaff); 
                             } else {
                                 fetchStaff();

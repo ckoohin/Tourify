@@ -8,14 +8,20 @@ const {
     updateSupplier,
     deleteSupplierFromController,
 } = require("../../controllers/suppliers/supplierController.js");
-const { authenticate, authorize } = require("../../middleware/authMiddleware");
+const { authenticate } = require("../../middleware/authMiddleware");
+const { authorize } = require("../../middleware/authorize");
 
-router.get("/:id", getSupplierById);
-router.get("/", getAllSuppliers);
+router.get(
+    "/:id",
+    authenticate,
+    authorize("suppliers.manage"),
+    getSupplierById
+);
+router.get("/", authenticate, authorize("suppliers.manage"), getAllSuppliers);
 router.post(
     "/",
-    // authenticate,
-    // authorize("admin", "manager"),
+    authenticate,
+    authorize("suppliers.manage"),
     [
         body("code")
             .trim()
@@ -122,8 +128,8 @@ router.post(
 
 router.put(
     "/:id",
-    // authenticate,
-    // authorize("admin", "manager"),
+    authenticate,
+    authorize("suppliers.manage"),
     [
         body("code")
             .trim()
@@ -230,8 +236,8 @@ router.put(
 
 router.delete(
     "/:id",
-    // authenticate,
-    // authorize("admin"),
+    authenticate,
+    authorize("suppliers.manage"),
     deleteSupplierFromController
 );
 

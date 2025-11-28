@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+// Imports Services
 import roleService from '../../services/api/roleService';
 import permissionService from '../../services/api/permissionService';
 import { useAuth } from '../../context/AuthContext'; 
 
-
+// Imports Components UI
 import RoleTable from '../../components/rbac/RoleTable';
 import RoleModal from '../../components/rbac/RoleModal';
 import RoleAssignmentModal from '../../components/rbac/RoleAssignmentModal';
 
 const RoleList = () => {
+  // Lấy user info và hàm refresh từ Context để cập nhật Sidebar khi cần
   const { user, refreshPermissions } = useAuth();
 
   const [roles, setRoles] = useState([]);
@@ -29,6 +31,7 @@ const RoleList = () => {
   const [originalPermissionIds, setOriginalPermissionIds] = useState([]); 
   const [assignLoading, setAssignLoading] = useState(false);
 
+  // 1. Fetch Roles
   const fetchRoles = async () => {
     setLoading(true);
     try {
@@ -66,7 +69,7 @@ const RoleList = () => {
         <span className="text-sm">Bạn chắc chắn muốn xóa vai trò này?</span>
         <div className="flex gap-2 shrink-0">
           <button
-            className="btn-confirm"
+            className="bg-red-600 text-white px-3 py-1 rounded text-xs"
             onClick={async () => {
               toast.dismiss(t.id); 
               try {
@@ -81,7 +84,7 @@ const RoleList = () => {
             Xóa
           </button>
           <button
-            className="btn-cancel"
+            className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-xs"
             onClick={() => toast.dismiss(t.id)}
           >
             Hủy
@@ -89,7 +92,6 @@ const RoleList = () => {
         </div>
       </div>
     ), {
-      className: 'my-toast-confirm',
       position: 'top-center',
       duration: 5000,
     });
@@ -104,14 +106,16 @@ const RoleList = () => {
     setOriginalPermissionIds([]);
 
     try {
+      // Lấy danh sách tất cả quyền (limit 100 để an toàn)
       const permRes = await permissionService.getAllPermissions({ limit: 100 });
       if (permRes.success) {
         const perms = Array.isArray(permRes.data) ? permRes.data : (permRes.data.permissions || permRes.data.data || []);
         setAllPermissions(perms);
       } else {
-        toast.error("Không thể tải danh sách quyền");
+        toast.error("Không thể tải danh sách quyền hệ thống");
       }
 
+      // Lấy quyền hiện có của vai trò
       const roleRes = await roleService.getRolePermissions(role.id);
       if (roleRes.success && roleRes.data && Array.isArray(roleRes.data.permissions)) {
         const currentIds = roleRes.data.permissions.map(p => p.id);
@@ -119,8 +123,8 @@ const RoleList = () => {
         setOriginalPermissionIds(currentIds);
       }
     } catch (error) {
-      console.error("Lỗi:", error);
-      toast.error("Lỗi kết nối server");
+      console.error("Lỗi load quyền:", error);
+      toast.error("Lỗi kết nối server khi lấy dữ liệu quyền");
     } finally {
       setAssignLoading(false);
     }
@@ -132,6 +136,7 @@ const RoleList = () => {
     );
   };
 
+  // --- HÀM LƯU QUYỀN (ĐÃ SỬA LOGIC KIỂM TRA LỖI) ---
   const handleSaveAssignment = async () => {
     if (!selectedRole) return;
     setAssignLoading(true);
@@ -144,24 +149,26 @@ const RoleList = () => {
       if (toRemove.length > 0) promises.push(roleService.revokePermissions(selectedRole.id, toRemove));
 
       if (promises.length > 0) {
+        // Chờ tất cả request hoàn thành
         const results = await Promise.all(promises);
         
-
+        // Kiểm tra xem có request nào bị lỗi không (success === false)
         const hasError = results.some(res => !res || !res.success);
 
         if (hasError) {
+          // Nếu có lỗi, tìm thông báo lỗi và hiển thị
+          const errorMsg = results.find(res => !res.success)?.message || 'Lỗi lưu dữ liệu vào hệ thống';
           console.error("Chi tiết lỗi API:", results);
-
-          const errorMsg = results.find(res => !res.success)?.message || 'Lỗi lưu dữ liệu';
-          toast.error(errorMsg); 
+          toast.error(`Thất bại: ${errorMsg}`);
         } else {
-
+          // Nếu tất cả thành công
           toast.success('Cập nhật phân quyền thành công!');
           fetchRoles(); 
           
-          // Cập nhật sidebar nếu cần
+          // LOGIC: Nếu đang sửa quyền của chính mình -> Reload Sidebar ngay
           if (user && user.role_id === selectedRole.id) {
-            await refreshPermissions(); // Nếu có dùng AuthContext
+             await refreshPermissions(); 
+             toast('Giao diện đã được cập nhật theo quyền mới', { icon: '🔄' });
           }
           setShowAssignModal(false);
         }
@@ -172,7 +179,7 @@ const RoleList = () => {
       
     } catch (error) {
       console.error(error);
-      toast.error('Lỗi hệ thống khi lưu quyền');
+      toast.error(error.message || 'Lỗi hệ thống khi lưu quyền');
     } finally {
       setAssignLoading(false);
     }
@@ -191,7 +198,7 @@ const RoleList = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-64 bg-white rounded-xl">
+        <div className="flex justify-center items-center h-64 bg-white rounded-xl border border-slate-200">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       ) : (
@@ -215,6 +222,8 @@ const RoleList = () => {
         onClose={() => setShowAssignModal(false)}
         onSave={handleSaveAssignment}
         roleName={selectedRole?.name}
+        // Truyền roleSlug để Modal biết có cần khóa quyền admin không
+        roleSlug={selectedRole?.slug} 
         allPermissions={allPermissions}
         selectedIds={rolePermissionIds}
         onToggle={handleTogglePermission}
