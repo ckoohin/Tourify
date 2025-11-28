@@ -21,7 +21,7 @@ const tourRoutes = require("./routes/tours/tourRoutes.js");
 const tourImageRoutes = require("./routes/tours/tourImageRoutes.js");
 const tourVersionRoutes = require("./routes/tours/tourVersionRoutes.js");
 const tourPriceRoutes = require("./routes/tours/tourPriceRoutes.js");
-const customerRoutes = require("./routes/customers/customer.js");
+const customerRoutes = require("./routes/authentication/customer.js");
 const bookingRoutes = require("./routes/bookings/booking.js");
 
 const app = express();
