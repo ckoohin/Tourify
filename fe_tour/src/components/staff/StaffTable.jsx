@@ -1,9 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+// Bỏ Link, thêm Edit icon
 import { Edit, Trash2, Star, Phone, Mail, Bus, User, Map } from 'lucide-react';
-import StatusBadge from '../ui/StatusBadge'; // Tái sử dụng component cũ
+import StatusBadge from '../ui/StatusBadge';
 
-const StaffTable = ({ staffList, onDelete }) => {
+// Thêm onEdit vào props
+const StaffTable = ({ staffList, onDelete, onEdit }) => {
   
   const getRoleIcon = (type) => {
     switch(type) {
@@ -108,8 +109,14 @@ const StaffTable = ({ staffList, onDelete }) => {
 
               <td className="p-4 text-right">
                 <div className="flex justify-end gap-2">
-                  <Link to={`/staff/edit/${staff.id}`} className="p-2 text-blue-600 hover:bg-blue-50 rounded"><Edit size={18} /></Link>
-                  <button onClick={() => onDelete(staff.id)} className="p-2 text-red-600 hover:bg-red-50 rounded"><Trash2 size={18} /></button>
+                  {/* SỬA Ở ĐÂY: Dùng button gọi onEdit thay vì Link */}
+                  <button 
+                    onClick={() => onEdit(staff)} 
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                  >
+                    <Edit size={18} />
+                  </button>
+                  <button onClick={() => onDelete(staff.id)} className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"><Trash2 size={18} /></button>
                 </div>
               </td>
             </tr>
