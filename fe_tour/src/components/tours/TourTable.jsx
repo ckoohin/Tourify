@@ -100,7 +100,7 @@ const TourTable = ({ tours, onDelete, onEdit }) => {
                                         src={displayImage} 
                                         alt={tour.code} 
                                         className="w-full h-full object-cover"
-                                        onError={(e) => {e.target.src = 'https://placehold.co/100x100?text=Error'}}
+                                        onError={(e) => {e.target.src = 'https://vcdn1-dulich.vnecdn.net/2022/03/31/mapilenghagiangvnexpress-16487-2310-5584-1648718524.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=kOOQrA2oCmdoblPaNEpo1A'}}
                                     />
                                 </Link>
                             </td>

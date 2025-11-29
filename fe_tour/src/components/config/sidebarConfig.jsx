@@ -64,10 +64,9 @@ export const SIDEBAR_CONFIG = [
     label: 'Quản lý Booking',
     icon: Ticket,
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['bookings.create', 'bookings.manage'],
+    permissions: ['bookings.create', 'booking.manage'],
     children: [
-      { label: 'Tạo booking mới', path: '/bookings/create', permissions: ['bookings.create'] },
-      { label: 'Quản lý tình trạng booking', path: '/bookings', permissions: ['bookings.manage'] },
+      { label: 'Quản lý booking', path: '/bookings', permissions: ['booking.manage'] },
       { label: 'Xuất Báo giá/Hợp đồng', path: '/admin/bookings/documents', permissions: ['bookings.documents'] }
     ]
   },
