@@ -6,6 +6,7 @@ const {
     update,
     deleteTour,
     getAllByKeyWord,
+    cloneTourModel,
 } = require("../../models/tours/Tour.js");
 
 async function getAllTours(req, res, next) {
@@ -256,6 +257,37 @@ async function deleteTourFromController(req, res, next) {
     }
 }
 
+async function cloneTour(req, res, next) {
+    try {
+        const { id } = req.params;
+        const { new_name, new_code, new_slug } = req.body;
+
+        if (!new_name || !new_code || !new_slug) {
+            return res.status(400).json({
+                success: false,
+                message: "Vui lòng cung cấp tên, mã và slug cho tour mới",
+            });
+        }
+
+        const clonedTourId = await cloneTourModel(id, {
+            new_name,
+            new_code,
+            new_slug,
+            created_by: req.user.id, 
+        });
+
+        const newTour = await getById(clonedTourId);
+
+        res.status(201).json({
+            success: true,
+            message: "Clone tour thành công",
+            data: { tour: newTour },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
     getAllTours: getAllTours,
     getTourById: getTourById,
@@ -263,4 +295,5 @@ module.exports = {
     updateTour: updateTour,
     deleteTourFromController: deleteTourFromController,
     getAllToursByKeyWord: getAllToursByKeyWord,
+    cloneTour: cloneTour,
 };

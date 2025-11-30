@@ -186,6 +186,174 @@ async function deleteTour(id) {
     }
 }
 
+async function cloneTourModel(originalTourId, newData) {
+    try {
+        const originalTour = await query(
+            'SELECT * FROM tours WHERE id = ?',
+            [originalTourId]
+        );
+
+        if (!originalTour || originalTour.length === 0) {
+            throw new Error('Tour không tồn tại');
+        }
+
+        const tour = originalTour[0];
+
+        const tourResult = await query(
+            `INSERT INTO tours (
+                code, name, slug, category_id, description, highlights,
+                duration_days, duration_nights, departure_location, destination,
+                min_group_size, max_group_size, is_customizable,
+                qr_code, booking_url, status, created_by
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?)`,
+            [
+                newData.new_code,
+                newData.new_name,
+                newData.new_slug,
+                tour.category_id,
+                tour.description,
+                tour.highlights,
+                tour.duration_days,
+                tour.duration_nights,
+                tour.departure_location,
+                tour.destination,
+                tour.min_group_size,
+                tour.max_group_size,
+                tour.is_customizable,
+                null,
+                null,
+                newData.created_by
+            ]
+        );
+
+        const newTourId = tourResult.insertId;
+
+        const images = await query(
+            'SELECT * FROM tour_images WHERE tour_id = ?',
+            [originalTourId]
+        );
+
+        for (const img of images) {
+            await query(
+                `INSERT INTO tour_images (
+                    tour_id, image_url, title, description, display_order, is_featured
+                ) VALUES (?, ?, ?, ?, ?, ?)`,
+                [
+                    newTourId,
+                    img.image_url,
+                    img.title,
+                    img.description,
+                    img.display_order,
+                    img.is_featured
+                ]
+            );
+        }
+
+        const policies = await query(
+            'SELECT * FROM tour_policies WHERE tour_id = ?',
+            [originalTourId]
+        );
+
+        for (const policy of policies) {
+            await query(
+                `INSERT INTO tour_policies (
+                    tour_id, policy_type, title, content, display_order, is_active
+                ) VALUES (?, ?, ?, ?, ?, ?)`,
+                [
+                    newTourId,
+                    policy.policy_type,
+                    policy.title,
+                    policy.content,
+                    policy.display_order,
+                    policy.is_active
+                ]
+            );
+        }
+
+        const versions = await query(
+            'SELECT * FROM tour_versions WHERE tour_id = ?',
+            [originalTourId]
+        );
+
+        for (const version of versions) {
+            const versionResult = await query(
+                `INSERT INTO tour_versions (
+                    tour_id, name, type, valid_from, valid_to,
+                    description, is_default, is_active
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    newTourId,
+                    version.name,
+                    version.type,
+                    version.valid_from,
+                    version.valid_to,
+                    version.description,
+                    version.is_default,
+                    version.is_active
+                ]
+            );
+
+            const newVersionId = versionResult.insertId;
+
+            const prices = await query(
+                'SELECT * FROM tour_prices WHERE tour_version_id = ?',
+                [version.id]
+            );
+
+            for (const price of prices) {
+                await query(
+                    `INSERT INTO tour_prices (
+                        tour_version_id, price_type, min_pax, max_pax,
+                        price, currency, valid_from, valid_to,
+                        description, is_active
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        newVersionId,
+                        price.price_type,
+                        price.min_pax,
+                        price.max_pax,
+                        price.price,
+                        price.currency,
+                        price.valid_from,
+                        price.valid_to,
+                        price.description,
+                        price.is_active
+                    ]
+                );
+            }
+
+            const itineraries = await query(
+                'SELECT * FROM tour_itineraries WHERE tour_version_id = ?',
+                [version.id]
+            );
+
+            for (const itinerary of itineraries) {
+                await query(
+                    `INSERT INTO tour_itineraries (
+                        tour_version_id, day_number, title, description,
+                        activities, meals, accommodation, notes
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        newVersionId,
+                        itinerary.day_number,
+                        itinerary.title,
+                        itinerary.description,
+                        itinerary.activities,
+                        itinerary.meals,
+                        itinerary.accommodation,
+                        itinerary.notes
+                    ]
+                );
+            }
+        }
+
+        return newTourId;
+
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     getAll: getAll,
     getById: getById,
@@ -193,4 +361,5 @@ module.exports = {
     update: update,
     deleteTour: deleteTour,
     getAllByKeyWord: getAllByKeyWord,
+    cloneTourModel: cloneTourModel,
 };

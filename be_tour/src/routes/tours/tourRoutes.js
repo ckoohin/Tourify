@@ -11,6 +11,7 @@ const {
     updateTour,
     deleteTourFromController,
     getAllToursByKeyWord,
+    cloneTour,
 } = require("../../controllers/tours/tourController.js");
 
 router.get(
@@ -241,6 +242,35 @@ router.delete(
     authenticate,
     authorize("tours.manage"),
     deleteTourFromController
+);
+
+router.post(
+    "/:id/clone",
+    authenticate,
+    authorize("tours.manage"),
+    [
+        body("new_code")
+            .trim()
+            .notEmpty()
+            .withMessage("Mã code mới không được để trống")
+            .isLength({ max: 50 })
+            .withMessage("Mã code tối đa 50 ký tự"),
+        body("new_name")
+            .trim()
+            .notEmpty()
+            .withMessage("Tên tour mới không được để trống")
+            .isLength({ max: 255 })
+            .withMessage("Tên tour tối đa 255 ký tự"),
+        body("new_slug")
+            .trim()
+            .notEmpty()
+            .withMessage("Slug không được để trống")
+            .matches(/^[a-z0-9-]+$/)
+            .withMessage("Slug chỉ chứa chữ thường, số và dấu gạch ngang")
+            .isLength({ max: 255 })
+            .withMessage("Slug tối đa 255 ký tự"),
+    ],
+    cloneTour
 );
 
 module.exports = router;
