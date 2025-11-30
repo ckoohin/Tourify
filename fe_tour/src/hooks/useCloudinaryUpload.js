@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { ApiHelper } from '@/utils/api';
+import api from '../services/api/axios'; 
 
 export function useCloudinaryUpload() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const uploadImage = async (file, folder = 'products') => {
+  const uploadImage = async (file, folder = 'tours') => {
     setUploading(true);
     setProgress(0);
 
     try {
-      const signatureResponse = await ApiHelper.post('api/v1/uploads/signature', {
+      const signatureResponse = await api.post('/uploads/signature', {
         paramsToSign: { folder }
       });
 
@@ -25,21 +25,21 @@ export function useCloudinaryUpload() {
       formData.append('timestamp', timestamp.toString());
       formData.append('signature', signature);
       formData.append('folder', folder);
-      formData.append('api_key', process.env.VITE_CLOUDINARY_API_KEY || '');
+      formData.append('api_key', import.meta.env.VITE_CLOUDINARY_API_KEY);
 
-      const cloudName = process.env.VITE_CLOUDINARY_CLOUD_NAME || '';
+      const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
       const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
-      const xhr = new XMLHttpRequest();
-
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          setProgress(percent);
-        }
-      });
-
       const uploadPromise = new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            setProgress(percent);
+          }
+        });
+
         xhr.addEventListener('load', () => {
           if (xhr.status === 200) {
             const response = JSON.parse(xhr.responseText);
@@ -71,15 +71,14 @@ export function useCloudinaryUpload() {
     }
   };
 
-  const uploadMultipleImages = async (files, folder = 'products') => {
+  const uploadMultipleImages = async (files, folder = 'tours') => {
     setUploading(true);
     try {
-      const uploadPromises = files.map(file => uploadImage(file, folder));
+      const uploadPromises = files.map((file) => uploadImage(file, folder));
       const results = await Promise.all(uploadPromises);
 
-      return results
-        .filter(r => r.success && r.url)
-        .map(r => r.url);
+      return results.filter(r => r.success && r.url).map(r => r.url);
+
     } catch {
       return [];
     } finally {
