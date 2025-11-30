@@ -6,7 +6,7 @@ import { SIDEBAR_CONFIG, ROLES } from '../../components/config/sidebarConfig';
 import SidebarItem from './sidebar/SidebarItem';
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
-  const { user, hasPermission, getUserRole } = useAuth();
+  const { hasPermission, getUserRole } = useAuth();
   
   const [expandedItems, setExpandedItems] = useState({});
 
