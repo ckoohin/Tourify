@@ -8,6 +8,7 @@ const {
     getAllByKeyWord,
     cloneTourModel,
 } = require("../../models/tours/Tour.js");
+const { query } = require("../../config/db.js");
 
 async function getAllTours(req, res, next) {
     try {
@@ -194,7 +195,7 @@ async function createTour(req, res, next) {
 
         res.status(201).json({
             success: true,
-            message: "Tạo tour cấp thành công",
+            message: "Tạo tour thành công",
             data: { tour: newTour },
         });
     } catch (error) {

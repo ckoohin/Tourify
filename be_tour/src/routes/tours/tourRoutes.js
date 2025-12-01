@@ -12,6 +12,7 @@ const {
     deleteTourFromController,
     getAllToursByKeyWord,
     cloneTour,
+    generateTourQRAndUrl,
 } = require("../../controllers/tours/tourController.js");
 
 router.get(

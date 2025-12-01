@@ -26,6 +26,7 @@ const bookingRoutes = require("./routes/bookings/booking.js");
 const bookingStatusHistoryRoutes = require("./routes/bookings/bookingStatusHistory.js");
 const uploadRoutes = require("./routes/settings/upload.routes.js");
 const dashboardRoutes = require("./routes/dashboard/dashboard.js");
+const quoteRoutes = require("./routes/tours/quoteRoutes");
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.use("/api/v1/tours", tourRoutes);
 app.use("/api/v1/tours-image", tourImageRoutes);
 app.use("/api/v1/tours-version", tourVersionRoutes);
 app.use("/api/v1/tours-price", tourPriceRoutes);
+app.use("/api/v1/quotes", quoteRoutes);
 app.use("/api/v1/roles", roleRoutes);
 app.use("/api/v1/permissions", permissionRoutes);
 app.use("/api/v1/permission-roles", permissionRoleRoutes);
