@@ -1,6 +1,4 @@
 const { validationResult } = require("express-validator");
-const { generateTourQRCode, deleteQRCode } = require("../../services/qrCodeService.js");
-const { generateBookingUrl } = require("../../services/bookingUrlService.js");
 const {
     getAll,
     getById,
@@ -197,7 +195,7 @@ async function createTour(req, res, next) {
 
         res.status(201).json({
             success: true,
-            message: "Tạo tour cấp thành công",
+            message: "Tạo tour thành công",
             data: { tour: newTour },
         });
     } catch (error) {
@@ -291,50 +289,6 @@ async function cloneTour(req, res, next) {
     }
 }
 
-async function generateTourQRAndUrl(req, res, next) {
-    try {
-        const { id } = req.params;
-
-        const tour = await query(
-            'SELECT * FROM tours WHERE id = ?',
-            [id]
-        );
-
-        if (!tour || tour.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Không tìm thấy tour"
-            });
-        }
-
-        const tourData = tour[0];
-
-        const bookingUrl = generateBookingUrl(tourData.slug, tourData.id);
-
-        const qrCodeUrl = await generateTourQRCode(
-            tourData.id,
-            tourData.code,
-            bookingUrl
-        );
-
-        await query(
-            'UPDATE tours SET booking_url = ?, qr_code = ? WHERE id = ?',
-            [bookingUrl, qrCodeUrl, id]
-        );
-
-        res.json({
-            success: true,
-            message: "Tạo QR code và booking URL thành công",
-            data: {
-                booking_url: bookingUrl,
-                qr_code: qrCodeUrl
-            }
-        });
-    } catch (error) {
-        next(error);
-    }
-}
-
 module.exports = {
     getAllTours: getAllTours,
     getTourById: getTourById,
@@ -343,5 +297,4 @@ module.exports = {
     deleteTourFromController: deleteTourFromController,
     getAllToursByKeyWord: getAllToursByKeyWord,
     cloneTour: cloneTour,
-    generateTourQRAndUrl: generateTourQRAndUrl,
 };

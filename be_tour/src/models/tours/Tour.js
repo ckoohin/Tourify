@@ -1,4 +1,6 @@
 const { query } = require("../../config/db");
+const { generateBookingUrl } = require("../../services/bookingUrlService");
+const { generateTourQRCode } = require("../../services/qrCodeService");
 
 async function getAll() {
     try {
@@ -88,14 +90,12 @@ async function create(data) {
             min_group_size,
             max_group_size,
             is_customizable,
-            qr_code,
-            booking_url,
             status,
             created_by,
         } = data;
 
-        const sql = `INSERT INTO tours (code, name, slug, category_id, description, highlights, duration_days, duration_nights, departure_location, destination, min_group_size, max_group_size, is_customizable, qr_code, booking_url, status, created_by)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        const sql = `INSERT INTO tours (code, name, slug, category_id, description, highlights, duration_days, duration_nights, departure_location, destination, min_group_size, max_group_size, is_customizable, status, created_by)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
         const result = await query(sql, [
             code || null,
@@ -111,13 +111,19 @@ async function create(data) {
             min_group_size || null,
             max_group_size || null,
             is_customizable || null,
-            qr_code || null,
-            booking_url || null,
             status || null,
             created_by || null,
         ]);
 
-        return result.insertId;
+        const tourId = result.insertId;
+        const booking_url = generateBookingUrl(slug, tourId);
+        const qr_code = await generateTourQRCode(tourId, code, booking_url);
+
+        await query(
+            'UPDATE tours SET booking_url = ?, qr_code = ? WHERE id = ?',
+            [booking_url, qr_code, tourId]
+        );
+        return tourId;
     } catch (error) {
         throw error;
     }

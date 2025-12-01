@@ -274,11 +274,4 @@ router.post(
     cloneTour
 );
 
-router.post(
-    "/:id/generate-qr",
-    authenticate,
-    authorize("tours.manage"),
-    generateTourQRAndUrl
-);
-
 module.exports = router;
