@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Search, CheckCircle, XCircle, FolderTree } from 'lucide-react';
+import toast from 'react-hot-toast'; // Import Toast
 import tourCategoryService from '../../services/api/tourCategoryService';
 import CategoryForm from '../../components/categories/CategoryForm';
 
@@ -20,6 +21,9 @@ const CategoryList = () => {
       }
     } catch (error) {
       console.error("Lỗi tải danh mục:", error);
+      toast.error('Không thể tải danh sách danh mục', {
+        className: 'my-toast-error'
+      });
     } finally {
       setLoading(false);
     }
@@ -29,32 +33,55 @@ const CategoryList = () => {
     fetchCategories();
   }, []);
 
-  // Xử lý mở Modal Tạo mới
   const handleCreate = () => {
     setEditingCategory(null);
     setIsModalOpen(true);
   };
 
-  // Xử lý mở Modal Sửa
   const handleEdit = (category) => {
     setEditingCategory(category);
     setIsModalOpen(true);
   };
 
-  // Xử lý Xóa
-  const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa danh mục này?')) {
-      try {
-        await tourCategoryService.delete(id);
-        alert('Xóa thành công!');
-        fetchCategories();
-      } catch (error) {
-        alert('Xóa thất bại: ' + (error.response?.data?.message || error.message));
-      }
-    }
+  const handleDelete = (id) => {
+    toast((t) => (
+      <div className="flex items-center justify-between w-full gap-2">
+        <span className="text-sm font-medium text-slate-700">Xóa danh mục này?</span>
+        <div className="flex gap-2 shrink-0">
+          <button
+            className="btn-confirm" 
+            onClick={async () => {
+              toast.dismiss(t.id); 
+              try {
+                await tourCategoryService.delete(id);
+                toast.success('Xóa danh mục thành công!', {
+                  className: 'my-toast-success'
+                });
+                fetchCategories();
+              } catch (error) {
+                toast.error('Xóa thất bại: ' + (error.response?.data?.message || error.message), {
+                  className: 'my-toast-error'
+                });
+              }
+            }}
+          >
+            Xóa
+          </button>
+          <button
+            className="btn-cancel" 
+            onClick={() => toast.dismiss(t.id)}
+          >
+            Hủy
+          </button>
+        </div>
+      </div>
+    ), {
+      className: 'my-toast-confirm', 
+      position: 'top-center',
+      duration: 5000,
+    });
   };
 
-  // Lọc danh sách theo từ khóa tìm kiếm (Frontend filter)
   const filteredCategories = categories.filter(cat => 
     cat.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     cat.slug.toLowerCase().includes(searchTerm.toLowerCase())
@@ -62,7 +89,6 @@ const CategoryList = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Danh mục Tour</h1>
@@ -70,27 +96,25 @@ const CategoryList = () => {
         </div>
         <button 
           onClick={handleCreate}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm font-medium"
         >
           <Plus size={20} /> Thêm Danh mục
         </button>
       </div>
 
-      {/* Search Bar */}
       <div className="mb-6 bg-white p-4 rounded-lg shadow-sm border border-slate-200 max-w-md">
         <div className="relative">
            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
            <input 
              type="text" 
              placeholder="Tìm kiếm danh mục..." 
-             className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+             className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
              value={searchTerm}
              onChange={(e) => setSearchTerm(e.target.value)}
            />
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-lg shadow border border-slate-200 overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead className="bg-slate-50 text-slate-700 text-sm font-semibold">
@@ -150,14 +174,14 @@ const CategoryList = () => {
         </table>
       </div>
 
-      {/* Modal Form */}
       <CategoryForm 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         editData={editingCategory}
-        onSuccess={fetchCategories}
+        onSuccess={(data, isUpdate) => {
+            fetchCategories();
+        }}
       />
-
     </div>
   );
 };

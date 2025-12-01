@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Plus, Loader2, ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 import tourService from '../../services/api/tourService';
-
-import TourCard from '../../components/tours/TourCard';
+// Thay thế TourCard bằng TourTable
+import TourTable from '../../components/tours/TourTable';
 import TourFilter from '../../components/tours/TourFilter';
+import Modal from '../../components/ui/Modal';
+import TourForm from '../../components/tours/TourForm';
 
-const ITEMS_PER_ROW = 4;
-const ROWS_PER_PAGE = 6;
-const ITEMS_PER_PAGE = ITEMS_PER_ROW * ROWS_PER_PAGE; 
+// Import đúng đường dẫn file toast của bạn (giữ nguyên logic toast cũ)
+import { showDeleteConfirm } from '../../components/config/toast';
+
+// Cấu hình phân trang cho dạng bảng (thường là 10 hoặc 20 dòng)
+const ITEMS_PER_PAGE = 10; 
 
 const TourList = () => {
   const [allTours, setAllTours] = useState([]);
@@ -19,6 +23,9 @@ const TourList = () => {
   
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTour, setSelectedTour] = useState(null);
 
   const fetchTours = async () => {
     setLoading(true);
@@ -32,6 +39,7 @@ const TourList = () => {
       }
     } catch (error) {
       console.error("Lỗi tải danh sách tour:", error);
+      toast.error("Không thể tải danh sách tour");
     } finally {
       setLoading(false);
     }
@@ -53,22 +61,48 @@ const TourList = () => {
     setFilters(prev => ({ ...prev, ...newFilters }));
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa tour này?')) {
-      try {
-        await tourService.deleteTour(id);
-        alert('Xóa thành công!');
-        fetchTours();
-      } catch (error) {
-        alert('Xóa thất bại');
-      }
-    }
-  };
-
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  // --- HÀM XÓA ---
+  const handleDelete = async (id) => {
+    showDeleteConfirm(async () => {
+        try {
+            const toastId = toast.loading('Đang xóa...');
+            await tourService.deleteTour(id);
+            
+            toast.dismiss(toastId);
+            toast.success('Đã xóa tour thành công!');
+            
+            fetchTours(); 
+        } catch (error) {
+            toast.dismiss();
+            toast.error("Lỗi xóa: " + (error.response?.data?.message || error.message));
+        }
+    }, "Bạn có chắc chắn muốn xóa tour này? Hành động này không thể hoàn tác.");
+  };
+
+  const handleOpenCreate = () => {
+    setSelectedTour(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (tour) => {
+    setSelectedTour(tour);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => setSelectedTour(null), 300); 
+  };
+
+  const handleSuccess = () => {
+    fetchTours();
+    handleCloseModal();
   };
 
   return (
@@ -79,12 +113,12 @@ const TourList = () => {
           <p className="text-slate-500 mt-1 text-sm">Quản lý {allTours.length} tour du lịch trong hệ thống</p>
         </div>
         <div className="flex gap-3">
-          <Link 
-            to="/tours/create" 
+          <button 
+            onClick={handleOpenCreate}
             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-blue-600/20 font-medium"
           >
             <Plus size={20} /> Tạo Tour Mới
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -107,49 +141,43 @@ const TourList = () => {
             </div>
           ) : (
             <div className="flex-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                {displayTours.map((tour) => (
-                  <TourCard key={tour.id} tour={tour} onDelete={handleDelete} />
-                ))}
+              {/* --- THAY THẾ GRID CARD BẰNG TABLE --- */}
+              <div className="mb-8">
+                <TourTable 
+                  tours={displayTours} 
+                  onDelete={handleDelete} 
+                  onEdit={handleOpenEdit}
+                />
               </div>
 
               {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-8 pb-8">
-                  <button
-                    onClick={() => goToPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
+                <div className="flex justify-center items-center gap-2 mt-auto pb-8">
+                  <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50"><ChevronLeft size={20} /></button>
                   <div className="flex gap-1">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => goToPage(page)}
-                        className={`w-10 h-10 rounded-lg text-sm font-medium transition-all ${
-                          currentPage === page
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-                            : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        {page}
-                      </button>
+                      <button key={page} onClick={() => goToPage(page)} className={`w-10 h-10 rounded-lg text-sm font-medium ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200'}`}>{page}</button>
                     ))}
                   </div>
-                  <button
-                    onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronRight size={20} />
-                  </button>
+                  <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-50"><ChevronRight size={20} /></button>
                 </div>
               )}
             </div>
           )}
         </>
       )}
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title={selectedTour ? `Cập nhật Tour: ${selectedTour.code}` : "Tạo Tour Mới"}
+        maxWidth="max-w-5xl"
+      >
+         <TourForm 
+            initialData={selectedTour}
+            onClose={handleCloseModal}
+            onSuccess={handleSuccess}
+         />
+      </Modal>
     </div>
   );
 };

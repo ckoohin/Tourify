@@ -9,7 +9,6 @@ import AuthLayout from './components/layout/AuthLayout';
 import Sidebar from './components/layout/Sidebar.jsx';
 
 // Pages
-import Dashboard from './pages/dashboard/Dashboard';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import TourList from './pages/tour/TourList';
@@ -38,6 +37,8 @@ import ProviderEdit from './pages/provider/ProviderEdit';
 import Reports from './pages/reports/Reports';
 import Settings from './pages/settings/Settings';
 import NotFound from './pages/NotFound.jsx';
+import RBACPage from './pages/rbac/RBACPage';
+import DashboardController from './pages/dashboard/DashboardController.jsx';
 
 
 // ... import other pages
@@ -57,7 +58,7 @@ function App() {
           {/* Protected Routes */}
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route path="/" element={<Navigate to="/dashboard" />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<DashboardController />} />
             
             {/* Tour Management */}
             <Route path="/tours" element={<TourList />} />
@@ -80,7 +81,9 @@ function App() {
             {/* Staff Management */}
             <Route path="/staff" element={<StaffList />} />  
             <Route path="/staff/create" element={<StaffCreate />} />
-            <Route path="/staff/edit/:id" element={<StaffEdit />} />      
+            <Route path="/staff/edit/:id" element={<StaffEdit />} />     
+            <Route path="/admin/roles" element={<RBACPage />} />
+            <Route path="/admin/permissions" element={<RBACPage />} />
             
             {/* Provider Management */}
             <Route path="/providers" element={<ProviderList />} />

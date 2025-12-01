@@ -8,8 +8,8 @@ const TourImages = ({ tourId }) => {
     if (!file) return;
     
     const formData = new FormData();
-    formData.append('img', file);       // 'img' phải khớp với upload.single("img") bên BE
-    formData.append('tour_id', tourId); // BE yêu cầu field này
+    formData.append('img', file);       
+    formData.append('tour_id', tourId); 
     
     try {
         await tourService.uploadImage(formData);

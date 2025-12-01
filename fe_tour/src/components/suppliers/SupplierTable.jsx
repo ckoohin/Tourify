@@ -1,11 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Edit, Trash2, Star, Phone, MapPin, Hotel, Utensils, Bus, Map as MapIcon, ShieldCheck, FileText } from 'lucide-react';
 import StatusBadge from '../ui/StatusBadge';
 
-const SupplierTable = ({ suppliers, onDelete }) => {
+const SupplierTable = ({ suppliers, onDelete, onEdit }) => {
   
-  // Helper icon cho loại hình
   const getTypeIcon = (type) => {
     switch(type) {
         case 'hotel': return <Hotel size={14} className="text-blue-600"/>;
@@ -17,7 +15,6 @@ const SupplierTable = ({ suppliers, onDelete }) => {
     }
   };
 
-  // Helper text tiếng Việt
   const getTypeName = (type) => {
     const map = {
         hotel: 'Khách sạn', restaurant: 'Nhà hàng', transport: 'Vận chuyển',
@@ -96,8 +93,13 @@ const SupplierTable = ({ suppliers, onDelete }) => {
 
                 <td className="p-4 text-right">
                     <div className="flex justify-end gap-2">
-                    <Link to={`/providers/${sup.id}/edit`} className="p-2 text-blue-600 hover:bg-blue-50 rounded"><Edit size={18} /></Link>
-                    <button onClick={() => onDelete(sup.id)} className="p-2 text-red-600 hover:bg-red-50 rounded"><Trash2 size={18} /></button>
+                    <button 
+                        onClick={() => onEdit(sup)} 
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                    >
+                        <Edit size={18} />
+                    </button>
+                    <button onClick={() => onDelete(sup.id)} className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"><Trash2 size={18} /></button>
                     </div>
                 </td>
                 </tr>

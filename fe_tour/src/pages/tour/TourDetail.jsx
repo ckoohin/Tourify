@@ -18,7 +18,6 @@ const TourDetail = () => {
       try {
         const res = await tourService.getTourById(id);
         if (res.success) {
-          // Đảm bảo lấy đúng object tour dù backend trả về mảng hay object
           const data = Array.isArray(res.data.tour) ? res.data.tour[0] : res.data.tour;
           setTour(data);
         }

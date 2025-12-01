@@ -1,146 +1,115 @@
-import React from 'react';
-import { NavLink, Link } from 'react-router-dom';
-import {
-  CircleUserRound, // Đã sửa: UserRoundPin -> CircleUserRound
-  LayoutDashboard,
-  Map,
-  CalendarDays,
-  MapPin,
-  Ticket,
-  Users,
-  User,
-  LineChart,
-  Settings,
-  X,
-  LogOut,
-} from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { X, Globe2, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { SIDEBAR_CONFIG, ROLES } from '../../components/config/sidebarConfig';
+import SidebarItem from './sidebar/SidebarItem';
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
-  const baseLinkClass =
-    'flex items-center px-3 py-2.5 hover:text-white hover:bg-slate-800 rounded-lg transition-colors group';
-  const activeLinkClass =
-    'bg-primary text-white shadow-sm shadow-primary/20 font-medium';
+  const { hasPermission, getUserRole } = useAuth();
+  
+  const [expandedItems, setExpandedItems] = useState({});
 
-  // Hàm helper để gán class
-  const getNavLinkClass = ({ isActive }) =>
-    `${baseLinkClass} ${isActive ? activeLinkClass : ''}`;
+  const handleToggle = (label) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [label]: !prev[label]
+    }));
+  };
+
+  const currentRole = getUserRole();
+
+  const menuItems = useMemo(() => {
+    const filterMenu = (items) => {
+      return items.reduce((acc, item) => {
+        let validChildren = [];
+        if (item.children && item.children.length > 0) {
+          validChildren = filterMenu(item.children);
+        }
+
+        let isVisible = false;
+
+        if (item.permissions && item.permissions.length > 0) {
+           if (hasPermission(item.permissions)) {
+             isVisible = true;
+           }
+        } 
+        else {
+           if (item.allowedRoles && item.allowedRoles.length > 0) {
+             if (item.allowedRoles.includes(currentRole)) {
+               isVisible = true;
+             }
+           } else {
+             isVisible = true;
+           }
+        }
+
+        if (validChildren.length > 0) {
+           acc.push({ ...item, children: validChildren });
+        } else if (isVisible) {
+           if (!item.children || item.children.length === 0 || item.path) {
+              acc.push(item);
+           }
+        }
+
+        return acc;
+      }, []);
+    };
+
+    return filterMenu(SIDEBAR_CONFIG);
+  }, [currentRole, hasPermission]); 
 
   return (
     <>
-      {/* Lớp phủ cho di động, click để đóng */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-20 bg-black/50 md:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden transition-opacity"
           onClick={toggleSidebar}
-        ></div>
+        />
       )}
 
-      {/* === SIDEBAR === */}
+      {/* Sidebar Container */}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-64 bg-midnight text-slate-300 flex-shrink-0 flex flex-col transition-transform duration-300 ease-in-out md:static md:translate-x-0
-                  ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#0f172a] flex flex-col transition-transform duration-300 ease-in-out md:static md:translate-x-0 border-r border-slate-800 shadow-2xl
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        {/* Logo Area */}
-        <div className="h-16 flex items-center justify-between px-6 bg-slate-900/50 border-b border-slate-800">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="bg-primary p-2 rounded-lg">
-              <CircleUserRound className="text-white w-5 h-5" /> {/* Đã sửa */}
+        {/* Header */}
+        <div className="h-20 flex items-center justify-between px-6 border-b border-slate-800 bg-[#0f172a]">
+          <Link to="/" className="flex items-center gap-3 group cursor-pointer select-none">
+            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl shadow-lg group-hover:shadow-blue-500/40 transition-all duration-300">
+              <Globe2 className="text-white w-6 h-6" />
             </div>
-            <span className="text-white text-xl font-bold tracking-wide">
-              Tourify
-            </span>
+            <div>
+              <h1 className="text-white text-lg font-bold tracking-tight group-hover:text-blue-400 transition-colors duration-300">Tourify</h1>
+              <span className="text-xs text-slate-400 font-medium px-1.5 py-0.5 rounded bg-slate-800 uppercase tracking-wider">
+                {currentRole !== 'guest' ? currentRole.toUpperCase() : 'GUEST'}
+              </span>
+            </div>
           </Link>
-          {/* Nút đóng cho di động */}
-          <button
-            onClick={toggleSidebar}
-            className="md:hidden text-slate-400 hover:text-white"
-          >
-            <X className="w-6 h-6" />
+          <button onClick={toggleSidebar} className="md:hidden text-slate-400 hover:text-white transition-colors">
+            <X size={24} />
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-          {/* Menu Group: Tổng quan */}
-          <div className="mb-4">
-            <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-              Tổng quan
-            </p>
-            <NavLink to="/dashboard" className={getNavLinkClass}>
-              <LayoutDashboard className="mr-3 w-5 h-5" />
-              <span>Dashboard</span>
-            </NavLink>
-          </div>
-
-          {/* Menu Group: Nghiệp vụ chính */}
-          <div className="mb-4">
-            <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-              Quản lý Tour
-            </p>
-            <NavLink to="/tours" className={getNavLinkClass}>
-              <Map className="mr-3 w-5 h-5" />
-              <span>Danh sách Tour</span>
-            </NavLink>
-            <NavLink to="/categories" className={getNavLinkClass}>
-              <Settings className="mr-3 w-5 h-5" />
-              <span>Danh mục Tour</span>
-            </NavLink>
-            <NavLink to="/schedules" className={getNavLinkClass}>
-              <CalendarDays className="mr-3 w-5 h-5" />
-              <span>Lịch khởi hành</span>
-            </NavLink>
-            <NavLink to="/attractions" className={getNavLinkClass}>
-              <MapPin className="mr-3 w-5 h-5" />
-              <span>Điểm tham quan</span>
-            </NavLink>
-          </div>
-
-          {/* Menu Group: Bán hàng */}
-          <div className="mb-4">
-            <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-              Kinh doanh
-            </p>
-            <NavLink
-              to="/bookings"
-              className={({ isActive }) =>
-                `${getNavLinkClass({ isActive })} justify-between`
-              }
-            >
-              <div className="flex items-center">
-                <Ticket className="mr-3 w-5 h-5" />
-                <span>Booking</span>
+        {/* Menu List */}
+        <nav className="flex-1 overflow-y-auto py-6 px-2 space-y-1 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {menuItems.length > 0 ? (
+            menuItems.map((item, index) => (
+              <SidebarItem
+                key={index}
+                item={item}
+                isExpanded={!!expandedItems[item.label]}
+                onToggle={() => handleToggle(item.label)}
+              />
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center h-64 text-slate-500 px-6 text-center animate-pulse">
+              <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mb-3">
+                <AlertCircle size={24} />
               </div>
-              <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                8
-              </span>
-            </NavLink>
-            <NavLink to="/customers" className={getNavLinkClass}>
-              <Users className="mr-3 w-5 h-5" />
-              <span>Khách hàng</span>
-            </NavLink>
-          </div>
-
-          {/* Menu Group: Nhân sự & Hệ thống */}
-          <div className="mb-4">
-            <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-              Hệ thống
-            </p>
-            <NavLink to="/staff" className={getNavLinkClass}>
-              <User className="mr-3 w-5 h-5" />
-              <span>Quản lí nhân sự</span>
-            </NavLink>
-            <NavLink to="/providers" className={getNavLinkClass}>
-              <User className="mr-3 w-5 h-5" />
-              <span>Quản lí nhà cung cấp</span>
-            </NavLink>
-            <NavLink to="/reports" className={getNavLinkClass}>
-              <LineChart className="mr-3 w-5 h-5" />
-              <span>Báo cáo doanh thu</span>
-            </NavLink>
-            <NavLink to="/settings" className={getNavLinkClass}>
-              <Settings className="mr-3 w-5 h-5" />
-              <span>Cài đặt</span>
-            </NavLink>
-          </div>
+              <p className="text-sm">Tài khoản chưa được phân quyền.</p>
+            </div>
+          )}
         </nav>
       </aside>
     </>
