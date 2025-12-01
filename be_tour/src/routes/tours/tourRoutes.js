@@ -12,6 +12,7 @@ const {
     deleteTourFromController,
     getAllToursByKeyWord,
     cloneTour,
+    generateTourQRAndUrl,
 } = require("../../controllers/tours/tourController.js");
 
 router.get(
@@ -271,6 +272,13 @@ router.post(
             .withMessage("Slug tối đa 255 ký tự"),
     ],
     cloneTour
+);
+
+router.post(
+    "/:id/generate-qr",
+    authenticate,
+    authorize("tours.manage"),
+    generateTourQRAndUrl
 );
 
 module.exports = router;
