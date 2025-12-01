@@ -51,8 +51,13 @@ const query = async (sql, params) => {
     }
 };
 
+async function getConnection() {
+    return await pool.getConnection();
+}
+
 module.exports = {
     pool,
     query,
     testConnection,
+    getConnection,
 };

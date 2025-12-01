@@ -1,4 +1,5 @@
 const { validationResult } = require("express-validator");
+const QRCode = require('qrcode');
 const {
     getAll,
     getById,
