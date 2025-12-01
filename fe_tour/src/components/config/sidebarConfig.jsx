@@ -32,17 +32,17 @@ export const SIDEBAR_CONFIG = [
     icon: List,
     path: '/categories',
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['categories.manage'], // Yêu cầu quyền này
+    permissions: ['categories.manage'], 
     children: [] 
   },
   {
     label: 'Quản lý Tour',
     icon: Map,
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['tours.view', 'tours.manage'], // Có quyền xem hoặc quản lý đều thấy
+    permissions: ['tours.view', 'tours.manage'], 
     children: [
       { label: 'Thông tin chi tiết tour', path: '/tours', permissions: ['tours.view'] },
-      { label: 'Quản lý phiên bản tour', path: '/admin/tour-versions', permissions: ['tour_versions.manage'] },
+      { label: 'Quản lý phiên bản tour', path: '/tour-versions', permissions: ['toursVersion.manage'] },
       { label: 'Tạo nhanh báo giá', path: '/admin/quotes/create', permissions: ['quotes.create'] },
       { label: 'Mã QR & Link đặt tour', path: '/admin/tours/qr', permissions: ['tours.share'] }
     ]

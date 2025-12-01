@@ -3,22 +3,24 @@ import { Plus, Loader2, ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-rea
 import toast from 'react-hot-toast';
 
 import tourService from '../../services/api/tourService';
-// Thay thế TourCard bằng TourTable
 import TourTable from '../../components/tours/TourTable';
 import TourFilter from '../../components/tours/TourFilter';
-import Modal from '../../components/ui/Modal';
+// [FIX 1] Bỏ import Modal vì TourForm đã tự xử lý giao diện Modal
+// import Modal from '../../components/ui/Modal'; 
 import TourForm from '../../components/tours/TourForm';
 
-// Import đúng đường dẫn file toast của bạn (giữ nguyên logic toast cũ)
 import { showDeleteConfirm } from '../../components/config/toast';
 
-// Cấu hình phân trang cho dạng bảng (thường là 10 hoặc 20 dòng)
 const ITEMS_PER_PAGE = 10; 
 
 const TourList = () => {
   const [allTours, setAllTours] = useState([]);
   const [displayTours, setDisplayTours] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // [FIX 2] Thêm state categories
+  const [categories, setCategories] = useState([]);
+
   const [filters, setFilters] = useState({ keyword: '', category_id: '', status: '' });
   
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,6 +28,23 @@ const TourList = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTour, setSelectedTour] = useState(null);
+
+  // [FIX 3] Hàm lấy danh mục để truyền vào Form
+  useEffect(() => {
+    const fetchCategories = async () => {
+        try {
+            const res = await tourService.getCategories();
+            if (res.success) {
+                // Xử lý tùy theo cấu trúc trả về của API (res.data.categories hoặc res.data)
+                const cats = res.data.categories || res.data || [];
+                setCategories(cats);
+            }
+        } catch (error) {
+            console.error("Lỗi tải danh mục:", error);
+        }
+    };
+    fetchCategories();
+  }, []);
 
   const fetchTours = async () => {
     setLoading(true);
@@ -67,22 +86,19 @@ const TourList = () => {
     }
   };
 
-  // --- HÀM XÓA ---
   const handleDelete = async (id) => {
     showDeleteConfirm(async () => {
         try {
             const toastId = toast.loading('Đang xóa...');
             await tourService.deleteTour(id);
-            
             toast.dismiss(toastId);
             toast.success('Đã xóa tour thành công!');
-            
             fetchTours(); 
         } catch (error) {
             toast.dismiss();
             toast.error("Lỗi xóa: " + (error.response?.data?.message || error.message));
         }
-    }, "Bạn có chắc chắn muốn xóa tour này? Hành động này không thể hoàn tác.");
+    }, "Bạn có chắc chắn muốn xóa tour này?");
   };
 
   const handleOpenCreate = () => {
@@ -105,6 +121,32 @@ const TourList = () => {
     handleCloseModal();
   };
 
+  const handleSubmitForm = async (formData) => {
+    const toastId = toast.loading("Đang xử lý...");
+    try {
+        if (selectedTour) {
+            // Cập nhật
+            await tourService.updateTour(selectedTour.id, formData);
+            toast.success("Cập nhật tour thành công");
+        } else {
+            // Tạo mới
+            await tourService.createTour(formData);
+            toast.success("Tạo tour mới thành công");
+        }
+        
+        // Đóng modal và tải lại danh sách
+        handleCloseModal();
+        fetchTours();
+        
+    } catch (error) {
+        const msg = error.response?.data?.message || "Có lỗi xảy ra";
+        toast.error(msg);
+        console.error(error);
+    } finally {
+        toast.dismiss(toastId);
+    }
+  };
+
   return (
     <div className="p-6 max-w-[1600px] mx-auto min-h-screen flex flex-col">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -122,7 +164,7 @@ const TourList = () => {
         </div>
       </div>
 
-      <TourFilter onFilterChange={handleFilterChange} />
+      <TourFilter onFilterChange={handleFilterChange} categories={categories} />
 
       {loading ? (
         <div className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
@@ -141,12 +183,12 @@ const TourList = () => {
             </div>
           ) : (
             <div className="flex-1">
-              {/* --- THAY THẾ GRID CARD BẰNG TABLE --- */}
               <div className="mb-8">
                 <TourTable 
                   tours={displayTours} 
                   onDelete={handleDelete} 
                   onEdit={handleOpenEdit}
+                  categories={categories}
                 />
               </div>
 
@@ -166,18 +208,16 @@ const TourList = () => {
         </>
       )}
 
-      <Modal
-        isOpen={isModalOpen}
+      {/* [FIX 4] Render TourForm trực tiếp, không bọc Modal nữa */}
+      <TourForm 
+        isOpen={isModalOpen} 
         onClose={handleCloseModal}
+        onSuccess={handleSuccess}
+        onSubmit={handleSubmitForm}
+        initialData={selectedTour}
+        categories={categories} // Truyền categories đã fetch
         title={selectedTour ? `Cập nhật Tour: ${selectedTour.code}` : "Tạo Tour Mới"}
-        maxWidth="max-w-5xl"
-      >
-         <TourForm 
-            initialData={selectedTour}
-            onClose={handleCloseModal}
-            onSuccess={handleSuccess}
-         />
-      </Modal>
+      />
     </div>
   );
 };

@@ -17,6 +17,7 @@ const BREADCRUMB_NAMES = {
   'dashboard': 'Dashboard',
   'categories': 'Quản lý Danh mục',
   'tours': 'Quản lý Tour',
+  'tour-versions': 'Quản lý Phiên bản Tour',
   'create': 'Tạo mới',
   'edit': 'Chỉnh sửa',
   'schedules': 'Lịch khởi hành',

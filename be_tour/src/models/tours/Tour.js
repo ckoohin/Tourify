@@ -6,22 +6,35 @@ async function getAll() {
         const sql = `
         SELECT 
             t.id AS tour_id,
+            t.code,
             t.name,
             t.slug,
+            t.category_id,
+            tc.name as category_name,  
+            t.status,
             t.description,
             t.highlights,
             t.duration_days,
             t.duration_nights,
+            t.departure_location,
+            t.destination,
+            t.min_group_size,
+            t.max_group_size,
+            t.is_customizable,
+            t.updated_at,
             ti.id as tourImg_id,
             ti.image_url,
-            tv.id,
+            ti.is_featured,
+            tv.id as version_id,
             tv.name as tourVersion_name,
             tp.id as tourPrice_id,
             tp.price
         FROM tours t
+        LEFT JOIN tour_categories tc ON t.category_id = tc.id -- Join lấy tên danh mục
         LEFT JOIN tour_images as ti ON t.id = ti.tour_id
         LEFT JOIN tour_versions tv ON tv.tour_id = t.id
-        LEFT JOIN tour_prices tp ON tp.tour_version_id = tv.id;
+        LEFT JOIN tour_prices tp ON tp.tour_version_id = tv.id
+        ORDER BY t.created_at DESC;
         `;
         const tours = await query(sql, params);
         return tours;
@@ -64,9 +77,36 @@ async function getAllByKeyWord(keyword) {
 async function getById(id) {
     try {
         let params = [id];
-        const sql = `SELECT * FROM tours WHERE id=?`;
-        const tour = await query(sql, params);
-        return tour;
+        const sql = `
+        SELECT 
+            t.id AS tour_id, t.code, t.name, t.slug, t.category_id, t.status, 
+            t.description, t.highlights, t.duration_days, t.duration_nights, 
+            t.departure_location, t.destination, t.min_group_size, t.max_group_size, 
+            t.is_customizable, t.qr_code, t.booking_url, t.created_at, t.updated_at,
+            
+            ti.id as tourImg_id,
+            ti.image_url,
+            ti.is_featured,
+
+            tv.id as version_id,
+            tv.name as version_name,
+            tv.type as version_type,
+            tv.valid_from,
+            tv.valid_to,
+            
+            tp.id as price_id,
+            tp.price_type,
+            tp.price,
+            tp.currency
+        FROM tours t
+        LEFT JOIN tour_images ti ON ti.tour_id = t.id  
+        LEFT JOIN tour_versions tv ON tv.tour_id = t.id
+        LEFT JOIN tour_prices tp ON tp.tour_version_id = tv.id
+        WHERE t.id = ?
+        ORDER BY ti.is_featured DESC, tv.valid_from DESC; 
+        `;
+        const rows = await query(sql, params);
+        return rows; 
     } catch (error) {
         throw error;
     }

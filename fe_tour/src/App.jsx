@@ -39,6 +39,7 @@ import Settings from './pages/settings/Settings';
 import NotFound from './pages/NotFound.jsx';
 import RBACPage from './pages/rbac/RBACPage';
 import DashboardController from './pages/dashboard/DashboardController.jsx';
+import TourVersionList from './pages/tour/TourVersionList';
 
 
 // ... import other pages
@@ -65,6 +66,9 @@ function App() {
             <Route path="/tours/create" element={<TourCreate />} />
             <Route path="/tours/:id" element={<TourDetail />} />
             <Route path="/tours/:id/edit" element={<TourEdit />} />
+
+            {/* Tour_Version Management */}
+            <Route path="/tour-versions" element={<TourVersionList />} />
 
             {/* Tour_Categories Management */}
             <Route path="/categories" element={<CategoryList />} />

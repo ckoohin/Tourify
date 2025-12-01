@@ -23,6 +23,25 @@ async function getById(id) {
     }
 }
 
+async function add(tourId, imageUrl) {
+    try {
+        // Các trường khác để null hoặc mặc định
+        const sql = "INSERT INTO tour_images (tour_id, image_url, is_featured) VALUES (?, ?, 0)";
+        await query(sql, [tourId, imageUrl]);
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function deleteByTourId(tourId) {
+    try {
+        const sql = "DELETE FROM tour_images WHERE tour_id=?";
+        await query(sql, [tourId]);
+    } catch (error) {
+        throw error;
+    }
+}
+
 async function create(data, imgUrl) {
     try {
         const { tour_id, title, description, display_order, is_featured } =
@@ -114,4 +133,6 @@ async function create(data, imgUrl) {
 module.exports = {
     create: create,
     getById: getById,
+    add: add,
+    deleteByTourId: deleteByTourId,
 };

@@ -14,6 +14,9 @@ const tourService = {
   updateTour: (id, data) => api.put(`/tours/${id}`, data),
   deleteTour: (id) => api.delete(`/tours/${id}`),
 
+  // [THÊM MỚI] Hàm Clone Tour
+  cloneTour: (id, data) => api.post(`/tours/${id}/clone`, data),
+
   // --- DANH MỤC ---
   getCategories: (params = {}) => api.get('/tour-categories', { params }),
 
@@ -23,13 +26,21 @@ const tourService = {
   }),
 
   // --- VERSION ---
+  getVersions: (tourId) => api.get('/tours-version', { params: { tour_id: tourId } }),
   createVersion: (data) => api.post('/tours-version', data),
   updateVersion: (id, data) => api.put(`/tours-version/${id}`, data),
   deleteVersion: (id) => api.delete(`/tours-version/${id}`),
 
+
   // --- GIÁ ---
+   getPrices: (params) => api.get('/tours-price', { params }),
+  
+  getPriceById: (id) => api.get(`/tours-price/${id}`),
+  
   createPrice: (data) => api.post('/tours-price', data),
+  
   updatePrice: (id, data) => api.put(`/tours-price/${id}`, data),
+  
   deletePrice: (id) => api.delete(`/tours-price/${id}`),
 };
 
