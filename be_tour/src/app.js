@@ -23,7 +23,9 @@ const tourVersionRoutes = require("./routes/tours/tourVersionRoutes.js");
 const tourPriceRoutes = require("./routes/tours/tourPriceRoutes.js");
 const customerRoutes = require("./routes/authentication/customer.js");
 const bookingRoutes = require("./routes/bookings/booking.js");
+const bookingStatusHistoryRoutes = require("./routes/bookings/bookingStatusHistory.js");
 const uploadRoutes = require("./routes/settings/upload.routes.js");
+const dashboardRoutes = require("./routes/dashboard/dashboard.js");
 
 const app = express();
 
@@ -63,7 +65,9 @@ app.use("/api/v1/permissions", permissionRoutes);
 app.use("/api/v1/permission-roles", permissionRoleRoutes);
 app.use("/api/v1/customer", customerRoutes);
 app.use("/api/v1/booking", bookingRoutes);
+app.use("/api/v1/bookingStatusHistory", bookingStatusHistoryRoutes);
 app.use("/api/v1/uploads", uploadRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
 
 app.get("/health", (req, res) => {
     res.json({

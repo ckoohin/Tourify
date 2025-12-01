@@ -5,6 +5,10 @@ const {
     update,
     deleteBooking,
 } = require("../../models/bookings/Booking.js");
+
+const {
+    create: createStatusBooking,
+} = require("../../models/bookings/BookingStatusHistory.js");
 const { validationResult } = require("express-validator");
 
 async function getAllBookings(req, res, next) {
@@ -69,6 +73,19 @@ async function updateBooking(req, res, next) {
         }
 
         const { id } = req.params;
+        console.log(req.user);
+
+        const updatingBooking = await getById(id);
+
+        if (updatingBooking[0].status != req.body.status) {
+            const data = {
+                booking_id: updatingBooking[0].id,
+                from_status: updatingBooking[0].status,
+                to_status: req.body.status,
+                changed_by: req.user.id,
+            };
+            await createStatusBooking(data);
+        }
 
         const result = await update(req.body, id);
 
