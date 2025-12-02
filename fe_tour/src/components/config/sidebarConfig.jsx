@@ -51,13 +51,13 @@ export const SIDEBAR_CONFIG = [
     label: 'Lịch khởi hành & Vận hành',
     icon: CalendarDays,
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['schedules.manage', 'assignments.manage', 'departures.checkin'],
+    permissions: ['schedules.manage', 'assignments.manage', 'departures.checkin','tours.view','tours.create', 'tours.edit', 'tours.delete'],
     children: [
-      { label: 'Quản lý lịch & điểm đón', path: '/schedules', permissions: ['schedules.manage'] },
-      { label: 'Phân bổ nhân sự & dịch vụ', path: '/admin/assignments', permissions: ['assignments.manage'] },
-      { label: 'Danh sách đoàn & Check-in', path: '/admin/departures/checkin', permissions: ['departures.checkin'] },
-      { label: 'Phân phòng khách sạn', path: '/admin/departures/rooms', permissions: ['departures.rooms'] },
-      { label: 'Theo dõi chi phí thực tế', path: '/admin/departures/costs', permissions: ['departures.costs'] }
+      { label: 'Quản lý lịch khởi hành', path: '/departures', permissions: ['schedules.manage','tours.view','tours.create', 'tours.edit', 'tours.delete'] },
+      { label: 'Phân bổ nhân sự & dịch vụ', path: '/staff/assignments', permissions: ['assignments.manage','tours.view','tours.create', 'tours.edit', 'tours.delete'] },
+      { label: 'Danh sách đoàn & Check-in', path: '/admin/departures/checkin', permissions: ['departures.checkin','tours.view','tours.create', 'tours.edit', 'tours.delete'] },
+      { label: 'Phân phòng khách sạn', path: '/admin/departures/rooms', permissions: ['departures.rooms','tours.view','tours.create', 'tours.edit', 'tours.delete'] },
+      { label: 'Theo dõi chi phí thực tế', path: '/admin/departures/costs', permissions: ['departures.costs','tours.view','tours.create', 'tours.edit', 'tours.delete'] }
     ]
   },
   {

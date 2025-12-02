@@ -25,6 +25,12 @@ router.post('/',
   StaffAssignmentController.create
 );
 
+router.get('/',
+  AuthMiddleware.authenticate,
+  authorize('tours.view'),
+  StaffAssignmentController.getAll
+);
+
 router.get('/:id',
   AuthMiddleware.authenticate,
   authorize('tours.view'),

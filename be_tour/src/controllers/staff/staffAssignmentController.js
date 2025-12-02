@@ -56,6 +56,50 @@ class StaffAssignmentController {
     }
   }
 
+  static async getAll(req, res) {
+    try {
+      const { 
+        page = 1, 
+        limit = 10,
+        search,
+        role,
+        confirmed,
+        tour_departure_id,
+        staff_id,
+        date_from,
+        date_to,
+        status
+      } = req.query;
+
+      const result = await StaffAssignment.getAll({
+        page: parseInt(page),
+        limit: parseInt(limit),
+        search,
+        role,
+        confirmed: confirmed !== undefined ? parseInt(confirmed) : undefined,
+        tour_departure_id,
+        staff_id,
+        date_from,
+        date_to,
+        status
+      });
+
+      return ApiResponse.paginate(res, {
+        message: 'Lấy danh sách phân công thành công',
+        data: result.data,
+        page: result.pagination.currentPage,
+        limit: result.pagination.pageSize,
+        total: result.pagination.totalItems
+      });
+    } catch (error) {
+      console.error('Get staff assignments error:', error);
+      return ApiResponse.error(res, {
+        message: 'Lỗi khi lấy danh sách phân công',
+        errors: error.message
+      });
+    }
+  }
+
   static async update(req, res) {
     try {
       const errors = validationResult(req);
