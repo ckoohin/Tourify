@@ -1,9 +1,16 @@
 const { query } = require("../../config/db");
 
-async function getAll() {
+async function getAll(tour_id = null) {
     try {
+        let sql = `SELECT * FROM tour_versions`;
         let params = [];
-        const sql = `SELECT * FROM tour_versions`;
+
+        if (tour_id) {
+            sql += ` WHERE tour_id = ? ORDER BY valid_from DESC`;
+            params.push(tour_id);
+        } else {
+            sql += ` ORDER BY created_at DESC`;
+        }
         const tourVersions = await query(sql, params);
         return tourVersions;
     } catch (error) {

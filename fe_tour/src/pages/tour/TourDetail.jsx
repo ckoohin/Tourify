@@ -4,39 +4,86 @@ import {
   ArrowLeft, Edit, MapPin, Clock, Users, 
   Tag, CheckCircle, XCircle, Globe, Image as ImageIcon 
 } from 'lucide-react';
+import toast from 'react-hot-toast'; 
 
 import tourService from '../../services/api/tourService';
+import TourVersionManager from '../../components/tours/versions/TourVersionManager';
+import TourForm from '../../components/tours/TourForm'; 
 
 const TourDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState('');
+  
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+
+  const fetchCategories = async () => {
+    try {
+        const res = await tourService.getCategories();
+        if (res.success) {
+            setCategories(res.data.categories || res.data || []);
+        }
+    } catch (error) {
+        console.error("Lỗi tải danh mục", error);
+    }
+  };
+
+  const fetchTour = async () => {
+    try {
+      const res = await tourService.getTourById(id);
+      if (res.success) {
+        const data = Array.isArray(res.data.tour) ? res.data.tour[0] : res.data.tour;
+        setTour(data);
+        
+        if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+          const featured = data.images.find(img => img.is_featured === 1 || img.is_featured === true);
+          if (featured) setSelectedImage(getImgUrl(featured));
+          else {
+              const sorted = [...data.images].sort((a, b) => Number(a.id) - Number(b.id));
+              setSelectedImage(getImgUrl(sorted[sorted.length - 1]));
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching tour details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTour = async () => {
-      try {
-        const res = await tourService.getTourById(id);
-        if (res.success) {
-          const data = Array.isArray(res.data.tour) ? res.data.tour[0] : res.data.tour;
-          setTour(data);
-        }
-      } catch (error) {
-        console.error("Error fetching tour details:", error);
-        alert("Không thể tải thông tin tour.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchTour();
+    fetchCategories(); 
   }, [id]);
+
+  const handleUpdateTour = async (formData) => {
+    const toastId = toast.loading("Đang cập nhật...");
+    try {
+        // Gọi API Update
+        await tourService.updateTour(tour.id, formData);
+        toast.success("Cập nhật thành công");
+        setIsEditOpen(false);
+        fetchTour(); 
+    } catch (error) {
+        toast.error(error.response?.data?.message || "Lỗi cập nhật");
+    } finally {
+        toast.dismiss(toastId);
+    }
+  };
+
+  const getImgUrl = (imgItem) => {
+    if (!imgItem) return '';
+    return typeof imgItem === 'string' ? imgItem : imgItem.url;
+  };
 
   if (loading) return <div className="flex justify-center items-center h-screen text-slate-500">Đang tải dữ liệu...</div>;
   if (!tour) return <div className="flex justify-center items-center h-screen text-slate-500">Không tìm thấy tour.</div>;
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div>
           <button 
@@ -58,28 +105,28 @@ const TourDetail = () => {
             </span>
           </div>
         </div>
-        <Link 
-          to={`/tours/${tour.id}/edit`} 
+        
+        <button 
+          onClick={() => setIsEditOpen(true)}
           className="bg-blue-600 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-blue-700 transition-all shadow-md font-medium"
         >
           <Edit size={18}/> Chỉnh sửa Tour
-        </Link>
+        </button>
       </div>
 
-      {/* Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Left Column: Images & Main Info */}
         <div className="lg:col-span-2 space-y-8">
-          
-          {/* Images Gallery */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="aspect-video bg-slate-100 relative">
-              {tour.images && tour.images.length > 0 ? (
+            <div className="aspect-video bg-slate-100 relative group flex items-center justify-center">
+              {selectedImage ? (
                 <img 
-                  src={tour.images[0].url} 
+                  src={selectedImage} 
                   alt={tour.name} 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  onError={(e) => {
+                    e.target.onerror = null; 
+                    e.target.src = 'https://placehold.co/800x600/e2e8f0/94a3b8?text=Error+Loading+Image';
+                  }}
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-slate-400">
@@ -88,161 +135,92 @@ const TourDetail = () => {
                 </div>
               )}
             </div>
-            {/* Thumbnail list */}
-            {tour.images && tour.images.length > 1 && (
-              <div className="p-4 flex gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 pb-2">
-                {tour.images.map((img) => (
-                  <img 
-                    key={img.id} 
-                    src={img.url} 
-                    className="w-24 h-16 object-cover rounded-lg cursor-pointer hover:opacity-80 border border-slate-200 shrink-0" 
-                    alt="Thumbnail"
-                  />
-                ))}
+            {/* Thumbs */}
+            {tour.images && tour.images.length > 0 && (
+              <div className="p-4 bg-white border-t border-slate-100">
+                <div className="flex gap-3 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 pb-2">
+                  {tour.images.map((img, idx) => {
+                    const url = getImgUrl(img);
+                    return (
+                      <button 
+                        key={img.id || idx}
+                        onClick={() => setSelectedImage(url)}
+                        className={`relative w-24 h-16 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${url === selectedImage ? 'border-blue-600 ring-2 ring-blue-100' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                      >
+                        <img src={url} className="w-full h-full object-cover" alt={`Thumbnail ${idx}`}/>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Description */}
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
             <h2 className="text-xl font-bold text-slate-800 mb-4 border-b pb-4">Giới thiệu</h2>
             <div className="prose max-w-none text-slate-600 leading-relaxed whitespace-pre-line mb-8">
-              {tour.description || "Chưa có mô tả."}
+              {tour.description || <span className="text-slate-400 italic">Chưa có mô tả chi tiết.</span>}
             </div>
-            
             {tour.highlights && (
               <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                <h3 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
-                  <Tag size={18}/> Điểm nổi bật
-                </h3>
-                <ul className="list-disc list-inside text-blue-800 space-y-1">
-                    {tour.highlights.split('\n').map((line, idx) => (
-                        line.trim() && <li key={idx}>{line}</li>
+                <h3 className="font-bold text-blue-800 mb-3 flex items-center gap-2"><Tag size={18}/> Điểm nổi bật</h3>
+                <ul className="space-y-2">
+                    {tour.highlights.split('\n').map((line, idx) => line.trim() && (
+                          <li key={idx} className="flex items-start gap-2 text-blue-900 text-sm">
+                            <span className="mt-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full shrink-0"></span>{line}
+                          </li>
                     ))}
                 </ul>
               </div>
             )}
           </div>
 
-          {/* Versions & Prices Table */}
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-            <h2 className="text-xl font-bold text-slate-800 mb-6 border-b pb-4">Bảng giá & Phiên bản</h2>
-            {(!tour.versions || tour.versions.length === 0) ? (
-              <div className="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                  <p className="text-slate-500">Chưa có phiên bản giá nào được tạo.</p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {tour.versions.map((ver) => (
-                  <div key={ver.id} className="border border-slate-200 rounded-xl overflow-hidden">
-                    <div className="bg-slate-50 px-5 py-3 flex justify-between items-center border-b border-slate-200">
-                      <span className="font-bold text-slate-700">{ver.name}</span>
-                      <span className="text-xs bg-white border border-slate-300 px-2 py-1 rounded uppercase font-bold text-slate-500 tracking-wide">
-                        {ver.type}
-                      </span>
-                    </div>
-                    <table className="w-full text-sm text-left">
-                      <thead className="bg-white text-slate-500 border-b border-slate-100">
-                        <tr>
-                          <th className="px-5 py-3 font-medium">Đối tượng</th>
-                          <th className="px-5 py-3 font-medium">Giá (VND)</th>
-                          <th className="px-5 py-3 font-medium text-right">Số lượng</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-50">
-                        {ver.prices && ver.prices.length > 0 ? (
-                          ver.prices.map((price) => (
-                            <tr key={price.id} className="hover:bg-slate-50/50">
-                              <td className="px-5 py-3 capitalize font-medium text-slate-700">
-                                {price.price_type === 'adult' ? 'Người lớn' : 
-                                 price.price_type === 'child' ? 'Trẻ em' : 
-                                 price.price_type === 'infant' ? 'Em bé' : price.price_type}
-                              </td>
-                              <td className="px-5 py-3 font-bold text-blue-600">
-                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price.price)}
-                              </td>
-                              <td className="px-5 py-3 text-right text-slate-500">
-                                {price.min_pax || 1} - {price.max_pax || '∞'}
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr><td colSpan="3" className="px-5 py-4 text-center text-slate-400 italic">Chưa cập nhật giá</td></tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
-              </div>
-            )}
+            <TourVersionManager tourId={tour.id} />
           </div>
         </div>
 
-        {/* Right Column: Meta Info */}
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <h3 className="font-bold text-slate-800 mb-5">Thông tin hành trình</h3>
-            <ul className="space-y-4 text-sm">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 sticky top-6">
+            <h3 className="font-bold text-slate-800 mb-5 pb-2 border-b">Thông tin hành trình</h3>
+            <ul className="space-y-5 text-sm">
               <li className="flex items-start gap-4">
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg shrink-0">
-                    <Clock size={20} />
-                </div>
-                <div>
-                  <span className="block font-bold text-slate-700">Thời lượng</span>
-                  <span className="text-slate-600">{tour.duration_days} Ngày / {tour.duration_nights} Đêm</span>
-                </div>
+                <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl shrink-0"><Clock size={20} /></div>
+                <div><span className="block font-bold text-slate-700 mb-0.5">Thời lượng</span><span className="text-slate-600 font-medium">{tour.duration_days} Ngày / {tour.duration_nights} Đêm</span></div>
               </li>
               <li className="flex items-start gap-4">
-                 <div className="p-2 bg-orange-50 text-orange-600 rounded-lg shrink-0">
-                    <MapPin size={20} />
-                </div>
-                <div>
-                  <span className="block font-bold text-slate-700">Điểm khởi hành</span>
-                  <span className="text-slate-600">{tour.departure_location || "Chưa cập nhật"}</span>
-                </div>
+                 <div className="p-2.5 bg-orange-50 text-orange-600 rounded-xl shrink-0"><MapPin size={20} /></div>
+                 <div><span className="block font-bold text-slate-700 mb-0.5">Điểm khởi hành</span><span className="text-slate-600 font-medium">{tour.departure_location || "Chưa cập nhật"}</span></div>
               </li>
               <li className="flex items-start gap-4">
-                 <div className="p-2 bg-purple-50 text-purple-600 rounded-lg shrink-0">
-                    <Globe size={20} />
-                </div>
-                <div>
-                  <span className="block font-bold text-slate-700">Điểm đến</span>
-                  <span className="text-slate-600">{tour.destination || "Chưa cập nhật"}</span>
-                </div>
+                 <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl shrink-0"><Globe size={20} /></div>
+                 <div><span className="block font-bold text-slate-700 mb-0.5">Điểm đến</span><span className="text-slate-600 font-medium">{tour.destination || "Chưa cập nhật"}</span></div>
               </li>
               <li className="flex items-start gap-4">
-                 <div className="p-2 bg-green-50 text-green-600 rounded-lg shrink-0">
-                    <Users size={20} />
-                </div>
-                <div>
-                  <span className="block font-bold text-slate-700">Quy mô nhóm</span>
-                  <span className="text-slate-600">{tour.min_group_size} - {tour.max_group_size} khách</span>
-                </div>
+                 <div className="p-2.5 bg-green-50 text-green-600 rounded-xl shrink-0"><Users size={20} /></div>
+                 <div><span className="block font-bold text-slate-700 mb-0.5">Quy mô nhóm</span><span className="text-slate-600 font-medium">{tour.min_group_size} - {tour.max_group_size} khách</span></div>
               </li>
             </ul>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <h3 className="font-bold text-slate-800 mb-5">Cài đặt khác</h3>
-            <div className="space-y-3 text-sm">
-               <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                 <span className="text-slate-500">Thiết kế riêng (Custom)</span>
-                 <span className={`font-bold ${tour.is_customizable ? 'text-green-600' : 'text-slate-400'}`}>
-                   {tour.is_customizable ? 'Có' : 'Không'}
-                 </span>
-               </div>
-               <div className="flex justify-between items-center py-2 border-b border-slate-100">
-                 <span className="text-slate-500">Danh mục ID</span>
-                 <span className="font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{tour.category_id}</span>
-               </div>
-               <div className="pt-2">
-                   <span className="text-slate-500 block mb-1">Link Booking:</span>
-                   <a href="#" className="text-blue-600 hover:underline truncate block">{tour.booking_url || "Chưa có link"}</a>
-               </div>
+            <div className="mt-6 pt-6 border-t border-slate-100">
+                <h4 className="font-bold text-slate-800 mb-3 text-xs uppercase">Cài đặt khác</h4>
+                <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center"><span className="text-slate-500">Thiết kế riêng</span><span className={`font-bold px-2 py-0.5 rounded text-xs ${tour.is_customizable ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>{tour.is_customizable ? 'Có' : 'Không'}</span></div>
+                    <div className="flex justify-between items-center"><span className="text-slate-500">Danh mục ID</span><span className="font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{tour.category_id}</span></div>
+                </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* [MỚI] Modal Chỉnh sửa Tour */}
+      <TourForm 
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        onSubmit={handleUpdateTour}
+        initialData={tour}
+        categories={categories}
+        title={`Cập nhật Tour: ${tour.code}`}
+      />
     </div>
   );
 };

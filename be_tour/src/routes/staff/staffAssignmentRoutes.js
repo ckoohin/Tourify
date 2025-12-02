@@ -56,4 +56,10 @@ router.delete('/:id',
   StaffAssignmentController.delete
 );
 
+router.get('/',
+  AuthMiddleware.authenticate,
+  authorize('tours.view'),
+  StaffAssignmentController.getAll
+);
+
 module.exports = router;

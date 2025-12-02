@@ -9,7 +9,9 @@ const {
 
 async function getAllTourVersions(req, res, next) {
     try {
-        const tourVersions = await getAll();
+        const { tour_id } = req.query; 
+        const tourVersions = await getAll(tour_id);
+        
         return res.json({
             success: true,
             data: { tourVersions },

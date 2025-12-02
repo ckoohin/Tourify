@@ -5,13 +5,33 @@ import StatusBadge from '../ui/StatusBadge';
 
 const TourTable = ({ tours, onDelete, onEdit }) => {
 
-  // --- LOGIC XỬ LÝ DỮ LIỆU (Giữ nguyên từ TourCard) ---
-  
+  // --- LOGIC XỬ LÝ ẢNH (Đã cập nhật tối ưu) ---
   const getDisplayImage = (tour) => {
-    if (tour.images && Array.isArray(tour.images) && tour.images.length > 0) {
-        const featured = tour.images.find(img => img.is_featured);
-        return featured ? featured.url : tour.images[0].url;
+    const images = tour.images;
+
+    // Kiểm tra mảng ảnh hợp lệ
+    if (images && Array.isArray(images) && images.length > 0) {
+        
+        // 1. Ưu tiên tìm ảnh được đánh dấu là featured (is_featured = 1)
+        // Chỉ check nếu phần tử là object (để tránh lỗi với mảng string)
+        const featured = images.find(img => (typeof img === 'object' && img?.is_featured));
+        if (featured && featured.url) return featured.url;
+
+        // 2. Nếu không có featured, lấy ảnh MỚI NHẤT (thường là ảnh cuối cùng trong mảng)
+        const lastImage = images[images.length - 1];
+        
+        // Xử lý trường hợp item là object { url: '...' }
+        if (typeof lastImage === 'object' && lastImage?.url) {
+            return lastImage.url;
+        }
+        
+        // Xử lý trường hợp item là string URL trực tiếp (dữ liệu thô hoặc state tạm)
+        if (typeof lastImage === 'string') {
+            return lastImage;
+        }
     }
+    
+    // Ảnh placeholder mặc định nếu không có ảnh nào
     return 'https://placehold.co/600x400/e2e8f0/94a3b8?text=No+Image';
   };
 
@@ -56,7 +76,7 @@ const TourTable = ({ tours, onDelete, onEdit }) => {
           {/* --- HEADER --- */}
           <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200 font-semibold">
             <tr>
-              <th className="px-4 py-3 w-16 text-center">Ảnh</th>
+              <th className="px-4 py-3 w-20 text-center">Ảnh</th>
               <th className="px-4 py-3 max-w-[250px]">Thông tin Tour</th>
               <th className="px-4 py-3">Mã & Danh mục</th>
               <th className="px-4 py-3">Lịch trình & Thời gian</th>
@@ -78,6 +98,7 @@ const TourTable = ({ tours, onDelete, onEdit }) => {
                 tours.map((tour) => {
                     const statusConfig = getStatusConfig(tour.status);
                     const displayImage = getDisplayImage(tour);
+                    const imageCount = tour.images?.length || 0;
 
                     const durationText = (tour.duration_days || tour.duration_nights) 
                         ? `${tour.duration_days || 0}N ${tour.duration_nights || 0}Đ` 
@@ -93,15 +114,24 @@ const TourTable = ({ tours, onDelete, onEdit }) => {
 
                     return (
                         <tr key={tour.id} className="bg-white hover:bg-slate-50 transition-colors group">
-                            {/* 1. Hình ảnh */}
+                            {/* 1. Hình ảnh (Đã sửa logic hiển thị) */}
                             <td className="px-4 py-3 text-center">
-                                <Link to={`/tours/${tour.id}`} className="block w-14 h-14 rounded-lg overflow-hidden border border-slate-200 mx-auto relative group-hover:shadow-md transition-all">
+                                <Link to={`/tours/${tour.id}`} className="block w-14 h-14 rounded-lg overflow-hidden border border-slate-200 mx-auto relative group-hover:shadow-md transition-all bg-slate-50">
                                     <img 
                                         src={displayImage} 
                                         alt={tour.code} 
                                         className="w-full h-full object-cover"
-                                        onError={(e) => {e.target.src = 'https://vcdn1-dulich.vnecdn.net/2022/03/31/mapilenghagiangvnexpress-16487-2310-5584-1648718524.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=kOOQrA2oCmdoblPaNEpo1A'}}
+                                        onError={(e) => {
+                                            e.target.onerror = null; 
+                                            e.target.src = 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Error';
+                                        }}
                                     />
+                                    {/* Badge số lượng ảnh nếu có nhiều hơn 1 */}
+                                    {imageCount > 1 && (
+                                        <div className="absolute bottom-0 right-0 bg-black/60 text-white text-[9px] px-1 rounded-tl-md font-medium">
+                                            +{imageCount - 1}
+                                        </div>
+                                    )}
                                 </Link>
                             </td>
 
