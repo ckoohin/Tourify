@@ -3,6 +3,8 @@ const router = express.Router();
 const { body } = require('express-validator');
 const staffController = require('../../controllers/staff/staffController');
 const { authenticate, authorize } = require('../../middleware/authMiddleware');
+const StaffAssignmentController = require('../../controllers/staff/staffAssignmentController');
+const AuthMiddleware = require('../../middleware/authMiddleware');
 
 router.get(
   '/',
@@ -181,6 +183,18 @@ router.delete(
   authenticate,
   authorize('admin'),
   staffController.delete
+);
+
+router.get('/:staffId/schedule',
+  AuthMiddleware.authenticate,
+  authorize('tours.view'),
+  StaffAssignmentController.getStaffSchedule
+);
+
+router.get('/:staffId/availability',
+  AuthMiddleware.authenticate,
+  authorize('tours.view'),
+  StaffAssignmentController.checkAvailability
 );
 
 module.exports = router;

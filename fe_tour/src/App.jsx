@@ -40,7 +40,13 @@ import NotFound from './pages/NotFound.jsx';
 import RBACPage from './pages/rbac/RBACPage';
 import DashboardController from './pages/dashboard/DashboardController.jsx';
 import TourVersionList from './pages/tour/TourVersionList';
-
+import BookingKanban from './pages/booking/BookingKanban';
+import QuoteList from './pages/quote/QuoteList';
+import TourExpensePage from './pages/operation/TourExpensePage';
+import DepartureList from './pages/operation/DepartureList';
+import DepartureDetail from './pages/operation/DepartureDetail';
+import StaffAllocationPage from './pages/operation/StaffAllocationPage.jsx';
+import ServiceList from './pages/booking/service/ServiceList.jsx';
 
 // ... import other pages
 
@@ -66,6 +72,7 @@ function App() {
             <Route path="/tours/create" element={<TourCreate />} />
             <Route path="/tours/:id" element={<TourDetail />} />
             <Route path="/tours/:id/edit" element={<TourEdit />} />
+            <Route path="/quotes" element={<QuoteList />} />
 
             {/* Tour_Version Management */}
             <Route path="/tour-versions" element={<TourVersionList />} />
@@ -77,6 +84,18 @@ function App() {
             <Route path="/bookings" element={<BookingList />} />
             <Route path="/bookings/create" element={<BookingCreate />} />
             <Route path="/bookings/:id" element={<BookingDetail />} />
+            <Route path="/booking-kanban" element={<BookingKanban />} />
+            <Route path="/bookings/services" element={<ServiceList />} />
+            
+
+            {/* MODULE ĐIỀU HÀNH (OPERATION) */}
+            <Route path="/departures" element={<DepartureList />} />
+        
+            {/* Trang chi tiết (Chứa ServiceList, ExpenseList trong các Tabs) */}
+            <Route path="/departures/:id" element={<DepartureDetail />} />
+        
+            {/* Trang báo cáo chi phí riêng biệt */}
+            <Route path="/departures/:departureId/expenses-report" element={<TourExpensePage />} />
             
             {/* Customer Management */}
             <Route path="/customers" element={<CustomerList />} />
@@ -85,7 +104,8 @@ function App() {
             {/* Staff Management */}
             <Route path="/staff" element={<StaffList />} />  
             <Route path="/staff/create" element={<StaffCreate />} />
-            <Route path="/staff/edit/:id" element={<StaffEdit />} />     
+            <Route path="/staff/edit/:id" element={<StaffEdit />} />  
+            <Route path="/operations/staff-allocation" element={<StaffAllocationPage />} />   
             <Route path="/admin/roles" element={<RBACPage />} />
             <Route path="/admin/permissions" element={<RBACPage />} />
             

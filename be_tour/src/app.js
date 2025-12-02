@@ -11,19 +11,27 @@ const { testConnection } = require("./config/db");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const authRoutes = require("./routes/authentication/auth");
-const roleRoutes = require('./routes/authentication/roleRoutes');
-const permissionRoutes = require('./routes/authentication/permissionRoutes');
-const permissionRoleRoutes = require('./routes/authentication/permissionRoleRoutes');
+const roleRoutes = require("./routes/authentication/roleRoutes");
+const permissionRoutes = require("./routes/authentication/permissionRoutes");
+const permissionRoleRoutes = require("./routes/authentication/permissionRoleRoutes");
 const tourCategoryRoutes = require("./routes/tours/tourCategoryRoutes");
 const staffRoutes = require("./routes/staff/staff");
+const staffAssignmentRoutes = require("./routes/staff/staffAssignmentRoutes.js");
 const supplierRoutes = require("./routes/suppliers/supplier.js");
 const tourRoutes = require("./routes/tours/tourRoutes.js");
 const tourImageRoutes = require("./routes/tours/tourImageRoutes.js");
 const tourVersionRoutes = require("./routes/tours/tourVersionRoutes.js");
 const tourPriceRoutes = require("./routes/tours/tourPriceRoutes.js");
+const tourDepartureRoutes = require("./routes/tours/tourDepartureRoutes.js");
+const tourExpenseRoutes = require("./routes/tours/tourExpenseRoutes.js");
+const tourLogRoutes = require("./routes/tours/tourLogRoutes.js");
 const customerRoutes = require("./routes/authentication/customer.js");
 const bookingRoutes = require("./routes/bookings/booking.js");
+const serviceBookingRoutes = require("./routes/bookings/serviceBookingRoutes.js");
+const bookingStatusHistoryRoutes = require("./routes/bookings/bookingStatusHistory.js");
 const uploadRoutes = require("./routes/settings/upload.routes.js");
+const dashboardRoutes = require("./routes/dashboard/dashboard.js");
+const quoteRoutes = require("./routes/tours/quoteRoutes");
 
 const app = express();
 
@@ -53,17 +61,25 @@ app.use("/api", limiter);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/tour-categories", tourCategoryRoutes);
 app.use("/api/v1/staff", staffRoutes);
+app.use("/api/v1/staff-assignments", staffAssignmentRoutes);
 app.use("/api/v1/supplier", supplierRoutes);
 app.use("/api/v1/tours", tourRoutes);
 app.use("/api/v1/tours-image", tourImageRoutes);
 app.use("/api/v1/tours-version", tourVersionRoutes);
 app.use("/api/v1/tours-price", tourPriceRoutes);
-app.use('/api/v1/roles', roleRoutes);
-app.use('/api/v1/permissions', permissionRoutes);
-app.use('/api/v1/permission-roles', permissionRoleRoutes);
+app.use("/api/v1/departures", tourDepartureRoutes);
+app.use("/api/v1/tour-expenses", tourExpenseRoutes);
+app.use("/api/v1/tour-logs", tourLogRoutes);
+app.use("/api/v1/quotes", quoteRoutes);
+app.use("/api/v1/roles", roleRoutes);
+app.use("/api/v1/permissions", permissionRoutes);
+app.use("/api/v1/permission-roles", permissionRoleRoutes);
 app.use("/api/v1/customer", customerRoutes);
 app.use("/api/v1/booking", bookingRoutes);
+app.use("/api/v1/service-bookings", serviceBookingRoutes);
+app.use("/api/v1/bookingStatusHistory", bookingStatusHistoryRoutes);
 app.use("/api/v1/uploads", uploadRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
 
 app.get("/health", (req, res) => {
     res.json({

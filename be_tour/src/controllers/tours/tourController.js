@@ -9,6 +9,7 @@ const {
     getAllByKeyWord,
     cloneTourModel,
 } = require("../../models/tours/Tour.js");
+const { query } = require("../../config/db.js");
 
 const TourImage = require("../../models/tours/TourImage.js");
 
@@ -220,10 +221,17 @@ async function createTour(req, res, next) {
             }
         }
 
+
         const rows = await getById(tourId);
         const tours = mapTourData(rows);
         res.status(201).json({ success: true, message: "Tạo tour thành công", data: { tour: tours[0] } });
     } catch (error) { next(error); }
+
+        res.status(201).json({
+            success: true,
+            message: "Tạo tour thành công",
+            data: { tour: newTour },
+        });
 }
 
 async function updateTour(req, res, next) {

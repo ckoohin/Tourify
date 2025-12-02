@@ -39,11 +39,11 @@ export const SIDEBAR_CONFIG = [
     label: 'Quản lý Tour',
     icon: Map,
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['tours.view', 'tours.manage'], 
+    permissions: ['tours.view', 'tours.manage', 'toursVersion.manage', 'quotes.manage'], 
     children: [
       { label: 'Thông tin chi tiết tour', path: '/tours', permissions: ['tours.view'] },
       { label: 'Quản lý phiên bản tour', path: '/tour-versions', permissions: ['toursVersion.manage'] },
-      { label: 'Tạo nhanh báo giá', path: '/admin/quotes/create', permissions: ['quotes.create'] },
+      { label: 'Tạo nhanh báo giá', path: '/quotes', permissions: ['quotes.manage'] },
       { label: 'Mã QR & Link đặt tour', path: '/admin/tours/qr', permissions: ['tours.share'] }
     ]
   },
@@ -53,7 +53,7 @@ export const SIDEBAR_CONFIG = [
     allowedRoles: [ROLES.ADMIN],
     permissions: ['schedules.manage', 'assignments.manage', 'departures.checkin'],
     children: [
-      { label: 'Quản lý lịch & điểm đón', path: '/schedules', permissions: ['schedules.manage'] },
+      { label: 'Quản lý lịch & điểm đón', path: '/departures', permissions: ['schedules.manage'] },
       { label: 'Phân bổ nhân sự & dịch vụ', path: '/admin/assignments', permissions: ['assignments.manage'] },
       { label: 'Danh sách đoàn & Check-in', path: '/admin/departures/checkin', permissions: ['departures.checkin'] },
       { label: 'Phân phòng khách sạn', path: '/admin/departures/rooms', permissions: ['departures.rooms'] },
@@ -64,10 +64,11 @@ export const SIDEBAR_CONFIG = [
     label: 'Quản lý Booking',
     icon: Ticket,
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['bookings.create', 'booking.manage'],
+    permissions: ['bookings.create', 'booking.manage', 'bookingStatus.manage'],
     children: [
       { label: 'Quản lý booking', path: '/bookings', permissions: ['booking.manage'] },
-      { label: 'Xuất Báo giá/Hợp đồng', path: '/admin/bookings/documents', permissions: ['bookings.documents'] }
+      { label: 'Quản lý lịch sử trạng thái booking', path: '/booking-kanban', permissions: ['bookingStatus.manage'] },
+      { label: 'Quản lí dịch vụ', path: '/bookings/services', permissions: ['bookings.documents'] }
     ]
   },
   {
@@ -100,6 +101,7 @@ export const SIDEBAR_CONFIG = [
     permissions: ['staff.manage', 'staff.schedules'],
     children: [
       { label: 'Quản lý hồ sơ nhân sự', path: '/staff', permissions: ['staff.manage'] },
+      { label: 'Lịch làm việc phân công', path: '/operations/staff-allocation', permissions: ['guide.schedule'] },
       { label: 'Lịch làm việc & Phân công', path: '/admin/staff/schedules', permissions: ['staff.schedules'] }
     ]
   },
@@ -144,7 +146,7 @@ export const SIDEBAR_CONFIG = [
     allowedRoles: [ROLES.GUIDE],
     permissions: ['guide.schedule', 'guide.tours'],
     children: [
-      { label: 'Lịch làm việc phân công', path: '/guide/my-schedule', permissions: ['guide.schedule'] },
+      
       { label: 'Chi tiết tour sắp dẫn', path: '/guide/my-tours', permissions: ['guide.tours'] }
     ]
   },
@@ -165,7 +167,7 @@ export const SIDEBAR_CONFIG = [
     allowedRoles: [ROLES.GUIDE],
     permissions: ['guide.daily_log', 'guide.incidents'],
     children: [
-      { label: 'Cập nhật diễn biến ngày', path: '/guide/logs/daily', permissions: ['guide.daily_log'] },
+      { label: 'Cập nhật diễn biến ngày', path: '/guide/logs/daily', permissions: ['tours.edit'] },
       { label: 'Ghi nhận sự cố & xử lý', path: '/guide/logs/incidents', permissions: ['guide.incidents'] },
       { label: 'Ghi nhận phản hồi khách', path: '/guide/logs/feedbacks', permissions: ['guide.feedbacks'] },
       { label: 'Tải lên hình ảnh thực tế', path: '/guide/logs/gallery', permissions: ['guide.gallery'] }
