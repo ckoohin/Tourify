@@ -51,7 +51,7 @@ const CategoryForm = ({ isOpen, onClose, editData, onSuccess }) => {
         setParents(res.data.categories);
       }
     } catch (error) {
-      console.error("Lỗi tải danh mục cha");
+      console.error("Lỗi tải danh mục cha",error);
     }
   };
 
