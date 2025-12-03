@@ -1,6 +1,6 @@
-const StaffAssignment = require('../../models/staff/StaffAssignment');
-const ApiResponse = require('../../utils/apiResponse');
-const { validationResult } = require('express-validator');
+const StaffAssignment = require("../../models/staff/StaffAssignment");
+const ApiResponse = require("../../utils/apiResponse");
+const { validationResult } = require("express-validator");
 
 class StaffAssignmentController {
   static async create(req, res) {
@@ -8,24 +8,24 @@ class StaffAssignmentController {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return ApiResponse.error(res, {
-          message: 'Dữ liệu không hợp lệ',
+          message: "Dữ liệu không hợp lệ",
           errors: errors.array(),
-          statusCode: 400
+          statusCode: 400,
         });
       }
 
       const assignment = await StaffAssignment.create(req.body, req.user.id);
 
       return ApiResponse.success(res, {
-        message: 'Phân công nhân sự thành công',
+        message: "Phân công nhân sự thành công",
         data: assignment,
-        statusCode: 201
+        statusCode: 201,
       });
     } catch (error) {
-      console.error('Create staff assignment error:', error);
+      console.error("Create staff assignment error:", error);
       return ApiResponse.error(res, {
-        message: error.message || 'Lỗi khi phân công nhân sự',
-        statusCode: 400
+        message: error.message || "Lỗi khi phân công nhân sự",
+        statusCode: 400,
       });
     }
   }
@@ -38,28 +38,28 @@ class StaffAssignmentController {
 
       if (!assignment) {
         return ApiResponse.error(res, {
-          message: 'Không tìm thấy phân công',
-          statusCode: 404
+          message: "Không tìm thấy phân công",
+          statusCode: 404,
         });
       }
 
       return ApiResponse.success(res, {
-        message: 'Lấy chi tiết phân công thành công',
-        data: assignment
+        message: "Lấy chi tiết phân công thành công",
+        data: assignment,
       });
     } catch (error) {
-      console.error('Get staff assignment error:', error);
+      console.error("Get staff assignment error:", error);
       return ApiResponse.error(res, {
-        message: 'Lỗi khi lấy chi tiết phân công',
-        errors: error.message
+        message: "Lỗi khi lấy chi tiết phân công",
+        errors: error.message,
       });
     }
   }
 
   static async getAll(req, res) {
     try {
-      const { 
-        page = 1, 
+      const {
+        page = 1,
         limit = 10,
         search,
         role,
@@ -68,7 +68,7 @@ class StaffAssignmentController {
         staff_id,
         date_from,
         date_to,
-        status
+        status,
       } = req.query;
 
       const result = await StaffAssignment.getAll({
@@ -81,21 +81,21 @@ class StaffAssignmentController {
         staff_id,
         date_from,
         date_to,
-        status
+        status,
       });
 
       return ApiResponse.paginate(res, {
-        message: 'Lấy danh sách phân công thành công',
+        message: "Lấy danh sách phân công thành công",
         data: result.data,
         page: result.pagination.currentPage,
         limit: result.pagination.pageSize,
-        total: result.pagination.totalItems
+        total: result.pagination.totalItems,
       });
     } catch (error) {
-      console.error('Get staff assignments error:', error);
+      console.error("Get staff assignments error:", error);
       return ApiResponse.error(res, {
-        message: 'Lỗi khi lấy danh sách phân công',
-        errors: error.message
+        message: "Lỗi khi lấy danh sách phân công",
+        errors: error.message,
       });
     }
   }
@@ -105,9 +105,9 @@ class StaffAssignmentController {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return ApiResponse.error(res, {
-          message: 'Dữ liệu không hợp lệ',
+          message: "Dữ liệu không hợp lệ",
           errors: errors.array(),
-          statusCode: 400
+          statusCode: 400,
         });
       }
 
@@ -116,22 +116,22 @@ class StaffAssignmentController {
       const existingAssignment = await StaffAssignment.getById(id);
       if (!existingAssignment) {
         return ApiResponse.error(res, {
-          message: 'Không tìm thấy phân công',
-          statusCode: 404
+          message: "Không tìm thấy phân công",
+          statusCode: 404,
         });
       }
 
       const assignment = await StaffAssignment.update(id, req.body);
 
       return ApiResponse.success(res, {
-        message: 'Cập nhật phân công thành công',
-        data: assignment
+        message: "Cập nhật phân công thành công",
+        data: assignment,
       });
     } catch (error) {
-      console.error('Update staff assignment error:', error);
+      console.error("Update staff assignment error:", error);
       return ApiResponse.error(res, {
-        message: 'Lỗi khi cập nhật phân công',
-        errors: error.message
+        message: "Lỗi khi cập nhật phân công",
+        errors: error.message,
       });
     }
   }
@@ -143,22 +143,22 @@ class StaffAssignmentController {
       const existingAssignment = await StaffAssignment.getById(id);
       if (!existingAssignment) {
         return ApiResponse.error(res, {
-          message: 'Không tìm thấy phân công',
-          statusCode: 404
+          message: "Không tìm thấy phân công",
+          statusCode: 404,
         });
       }
 
       const assignment = await StaffAssignment.confirm(id);
 
       return ApiResponse.success(res, {
-        message: 'Xác nhận phân công thành công',
-        data: assignment
+        message: "Xác nhận phân công thành công",
+        data: assignment,
       });
     } catch (error) {
-      console.error('Confirm staff assignment error:', error);
+      console.error("Confirm staff assignment error:", error);
       return ApiResponse.error(res, {
-        message: 'Lỗi khi xác nhận phân công',
-        errors: error.message
+        message: "Lỗi khi xác nhận phân công",
+        errors: error.message,
       });
     }
   }
@@ -170,21 +170,21 @@ class StaffAssignmentController {
       const existingAssignment = await StaffAssignment.getById(id);
       if (!existingAssignment) {
         return ApiResponse.error(res, {
-          message: 'Không tìm thấy phân công',
-          statusCode: 404
+          message: "Không tìm thấy phân công",
+          statusCode: 404,
         });
       }
 
       await StaffAssignment.delete(id);
 
       return ApiResponse.success(res, {
-        message: 'Xóa phân công thành công'
+        message: "Xóa phân công thành công",
       });
     } catch (error) {
-      console.error('Delete staff assignment error:', error);
+      console.error("Delete staff assignment error:", error);
       return ApiResponse.error(res, {
-        message: 'Lỗi khi xóa phân công',
-        errors: error.message
+        message: "Lỗi khi xóa phân công",
+        errors: error.message,
       });
     }
   }
@@ -196,25 +196,25 @@ class StaffAssignmentController {
 
       if (!date_from || !date_to) {
         return ApiResponse.error(res, {
-          message: 'Vui lòng cung cấp khoảng thời gian',
-          statusCode: 400
+          message: "Vui lòng cung cấp khoảng thời gian",
+          statusCode: 400,
         });
       }
 
       const schedule = await StaffAssignment.getStaffSchedule(staffId, {
         date_from,
-        date_to
+        date_to,
       });
 
       return ApiResponse.success(res, {
-        message: 'Lấy lịch làm việc thành công',
-        data: schedule
+        message: "Lấy lịch làm việc thành công",
+        data: schedule,
       });
     } catch (error) {
-      console.error('Get staff schedule error:', error);
+      console.error("Get staff schedule error:", error);
       return ApiResponse.error(res, {
-        message: 'Lỗi khi lấy lịch làm việc',
-        errors: error.message
+        message: "Lỗi khi lấy lịch làm việc",
+        errors: error.message,
       });
     }
   }
@@ -226,8 +226,8 @@ class StaffAssignmentController {
 
       if (!departure_date || !return_date) {
         return ApiResponse.error(res, {
-          message: 'Vui lòng cung cấp ngày khởi hành và kết thúc',
-          statusCode: 400
+          message: "Vui lòng cung cấp ngày khởi hành và kết thúc",
+          statusCode: 400,
         });
       }
 
@@ -238,26 +238,26 @@ class StaffAssignmentController {
       );
 
       return ApiResponse.success(res, {
-        message: 'Kiểm tra tính khả dụng thành công',
+        message: "Kiểm tra tính khả dụng thành công",
         data: {
           staff_id: staffId,
           departure_date,
           return_date,
-          is_available: isAvailable
-        }
+          is_available: isAvailable,
+        },
       });
     } catch (error) {
-      console.error('Check availability error:', error);
+      console.error("Check availability error:", error);
       return ApiResponse.error(res, {
-        message: 'Lỗi khi kiểm tra tính khả dụng',
-        errors: error.message
+        message: "Lỗi khi kiểm tra tính khả dụng",
+        errors: error.message,
       });
     }
   }
-static async getAll(req, res) {
+  static async getAll(req, res) {
     try {
-      const { 
-        page = 1, 
+      const {
+        page = 1,
         limit = 10,
         search,
         role,
@@ -266,7 +266,7 @@ static async getAll(req, res) {
         staff_id,
         date_from,
         date_to,
-        status
+        status,
       } = req.query;
 
       const result = await StaffAssignment.getAll({
@@ -279,25 +279,24 @@ static async getAll(req, res) {
         staff_id,
         date_from,
         date_to,
-        status
+        status,
       });
 
       return ApiResponse.paginate(res, {
-        message: 'Lấy danh sách phân công thành công',
+        message: "Lấy danh sách phân công thành công",
         data: result.data,
         page: result.pagination.currentPage,
         limit: result.pagination.pageSize,
-        total: result.pagination.totalItems
+        total: result.pagination.totalItems,
       });
     } catch (error) {
-      console.error('Get staff assignments error:', error);
+      console.error("Get staff assignments error:", error);
       return ApiResponse.error(res, {
-        message: 'Lỗi khi lấy danh sách phân công',
-        errors: error.message
+        message: "Lỗi khi lấy danh sách phân công",
+        errors: error.message,
       });
     }
   }
-  
 }
 
 module.exports = StaffAssignmentController;
