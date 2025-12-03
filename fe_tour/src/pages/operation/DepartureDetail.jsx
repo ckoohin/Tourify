@@ -5,7 +5,7 @@ import departureService from '../../services/api/departureService';
 import GuestList from '../../components/operations/GuestList'; 
 import ServiceList from '../booking/service/ServiceList'; 
 import ExpenseList from '../../components/operations/ExpenseList'; 
-import TourLogList from '../../components/operations/logs/TourLogList';
+// import TourLogList from '../../components/operations/logs/TourLogList';
 import StaffAssignmentManager from '../../components/operations/staff/StaffAssignmentManager';
 
 const DepartureDetail = () => {
