@@ -28,6 +28,18 @@ router.post('/',
   TourExpenseController.create
 );
 
+router.get('/departure/:departureId',
+  AuthMiddleware.authenticate,
+  authorize('tours.view'),
+  TourExpenseController.getByDepartureId
+);
+
+router.get('/departure/:departureId/budget-comparison',
+  AuthMiddleware.authenticate,
+  authorize('tours.view'),
+  TourExpenseController.compareWithBudget
+);
+
 router.get('/:id',
   AuthMiddleware.authenticate,
   authorize('tours.view'),

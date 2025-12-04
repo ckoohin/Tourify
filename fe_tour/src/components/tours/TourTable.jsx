@@ -5,33 +5,29 @@ import StatusBadge from '../ui/StatusBadge';
 
 const TourTable = ({ tours, onDelete, onEdit }) => {
 
-  // --- LOGIC XỬ LÝ ẢNH (Đã cập nhật tối ưu) ---
+
   const getDisplayImage = (tour) => {
     const images = tour.images;
 
-    // Kiểm tra mảng ảnh hợp lệ
+
     if (images && Array.isArray(images) && images.length > 0) {
         
-        // 1. Ưu tiên tìm ảnh được đánh dấu là featured (is_featured = 1)
-        // Chỉ check nếu phần tử là object (để tránh lỗi với mảng string)
+
         const featured = images.find(img => (typeof img === 'object' && img?.is_featured));
         if (featured && featured.url) return featured.url;
 
-        // 2. Nếu không có featured, lấy ảnh MỚI NHẤT (thường là ảnh cuối cùng trong mảng)
+
         const lastImage = images[images.length - 1];
         
-        // Xử lý trường hợp item là object { url: '...' }
         if (typeof lastImage === 'object' && lastImage?.url) {
             return lastImage.url;
         }
-        
-        // Xử lý trường hợp item là string URL trực tiếp (dữ liệu thô hoặc state tạm)
+
         if (typeof lastImage === 'string') {
             return lastImage;
         }
     }
     
-    // Ảnh placeholder mặc định nếu không có ảnh nào
     return 'https://placehold.co/600x400/e2e8f0/94a3b8?text=No+Image';
   };
 
@@ -114,7 +110,6 @@ const TourTable = ({ tours, onDelete, onEdit }) => {
 
                     return (
                         <tr key={tour.id} className="bg-white hover:bg-slate-50 transition-colors group">
-                            {/* 1. Hình ảnh (Đã sửa logic hiển thị) */}
                             <td className="px-4 py-3 text-center">
                                 <Link to={`/tours/${tour.id}`} className="block w-14 h-14 rounded-lg overflow-hidden border border-slate-200 mx-auto relative group-hover:shadow-md transition-all bg-slate-50">
                                     <img 
@@ -126,7 +121,6 @@ const TourTable = ({ tours, onDelete, onEdit }) => {
                                             e.target.src = 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Error';
                                         }}
                                     />
-                                    {/* Badge số lượng ảnh nếu có nhiều hơn 1 */}
                                     {imageCount > 1 && (
                                         <div className="absolute bottom-0 right-0 bg-black/60 text-white text-[9px] px-1 rounded-tl-md font-medium">
                                             +{imageCount - 1}

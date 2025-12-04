@@ -5,9 +5,6 @@ import {
   Users, DollarSign, Hash, AlertCircle 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-// Giả định bạn đã import các service API từ file bạn cung cấp
-// Nếu chưa có file riêng, bạn có thể thay thế bằng axios call trực tiếp tại đây
 import serviceBookingService from '../../../services/api/serviceBookingService';
 import supplierService from '../../../services/api/supplierService';
 

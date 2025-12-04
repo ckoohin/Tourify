@@ -1,17 +1,25 @@
 import api from './axios';
 
 const tourExpenseService = {
-  // Lấy danh sách chi phí
-  getByDepartureId: (departureId) => api.get(`/tour-expenses/${departureId}/expenses`),
+  // Lấy danh sách chi phí của một tour
+  getByDepartureId: (departureId) => {
+    return api.get(`/tour-expenses/departure/${departureId}`);
+  },
 
-  // So sánh với dự toán
-  compareBudget: (departureId) => api.get(`/tour-expenses/${departureId}/expenses/compare-budget`),
+  // Lấy dữ liệu so sánh Thực tế vs Dự toán
+  compareWithBudget: (departureId) => {
+    return api.get(`/tour-expenses/departure/${departureId}/budget-comparison`);
+  },
 
-  // CRUD
   create: (data) => api.post('/tour-expenses', data),
+  
   update: (id, data) => api.put(`/tour-expenses/${id}`, data),
+  
   delete: (id) => api.delete(`/tour-expenses/${id}`),
+  
   approve: (id) => api.patch(`/tour-expenses/${id}/approve`),
+  
+  getById: (id) => api.get(`/tour-expenses/${id}`),
 };
 
 export default tourExpenseService;

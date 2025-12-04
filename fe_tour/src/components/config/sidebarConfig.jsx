@@ -51,7 +51,7 @@ export const SIDEBAR_CONFIG = [
     label: 'Lịch khởi hành & Vận hành',
     icon: CalendarDays,
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['schedules.manage', 'assignments.manage', 'departures.checkin','tours.view','tours.create', 'tours.edit', 'tours.delete'],
+    permissions: ['schedules.manage', 'assignments.manage', 'departures.checkin'],
     children: [
       { label: 'Quản lý lịch & điểm đón', path: '/departures', permissions: ['schedules.manage'] },
       { label: 'Phân bổ nhân sự & dịch vụ', path: '/admin/assignments', permissions: ['assignments.manage'] },
@@ -68,7 +68,6 @@ export const SIDEBAR_CONFIG = [
     children: [
       { label: 'Quản lý booking', path: '/bookings', permissions: ['booking.manage'] },
       { label: 'Quản lý lịch sử trạng thái booking', path: '/booking-kanban', permissions: ['bookingStatus.manage'] },
-      { label: 'Quản lí dịch vụ', path: '/bookings/services', permissions: ['bookings.documents'] }
     ]
   },
   {

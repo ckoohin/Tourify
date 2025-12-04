@@ -70,7 +70,6 @@ const BookingKanban = () => {
 
     const toastId = toast.loading("Đang cập nhật...");
     try {
-        // [FIX QUAN TRỌNG] Lưu URL ảnh vào log thay vì chữ 'Có' để sau này parse ra hiển thị được
         const logEntry = `[${new Date().toLocaleString()}] Chuyển trạng thái: ${draggedBooking.status} -> ${modalInfo.targetStatus}. Ghi chú: ${notes}. Ảnh: ${image_url || 'Không'}`;
         
         const updatedNotes = (draggedBooking.internal_notes || '') + '\n' + logEntry;
@@ -80,16 +79,30 @@ const BookingKanban = () => {
             formattedDate = new Date(draggedBooking.departure_date).toISOString().split('T')[0];
         }
 
+        // [FIX ERROR 500 & 400] Chuẩn bị payload sạch sẽ và đầy đủ
+        // 1. Backend yêu cầu 'booking_code' -> Phải thêm vào
+        // 2. Backend yêu cầu 'created_by' là số -> Ép kiểu Number
+        // 3. MySQL cấm update 'total_guests' -> Không đưa vào payload
         const payload = {
-            ...draggedBooking, 
-            status: modalInfo.targetStatus, 
-            internal_notes: updatedNotes,
-            departure_date: formattedDate,
+            booking_code: draggedBooking.booking_code, // [FIX 400] Thêm trường này
             customer_id: Number(draggedBooking.customer_id),
             tour_version_id: Number(draggedBooking.tour_version_id),
-            created_by: draggedBooking.created_by || 1,
-            total_amount: Number(draggedBooking.total_amount),
-            unit_price: Number(draggedBooking.unit_price),
+            departure_date: formattedDate,
+            total_adults: Number(draggedBooking.total_adults || 0),
+            total_children: Number(draggedBooking.total_children || 0),
+            total_infants: Number(draggedBooking.total_infants || 0),
+            unit_price: Number(draggedBooking.unit_price || 0),
+            total_amount: Number(draggedBooking.total_amount || 0),
+            discount_amount: Number(draggedBooking.discount_amount || 0),
+            paid_amount: Number(draggedBooking.paid_amount || 0),
+            currency: draggedBooking.currency || 'VND',
+            status: modalInfo.targetStatus, 
+            special_requests: draggedBooking.special_requests,
+            internal_notes: updatedNotes,
+            cancel_reason: draggedBooking.cancel_reason,
+            sales_person_id: draggedBooking.sales_person_id ? Number(draggedBooking.sales_person_id) : null,
+            created_by: draggedBooking.created_by ? Number(draggedBooking.created_by) : 1, // [FIX 400] Ép kiểu số
+            booking_type: draggedBooking.booking_type,
         };
 
         await bookingService.update(draggedBooking.id, payload);
@@ -99,7 +112,13 @@ const BookingKanban = () => {
 
     } catch (error) {
         console.error(error);
-        const errorMsg = error.response?.data?.errors?.[0]?.msg || error.response?.data?.message || "Lỗi server";
+        // Hiển thị chi tiết lỗi validation từ backend nếu có
+        let errorMsg = "Lỗi server";
+        if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+            errorMsg = error.response.data.errors.map(e => e.msg).join(", ");
+        } else {
+            errorMsg = error.response?.data?.message || "Lỗi server";
+        }
         toast.error("Cập nhật thất bại: " + errorMsg);
     } finally {
         toast.dismiss(toastId);
@@ -145,7 +164,6 @@ const BookingKanban = () => {
                                 key={booking.id} 
                                 booking={booking} 
                                 onDragStart={handleDragStart}
-                                // [MỚI] Bắt sự kiện click để mở modal chi tiết
                                 onClick={(bk) => setDetailBooking(bk)}
                             />
                         ))}
@@ -160,7 +178,6 @@ const BookingKanban = () => {
         })}
       </div>
 
-      {/* Modal Update (Kéo thả) */}
       <StatusUpdateModal 
         isOpen={modalInfo.open}
         onClose={() => setModalInfo({ ...modalInfo, open: false })}
@@ -169,7 +186,6 @@ const BookingKanban = () => {
         newStatus={modalInfo.targetStatus}
       />
 
-      {/* [MỚI] Modal Chi Tiết (Click) */}
       <BookingDetailModal 
         isOpen={!!detailBooking}
         onClose={() => setDetailBooking(null)}
