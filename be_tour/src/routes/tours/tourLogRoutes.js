@@ -26,6 +26,18 @@ router.post('/',
   TourLogController.create
 );
 
+router.get('/departure/:departureId/stats',
+  AuthMiddleware.authenticate,
+  authorize('tours.view'),
+  TourLogController.getStats
+);
+
+router.get('/departure/:departureId',
+  AuthMiddleware.authenticate,
+  authorize('tours.view'),
+  TourLogController.getByDepartureId
+);
+
 router.get('/:id',
   AuthMiddleware.authenticate,
   authorize('tours.view'),

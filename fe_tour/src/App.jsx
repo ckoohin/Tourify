@@ -42,11 +42,9 @@ import DashboardController from './pages/dashboard/DashboardController.jsx';
 import TourVersionList from './pages/tour/TourVersionList';
 import BookingKanban from './pages/booking/BookingKanban';
 import QuoteList from './pages/quote/QuoteList';
-import TourExpensePage from './pages/operation/TourExpensePage';
 import DepartureList from './pages/operation/DepartureList';
 import DepartureDetail from './pages/operation/DepartureDetail';
-import StaffAllocationPage from './pages/operation/StaffAllocationPage.jsx';
-import ServiceList from './pages/booking/service/ServiceList.jsx';
+import ServiceList from './components/operations/service/ServiceList.jsx';
 
 // ... import other pages
 
@@ -85,7 +83,7 @@ function App() {
             <Route path="/bookings/create" element={<BookingCreate />} />
             <Route path="/bookings/:id" element={<BookingDetail />} />
             <Route path="/booking-kanban" element={<BookingKanban />} />
-            <Route path="/bookings/services" element={<ServiceList />} />
+            <Route path="/bookings-services" element={<ServiceList />} />
             
 
             {/* MODULE ĐIỀU HÀNH (OPERATION) */}
@@ -95,7 +93,6 @@ function App() {
             <Route path="/departures/:id" element={<DepartureDetail />} />
         
             {/* Trang báo cáo chi phí riêng biệt */}
-            <Route path="/departures/:departureId/expenses-report" element={<TourExpensePage />} />
             
             {/* Customer Management */}
             <Route path="/customers" element={<CustomerList />} />
@@ -104,8 +101,7 @@ function App() {
             {/* Staff Management */}
             <Route path="/staff" element={<StaffList />} />  
             <Route path="/staff/create" element={<StaffCreate />} />
-            <Route path="/staff/edit/:id" element={<StaffEdit />} />  
-            <Route path="/operations/staff-allocation" element={<StaffAllocationPage />} />   
+            <Route path="/staff/edit/:id" element={<StaffEdit />} />    
             <Route path="/admin/roles" element={<RBACPage />} />
             <Route path="/admin/permissions" element={<RBACPage />} />
             

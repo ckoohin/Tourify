@@ -51,14 +51,9 @@ export const SIDEBAR_CONFIG = [
     label: 'Lịch khởi hành & Vận hành',
     icon: CalendarDays,
     allowedRoles: [ROLES.ADMIN],
+    path: '/departures',
     permissions: ['schedules.manage', 'assignments.manage', 'departures.checkin'],
-    children: [
-      { label: 'Quản lý lịch & điểm đón', path: '/departures', permissions: ['schedules.manage'] },
-      { label: 'Phân bổ nhân sự & dịch vụ', path: '/admin/assignments', permissions: ['assignments.manage'] },
-      { label: 'Danh sách đoàn & Check-in', path: '/admin/departures/checkin', permissions: ['departures.checkin'] },
-      { label: 'Phân phòng khách sạn', path: '/admin/departures/rooms', permissions: ['departures.rooms'] },
-      { label: 'Theo dõi chi phí thực tế', path: '/admin/departures/costs', permissions: ['departures.costs'] }
-    ]
+    children: []
   },
   {
     label: 'Quản lý Booking',
@@ -68,7 +63,7 @@ export const SIDEBAR_CONFIG = [
     children: [
       { label: 'Quản lý booking', path: '/bookings', permissions: ['booking.manage'] },
       { label: 'Quản lý lịch sử trạng thái booking', path: '/booking-kanban', permissions: ['bookingStatus.manage'] },
-      { label: 'Quản lí dịch vụ', path: '/bookings/services', permissions: ['bookings.documents'] }
+      { label: 'Quản lí dịch vụ', path: '/bookings-services', permissions: ['bookings.documents'] }
     ]
   },
   {
