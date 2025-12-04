@@ -1,4 +1,4 @@
-const { query } = require('../../config/db');
+const { query } = require("../../config/db");
 
 class TourLog {
   static async create(data, createdBy) {
@@ -13,7 +13,7 @@ class TourLog {
         content,
         images,
         location,
-        weather
+        weather,
       } = data;
 
       const sql = `
@@ -37,13 +37,13 @@ class TourLog {
         log_date,
         log_time || null,
         day_number || null,
-        log_type || 'note',
+        log_type || "note",
         title || null,
         content,
         images ? JSON.stringify(images) : null,
         location || null,
         weather || null,
-        createdBy
+        createdBy,
       ]);
 
       return await this.getById(result.insertId);
@@ -66,7 +66,7 @@ class TourLog {
       `;
 
       const [log] = await query(sql, [id]);
-      
+
       if (log && log.images) {
         try {
           log.images = JSON.parse(log.images);
@@ -92,7 +92,7 @@ class TourLog {
         content,
         images,
         location,
-        weather
+        weather,
       } = data;
 
       const sql = `
@@ -121,7 +121,7 @@ class TourLog {
         images ? JSON.stringify(images) : null,
         location || null,
         weather || null,
-        id
+        id,
       ]);
 
       return await this.getById(id);
@@ -132,7 +132,7 @@ class TourLog {
 
   static async delete(id) {
     try {
-      const sql = 'DELETE FROM tour_logs WHERE id = ?';
+      const sql = "DELETE FROM tour_logs WHERE id = ?";
       await query(sql, [id]);
       return true;
     } catch (error) {
@@ -140,18 +140,21 @@ class TourLog {
     }
   }
 
-  static async getByDepartureId(departureId, { page = 1, limit = 20, log_type }) {
+  static async getByDepartureId(
+    departureId,
+    { page = 1, limit = 20, log_type }
+  ) {
     try {
       const offset = (page - 1) * limit;
-      let whereConditions = ['tl.tour_departure_id = ?'];
+      let whereConditions = ["tl.tour_departure_id = ?"];
       let params = [departureId];
 
       if (log_type) {
-        whereConditions.push('tl.log_type = ?');
+        whereConditions.push("tl.log_type = ?");
         params.push(log_type);
       }
 
-      const whereClause = whereConditions.join(' AND ');
+      const whereClause = whereConditions.join(" AND ");
 
       const countSql = `
         SELECT COUNT(*) as total
@@ -169,13 +172,12 @@ class TourLog {
         LEFT JOIN users u ON tl.created_by = u.id
         WHERE ${whereClause}
         ORDER BY tl.log_date DESC, tl.log_time DESC, tl.created_at DESC
-        LIMIT ? OFFSET ?
+        LIMIT ${limit} OFFSET ${offset}
       `;
-      params.push(limit, offset);
 
       const logs = await query(sql, params);
 
-      logs.forEach(log => {
+      logs.forEach((log) => {
         if (log.images) {
           try {
             log.images = JSON.parse(log.images);
@@ -191,8 +193,8 @@ class TourLog {
           currentPage: page,
           pageSize: limit,
           totalItems: total,
-          totalPages: Math.ceil(total / limit)
-        }
+          totalPages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       throw error;
@@ -214,7 +216,7 @@ class TourLog {
 
       const logs = await query(sql, [departureId, date]);
 
-      logs.forEach(log => {
+      logs.forEach((log) => {
         if (log.images) {
           try {
             log.images = JSON.parse(log.images);
@@ -245,7 +247,7 @@ class TourLog {
 
       const logs = await query(sql, [departureId]);
 
-      logs.forEach(log => {
+      logs.forEach((log) => {
         if (log.images) {
           try {
             log.images = JSON.parse(log.images);

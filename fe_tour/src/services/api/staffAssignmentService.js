@@ -16,10 +16,8 @@ const staffAssignmentService = {
   // Xác nhận phân công
   confirm: (id) => api.patch(`/staff-assignments/${id}/confirm`),
 
-  // Kiểm tra tính khả dụng (Check availability)
   checkAvailability: (staffId, params) => 
     api.get(`/staff-assignments/check-availability/${staffId}`, { params }),
-         // params: { departure_date, return_date }
 };
 
 export default staffAssignmentService;

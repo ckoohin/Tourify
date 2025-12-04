@@ -413,8 +413,8 @@ const TourForm = ({
                     {/* Tab 4: Settings */}
                     <div className={activeTab === 'settings' ? 'block' : 'hidden'}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <InputGroup label="Min Pax" name="min_group_size" type="number" value={formData.min_group_size} onChange={handleChange} error={errors.min_group_size} />
-                            <InputGroup label="Max Pax" name="max_group_size" type="number" value={formData.max_group_size} onChange={handleChange} error={errors.max_group_size} />
+                            <InputGroup label="Số khách tối thiểu" name="min_group_size" type="number" value={formData.min_group_size} onChange={handleChange} error={errors.min_group_size} />
+                            <InputGroup label="Số khách tối đa" name="max_group_size" type="number" value={formData.max_group_size} onChange={handleChange} error={errors.max_group_size} />
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Loại hình</label>
                                 <select name="is_customizable" value={formData.is_customizable} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">

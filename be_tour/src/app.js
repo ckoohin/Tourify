@@ -32,6 +32,9 @@ const bookingStatusHistoryRoutes = require("./routes/bookings/bookingStatusHisto
 const uploadRoutes = require("./routes/settings/upload.routes.js");
 const dashboardRoutes = require("./routes/dashboard/dashboard.js");
 const quoteRoutes = require("./routes/tours/quoteRoutes");
+const transactionRoutes = require("./routes/financial/transactionRoutes.js");
+const debtRoutes = require("./routes/financial/debtRoutes.js");
+const reportRoutes = require("./routes/financial/reportRoutes.js");
 
 const app = express();
 
@@ -80,6 +83,9 @@ app.use("/api/v1/service-bookings", serviceBookingRoutes);
 app.use("/api/v1/bookingStatusHistory", bookingStatusHistoryRoutes);
 app.use("/api/v1/uploads", uploadRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/transactions", transactionRoutes);
+app.use("/api/v1/debts", debtRoutes);
+app.use("/api/v1/reports", reportRoutes);
 
 app.get("/health", (req, res) => {
     res.json({

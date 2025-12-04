@@ -1,13 +1,10 @@
 import api from './axios';
 
 const tourLogService = {
-
   getByDepartureId: (departureId, params = {}) => 
     api.get(`/tour-logs/departure/${departureId}`, { params }),
 
-  getLogs: (departureId, params) => api.get(`/departures/${departureId}/logs`, { params }),
-  
-  getStats: (departureId) => api.get(`/departures/${departureId}/logs/stats`),
+  getStats: (departureId) => api.get(`/tour-logs/departure/${departureId}/stats`),
 
   create: (data) => api.post('/tour-logs', data),
   
