@@ -63,7 +63,6 @@ export const SIDEBAR_CONFIG = [
     children: [
       { label: 'Quản lý booking', path: '/bookings', permissions: ['booking.manage'] },
       { label: 'Quản lý lịch sử trạng thái booking', path: '/booking-kanban', permissions: ['bookingStatus.manage'] },
-      { label: 'Quản lí dịch vụ', path: '/bookings-services', permissions: ['bookings.documents'] }
     ]
   },
   {

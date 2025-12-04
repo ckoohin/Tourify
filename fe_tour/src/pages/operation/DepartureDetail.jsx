@@ -16,7 +16,7 @@ import DepartureFormModal from '../../components/operations/DepartureFormModal';
 import GuestList from '../../components/operations/GuestList';
 import ServiceList from '../../components/operations/service/ServiceList';
 import StaffAssignmentManager from '../../components/operations/staff/StaffAssignmentManager';
-import TourLogList from '../../components/operations/logs/TourLogList';
+import TourLogList from '../../components/operations/log/TourLogList';
 import TourExpenseManager from '../../components/operations/expenses/TourExpenseManager';
 
 const DepartureDetail = () => {
