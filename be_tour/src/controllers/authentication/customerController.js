@@ -1,5 +1,6 @@
 const {
     getAll,
+    getAllCustomerInQuotes,
     getById,
     create,
     update,
@@ -10,6 +11,19 @@ const { validationResult } = require("express-validator");
 async function getAllCustomers(req, res, next) {
     try {
         const customers = await getAll();
+        return res.json({
+            success: true,
+            data: { customers },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+// Chỉ lấy danh sách khách hàng trong bảng quotes với điều kiện status = sent
+async function fetchAllCustomersInQuotes(req, res, next) {
+    try {
+        const customers = await getAllCustomerInQuotes();
         return res.json({
             success: true,
             data: { customers },
@@ -116,6 +130,7 @@ async function deleteCustomerFromController(req, res, next) {
 
 module.exports = {
     getAllCustomers: getAllCustomers,
+    fetchAllCustomersInQuotes: fetchAllCustomersInQuotes,
     getCustomerById: getCustomerById,
     createCustomer: createCustomer,
     updateCustomer: updateCustomer,

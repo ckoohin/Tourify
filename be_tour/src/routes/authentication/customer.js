@@ -3,6 +3,7 @@ const router = express.Router();
 const { body } = require("express-validator");
 const {
     getAllCustomers,
+    fetchAllCustomersInQuotes,
     getCustomerById,
     createCustomer,
     updateCustomer,
@@ -10,6 +11,14 @@ const {
 } = require("../../controllers/authentication/customerController.js");
 const { authenticate } = require("../../middleware/authMiddleware");
 const { authorize } = require("../../middleware/authorize");
+
+// route lấy danh sách khách hàng trong bảng quotes với điều kiện status = sent
+router.get(
+    "/quotes",
+    authenticate,
+    authorize("customer.manage"),
+    fetchAllCustomersInQuotes
+);
 
 router.get("/:id", authenticate, authorize("customer.manage"), getCustomerById);
 

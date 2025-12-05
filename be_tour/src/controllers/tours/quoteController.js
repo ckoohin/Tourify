@@ -4,8 +4,23 @@ const {
     getQuoteById,
     updateQuoteStatus,
     getAllQuotes,
-    calculateQuotePrice
+    calculateQuotePrice,
+    getAllQuotesByCustomerId,
 } = require("../../models/tours/Quote");
+
+// Lấy tất cả báo giá của customer ID chỉ định
+async function getCustomerQuotes(req, res, next) {
+    try {
+        const { id } = req.params;
+        const quotes = await getAllQuotesByCustomerId(id);
+        return res.json({
+            success: true,
+            data: { quotes },
+        });
+    } catch (error) {
+        next(error);
+    }
+}
 
 async function createQuoteHandler(req, res, next) {
     try {
@@ -20,7 +35,7 @@ async function createQuoteHandler(req, res, next) {
 
         const quoteData = {
             ...req.body,
-            created_by: req.user.id
+            created_by: req.user.id,
         };
 
         const quote = await createQuote(quoteData);
@@ -62,7 +77,7 @@ async function listQuotesHandler(req, res, next) {
             status: req.query.status,
             customer_id: req.query.customer_id,
             from_date: req.query.from_date,
-            to_date: req.query.to_date
+            to_date: req.query.to_date,
         };
 
         const quotes = await getAllQuotes(filters);
@@ -106,7 +121,7 @@ async function calculatePriceHandler(req, res, next) {
 
         res.json({
             success: true,
-            data: priceData
+            data: priceData,
         });
     } catch (error) {
         next(error);
@@ -118,5 +133,6 @@ module.exports = {
     getQuoteHandler,
     listQuotesHandler,
     updateStatusHandler,
-    calculatePriceHandler
+    calculatePriceHandler,
+    getCustomerQuotes,
 };
