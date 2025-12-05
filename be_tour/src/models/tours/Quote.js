@@ -1,5 +1,18 @@
 const { query, getConnection } = require("../../config/db");
 
+// Lấy tất cả báo giá của customer ID chỉ định
+async function getAllQuotesByCustomerId(id) {
+    try {
+        let params = [id];
+        const sql =
+            "SELECT * FROM `quotes` WHERE customer_id = ? AND status = 'sent'";
+        const quotes = await query(sql, params);
+        return quotes;
+    } catch (error) {
+        throw error;
+    }
+}
+
 async function calculateQuotePrice(data) {
     const {
         tour_version_id,
@@ -8,7 +21,7 @@ async function calculateQuotePrice(data) {
         child_count = 0,
         infant_count = 0,
         senior_count = 0,
-        additional_services = []
+        additional_services = [],
     } = data;
 
     try {
@@ -22,89 +35,90 @@ async function calculateQuotePrice(data) {
         );
 
         if (!prices || prices.length === 0) {
-            throw new Error('Không tìm thấy giá cho tour này');
+            throw new Error("Không tìm thấy giá cho tour này");
         }
 
         let subtotal = 0;
         const breakdown = [];
 
         if (adult_count > 0) {
-            const adultPrice = prices.find(p => p.price_type === 'adult');
+            const adultPrice = prices.find((p) => p.price_type === "adult");
             if (adultPrice) {
                 const amount = parseFloat(adultPrice.price) * adult_count;
                 subtotal += amount;
                 breakdown.push({
-                    type: 'adult',
-                    label: 'Người lớn',
+                    type: "adult",
+                    label: "Người lớn",
                     quantity: adult_count,
                     unit_price: parseFloat(adultPrice.price),
-                    amount: amount
+                    amount: amount,
                 });
             }
         }
 
         if (child_count > 0) {
-            const childPrice = prices.find(p => p.price_type === 'child');
+            const childPrice = prices.find((p) => p.price_type === "child");
             if (childPrice) {
                 const amount = parseFloat(childPrice.price) * child_count;
                 subtotal += amount;
                 breakdown.push({
-                    type: 'child',
-                    label: 'Trẻ em',
+                    type: "child",
+                    label: "Trẻ em",
                     quantity: child_count,
                     unit_price: parseFloat(childPrice.price),
-                    amount: amount
+                    amount: amount,
                 });
             }
         }
 
         if (infant_count > 0) {
-            const infantPrice = prices.find(p => p.price_type === 'infant');
+            const infantPrice = prices.find((p) => p.price_type === "infant");
             if (infantPrice) {
                 const amount = parseFloat(infantPrice.price) * infant_count;
                 subtotal += amount;
                 breakdown.push({
-                    type: 'infant',
-                    label: 'Trẻ sơ sinh',
+                    type: "infant",
+                    label: "Trẻ sơ sinh",
                     quantity: infant_count,
                     unit_price: parseFloat(infantPrice.price),
-                    amount: amount
+                    amount: amount,
                 });
             }
         }
 
         if (senior_count > 0) {
-            const seniorPrice = prices.find(p => p.price_type === 'senior');
+            const seniorPrice = prices.find((p) => p.price_type === "senior");
             if (seniorPrice) {
                 const amount = parseFloat(seniorPrice.price) * senior_count;
                 subtotal += amount;
                 breakdown.push({
-                    type: 'senior',
-                    label: 'Người cao tuổi',
+                    type: "senior",
+                    label: "Người cao tuổi",
                     quantity: senior_count,
                     unit_price: parseFloat(seniorPrice.price),
-                    amount: amount
+                    amount: amount,
                 });
             }
         }
 
         if (additional_services && additional_services.length > 0) {
-            additional_services.forEach(service => {
-                const amount = parseFloat(service.unit_price) * service.quantity;
+            additional_services.forEach((service) => {
+                const amount =
+                    parseFloat(service.unit_price) * service.quantity;
                 subtotal += amount;
                 breakdown.push({
-                    type: 'service',
+                    type: "service",
                     label: service.name,
                     quantity: service.quantity,
                     unit_price: parseFloat(service.unit_price),
-                    amount: amount
+                    amount: amount,
                 });
             });
         }
 
         return {
             subtotal,
-            breakdown
+            breakdown,
         };
     } catch (error) {
         throw error;
@@ -113,7 +127,9 @@ async function calculateQuotePrice(data) {
 
 function generateQuoteNumber() {
     const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const random = Math.floor(Math.random() * 1000)
+        .toString()
+        .padStart(3, "0");
     return `QT${timestamp}${random}`;
 }
 
@@ -133,10 +149,10 @@ async function createQuote(data) {
             senior_count = 0,
             additional_services = [],
             discount_amount = 0,
-            special_requests = '',
-            terms = '',
+            special_requests = "",
+            terms = "",
             valid_days = 7,
-            created_by
+            created_by,
         } = data;
 
         const priceData = await calculateQuotePrice({
@@ -146,7 +162,7 @@ async function createQuote(data) {
             child_count,
             infant_count,
             senior_count,
-            additional_services
+            additional_services,
         });
 
         const subtotal = priceData.subtotal;
@@ -178,11 +194,11 @@ async function createQuote(data) {
                 subtotal,
                 discount_amount,
                 final_amount,
-                'VND',
+                "VND",
                 valid_until,
                 terms || null,
-                'draft',
-                created_by
+                "draft",
+                created_by,
             ]
         );
 
@@ -195,9 +211,8 @@ async function createQuote(data) {
             discount_amount,
             final_amount,
             breakdown: priceData.breakdown,
-            valid_until
+            valid_until,
         };
-
     } catch (error) {
         await connection.rollback();
         throw error;
@@ -240,17 +255,21 @@ async function getQuoteById(id) {
 
 async function updateQuoteStatus(id, status, updated_by) {
     try {
-        const timestamp_field = status === 'sent' ? 'sent_at' : 
-                               status === 'accepted' ? 'response_at' : null;
+        const timestamp_field =
+            status === "sent"
+                ? "sent_at"
+                : status === "accepted"
+                  ? "response_at"
+                  : null;
 
-        let sql = 'UPDATE quotes SET status = ?';
+        let sql = "UPDATE quotes SET status = ?";
         const params = [status];
 
         if (timestamp_field) {
             sql += `, ${timestamp_field} = NOW()`;
         }
 
-        sql += ' WHERE id = ?';
+        sql += " WHERE id = ?";
         params.push(id);
 
         const result = await query(sql, params);
@@ -278,26 +297,26 @@ async function getAllQuotes(filters = {}) {
         const params = [];
 
         if (filters.status) {
-            sql += ' AND q.status = ?';
+            sql += " AND q.status = ?";
             params.push(filters.status);
         }
 
         if (filters.customer_id) {
-            sql += ' AND q.customer_id = ?';
+            sql += " AND q.customer_id = ?";
             params.push(filters.customer_id);
         }
 
         if (filters.from_date) {
-            sql += ' AND q.created_at >= ?';
+            sql += " AND q.created_at >= ?";
             params.push(filters.from_date);
         }
 
         if (filters.to_date) {
-            sql += ' AND q.created_at <= ?';
+            sql += " AND q.created_at <= ?";
             params.push(filters.to_date);
         }
 
-        sql += ' ORDER BY q.created_at DESC';
+        sql += " ORDER BY q.created_at DESC";
 
         const quotes = await query(sql, params);
         return quotes;
@@ -311,5 +330,6 @@ module.exports = {
     getQuoteById,
     updateQuoteStatus,
     getAllQuotes,
-    calculateQuotePrice
+    calculateQuotePrice,
+    getAllQuotesByCustomerId,
 };

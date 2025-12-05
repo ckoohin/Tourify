@@ -3,7 +3,21 @@ import { X, Save, Calendar, User, DollarSign, Info, FileText, Layers } from 'luc
 import { validateBooking } from '../../utils/validators/bookingRules'; 
 import toast from 'react-hot-toast';
 
+// Lấy các hàm gọi api
+import customerService from '../../services/api/CustomerService';
+import tourService from '../../services/api/tourService';
+import quoteService from '../../services/api/quoteService';
+
 const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, currentUser }) => {
+
+  const [customer, setCustomer] = useState([]); //Lưu tất cả khách hàng trong bảng quotes với trạng thái status = sent
+  const [quotes, setQuotes] = useState([]); // Lưu tất cả báo giá của khách hàng sau khi chọn customer ID
+  const [quotesSelected, setQuotesSelected] = useState(""); // Lưu index của quotes được chọn trong mảng báo giá
+  const [listPrices, setListPrices] = useState([]);
+  const [adultPrice, setAdultPrice] = useState(0);
+  const [childPrice, setchildPrice] = useState(0);
+  const [infantPrice, setInfantPrice] = useState(0);
+
   const [activeTab, setActiveTab] = useState('general'); 
 
   const [formData, setFormData] = useState({
@@ -32,6 +46,65 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, currentUse
 
   const [errors, setErrors] = useState({});
 
+  async function getAllCustomers() {
+    const res = await customerService.getAllCustomerInQuotes();
+    setCustomer(res.data.customers);
+  }
+
+  async function getAllPriceByTourVerSionId(id) {
+    const res = await tourService.getPriceByVersionID(id);
+    setListPrices(res.data.tourPrices);
+  }
+
+  async function getAllQuotesById(id) {
+    const res = await quoteService.getQuotesByCustomerId(id);
+    setQuotes(res.data.quotes);
+  }
+
+  function handleChangeQuotes(e) {
+    setQuotesSelected(e.target.value);
+  }
+
+  useEffect(() => {
+    getAllCustomers();
+    if(formData.customer_id) {
+      getAllQuotesById(formData.customer_id);
+    }
+  }, [formData.customer_id])
+
+  useEffect(() => {
+    if(listPrices.length > 0) {
+      listPrices.forEach(price => {
+        if(price.price_type == 'adult') {
+          setAdultPrice(price.price)
+        } else if(price.price_type == 'child') {
+          setchildPrice(price.price)
+        } else if(price.price_type == 'infant') {
+          setInfantPrice(price.price)
+        }
+      })
+    }
+  }, [listPrices])
+
+  useEffect(() => {
+    if(formData.tour_version_id) {
+      getAllPriceByTourVerSionId(formData.tour_version_id);
+    }
+  }, [formData.tour_version_id])
+
+  useEffect(() => {
+    if(quotesSelected) {
+      const dataFillToForm = quotes.find((quote) => {
+        return quote.id == quotesSelected;
+      });
+
+      setFormData(prev => ({
+        ...prev,
+        tour_version_id: dataFillToForm.tour_version_id,
+      }));
+    }
+  }, [quotesSelected])
+
   // Reset form khi mở modal
   useEffect(() => {
     if (isOpen) {
@@ -51,10 +124,10 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, currentUse
             booking_type: 'individual',
             departure_date: new Date().toISOString().split('T')[0],
             status: 'pending',
-            total_adults: 1,
+            total_adults: 0,
             total_children: 0,
             total_infants: 0,
-            total_guests: 1,
+            total_guests: 0,
             unit_price: 0,
             total_amount: 0,
             discount_amount: 0,
@@ -67,6 +140,12 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, currentUse
             sales_person_id: currentUser?.id || '',
             created_by: currentUser?.id || 1
         });
+
+        setQuotesSelected("");
+        setQuotes([]);
+        setAdultPrice(0);
+        setchildPrice(0);
+        setInfantPrice(0);
       }
     }
   }, [isOpen, initialData, currentUser]);
@@ -78,14 +157,17 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, currentUse
     // Logic tính tiền cơ bản (để hỗ trợ người dùng, có thể sửa tay)
     // Ví dụ: Total = (Adults * UnitPrice) + (Children * UnitPrice * 0.75) ... Tùy logic business
     // Ở đây ta giữ đơn giản: Total nhập tay hoặc tính sơ bộ
-    
+    const totalPrices = Number(adultPrice) * Number(formData.total_adults) + Number(childPrice) * Number(formData.total_children) + Number(infantPrice) * Number(formData.total_infants);
+    const unitPrice = totalPrices / guests ? totalPrices / guests : 0;
     const final = Number(formData.total_amount) - Number(formData.discount_amount);
     const remaining = final - Number(formData.paid_amount);
 
     setFormData(prev => ({
         ...prev,
+        total_amount: totalPrices,
         total_guests: guests,
         final_amount: final >= 0 ? final : 0,
+        unit_price: unitPrice,
         remaining_amount: remaining
     }));
   }, [formData.total_adults, formData.total_children, formData.total_infants, formData.total_amount, formData.discount_amount, formData.paid_amount]);
@@ -194,8 +276,29 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, currentUse
                             <option value="group">Đoàn thể</option>
                         </select>
                     </div>
-                    <InputGroup label="Mã Khách hàng (ID)" name="customer_id" type="number" required placeholder="Nhập ID khách hàng" />
-                    <InputGroup label="Mã Tour Version (ID)" name="tour_version_id" type="number" required placeholder="Nhập ID phiên bản tour" />
+
+                    {/* lặp render ra danh sách khách hàng */}
+
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Mã khách hàng</label>
+                        <select name="customer_id" value={formData.customer_id} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg">
+                            <option value="">---Vui lòng chọn mã khách hàng---</option>
+                            {customer.map((customer, index) => (
+                              <option data-index={index} key={index} value={customer.id}>{customer.full_name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Bảng báo giá</label>
+                        <select name="quotes" value={quotesSelected} onChange={handleChangeQuotes} className="w-full px-3 py-2 border rounded-lg">
+                            <option value="">---Vui lòng chọn mã báo giá---</option>
+                            {quotes && quotes.length > 0 && quotes.map((quote, index) => (
+                              <option data-index={index} key={index} value={quote.id}>{quote.quote_number}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <InputGroup label="Mã Tour Version (ID)" name="tour_version_id" type="number" required placeholder="Nhập ID phiên bản tour" readOnly/>
                     <InputGroup label="Ngày khởi hành" name="departure_date" type="date" required />
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-slate-700 mb-1">Trạng thái</label>
@@ -214,9 +317,18 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, currentUse
             {/* Tab 2: Hành khách */}
             <div className={activeTab === 'guests' ? 'block' : 'hidden'}>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <InputGroup label="Người lớn (>12t)" name="total_adults" type="number" min="1" />
-                    <InputGroup label="Trẻ em (2-11t)" name="total_children" type="number" min="0" />
-                    <InputGroup label="Em bé (<2t)" name="total_infants" type="number" min="0" />
+                    <div className="mb-4">
+                      <InputGroup label="Người lớn (>12t)" name="total_adults" type="number" min="1" />
+                      <span>Giá người lớn: {new Intl.NumberFormat('vi-VN').format(adultPrice)} VND</span>
+                    </div>
+                    <div className="mb-4">
+                      <InputGroup label="Trẻ em (2-11t)" name="total_children" type="number" min="0" />
+                      <span>Giá trẻ em: {new Intl.NumberFormat('vi-VN').format(childPrice)} VND</span>
+                    </div>
+                    <div className="mb-4">
+                      <InputGroup label="Em bé (<2t)" name="total_infants" type="number" min="0" />
+                      <span>Giá em bé: {new Intl.NumberFormat('vi-VN').format(infantPrice)} VND</span>
+                    </div>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mt-2">
                     <p className="text-sm text-blue-800 font-medium">Tổng số khách: <span className="text-xl font-bold ml-2">{formData.total_guests}</span></p>
@@ -226,8 +338,8 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, currentUse
             {/* Tab 3: Tài chính */}
             <div className={activeTab === 'finance' ? 'block' : 'hidden'}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <InputGroup label="Đơn giá (Unit Price)" name="unit_price" type="number" required />
-                    <InputGroup label="Tổng tiền (Total Amount)" name="total_amount" type="number" required />
+                    <InputGroup label="Đơn giá (Unit Price)" name="unit_price" type="number" required readOnly/>
+                    <InputGroup label="Tổng tiền (Total Amount)" name="total_amount" type="number" required readOnly/>
                     <InputGroup label="Giảm giá (Discount)" name="discount_amount" type="number" />
                     <InputGroup label="Đã thanh toán (Paid)" name="paid_amount" type="number" />
                     
