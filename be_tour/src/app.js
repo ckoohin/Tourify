@@ -18,6 +18,7 @@ const tourCategoryRoutes = require("./routes/tours/tourCategoryRoutes");
 const staffRoutes = require("./routes/staff/staff");
 const staffAssignmentRoutes = require("./routes/staff/staffAssignmentRoutes.js");
 const supplierRoutes = require("./routes/suppliers/supplier.js");
+const supplierRatingRoutes = require("./routes/suppliers/supplierRatingRoutes");
 const tourRoutes = require("./routes/tours/tourRoutes.js");
 const tourImageRoutes = require("./routes/tours/tourImageRoutes.js");
 const tourVersionRoutes = require("./routes/tours/tourVersionRoutes.js");
@@ -37,6 +38,7 @@ const quoteRoutes = require("./routes/tours/quoteRoutes");
 const transactionRoutes = require("./routes/financial/transactionRoutes.js");
 const debtRoutes = require("./routes/financial/debtRoutes.js");
 const reportRoutes = require("./routes/financial/reportRoutes.js");
+const feedbackRoutes = require("./routes/feedback/feedbackRoutes");
 
 const app = express();
 
@@ -68,6 +70,7 @@ app.use("/api/v1/tour-categories", tourCategoryRoutes);
 app.use("/api/v1/staff", staffRoutes);
 app.use("/api/v1/staff-assignments", staffAssignmentRoutes);
 app.use("/api/v1/supplier", supplierRoutes);
+app.use("/api/v1/supplier-ratings", supplierRatingRoutes);
 app.use("/api/v1/tours", tourRoutes);
 app.use("/api/v1/tours-image", tourImageRoutes);
 app.use("/api/v1/tours-version", tourVersionRoutes);
@@ -90,6 +93,7 @@ app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/debts", debtRoutes);
 app.use("/api/v1/reports", reportRoutes);
+app.use("/api/v1/feedbacks", feedbackRoutes);
 
 app.get("/health", (req, res) => {
     res.json({
