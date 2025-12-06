@@ -8,7 +8,6 @@ const {
     getAllQuotesByCustomerId,
 } = require("../../models/tours/Quote");
 
-// Lấy tất cả báo giá của customer ID chỉ định
 async function getCustomerQuotes(req, res, next) {
     try {
         const { id } = req.params;

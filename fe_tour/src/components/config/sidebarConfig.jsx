@@ -43,8 +43,7 @@ export const SIDEBAR_CONFIG = [
     children: [
       { label: 'Thông tin chi tiết tour', path: '/tours', permissions: ['tours.view'] },
       { label: 'Quản lý phiên bản tour', path: '/tour-versions', permissions: ['toursVersion.manage'] },
-      { label: 'Tạo nhanh báo giá', path: '/quotes', permissions: ['quotes.manage'] },
-      { label: 'Mã QR & Link đặt tour', path: '/admin/tours/qr', permissions: ['tours.share'] }
+      { label: 'Tạo nhanh báo giá', path: '/quotes', permissions: ['quotes.manage'] }
     ]
   },
   {
@@ -87,10 +86,10 @@ export const SIDEBAR_CONFIG = [
     allowedRoles: [ROLES.ADMIN],
     permissions: ['finance.transactions', 'finance.debts'],
     children: [
-      { label: 'Theo dõi thu - chi', path: '/admin/finance/transactions', permissions: ['finance.transactions'] },
-      { label: 'Công nợ phải thu/trả', path: '/admin/finance/debts', permissions: ['finance.debts'] },
-      { label: 'Lịch sử thanh toán', path: '/admin/finance/payments', permissions: ['finance.payments'] },
-      { label: 'Báo cáo lãi lỗ', path: '/admin/finance/pnl', permissions: ['finance.pnl'] }
+      { label: 'Theo dõi thu - chi', path: '/finance/transactions', permissions: ['finance.transactions'] },
+      { label: 'Công nợ phải thu/trả', path: '/finance/debts', permissions: ['finance.debts'] },
+      { label: 'Lịch sử thanh toán', path: '/finance/payments', permissions: ['finance.payments'] },
+      { label: 'Báo cáo lãi lỗ', path: '/finance/pnl', permissions: ['finance.pnl'] }
     ]
   },
   {

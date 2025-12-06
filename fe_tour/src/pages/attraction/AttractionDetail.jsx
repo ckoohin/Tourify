@@ -7,24 +7,23 @@ import {
   Edit, 
   Phone, 
   Mail,
-  // --- Icons mới được thêm vào ---
-  User,           // Cho Người liên hệ
-  MapPin,         // Cho Địa chỉ
-  Tag,            // Cho Dịch vụ
-  FileText,       // Cho Hợp đồng
-  Calendar,       // Cho Ngày tháng
-  Ticket,         // Cho Booking
-  CalendarCheck   // Cho Lịch sử Booking
+  User,         
+  MapPin,         
+  Tag,            
+  FileText,       
+  Calendar,      
+  Ticket,         
+  CalendarCheck   
 } from 'lucide-react';
 import StatusBadge from '../../components/ui/StatusBadge';
-import { formatCurrency } from '../../utils/formatters'; // 👈 Cần import hàm này
+import { formatCurrency } from '../../utils/formatters'; 
 
 export default function AttractionDetail() {
   const { id } = useParams();
   const [attraction, setAttraction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('services'); // 'services', 'contracts', 'bookings'
+  const [activeTab, setActiveTab] = useState('services'); 
 
   // API 4: Lấy dữ liệu chi tiết
   useEffect(() => {

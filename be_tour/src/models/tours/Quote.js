@@ -1,6 +1,5 @@
 const { query, getConnection } = require("../../config/db");
 
-// Lấy tất cả báo giá của customer ID chỉ định
 async function getAllQuotesByCustomerId(id) {
     try {
         let params = [id];
