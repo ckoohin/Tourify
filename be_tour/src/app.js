@@ -25,6 +25,8 @@ const tourPriceRoutes = require("./routes/tours/tourPriceRoutes.js");
 const tourDepartureRoutes = require("./routes/tours/tourDepartureRoutes.js");
 const tourExpenseRoutes = require("./routes/tours/tourExpenseRoutes.js");
 const tourLogRoutes = require("./routes/tours/tourLogRoutes.js");
+const tourItineraryRoutes = require("./routes/tours/tourItineraryRoutes");
+const tourPolicyRoutes = require("./routes/tours/tourPolicyRoutes");
 const customerRoutes = require("./routes/authentication/customer.js");
 const bookingRoutes = require("./routes/bookings/booking.js");
 const serviceBookingRoutes = require("./routes/bookings/serviceBookingRoutes.js");
@@ -32,6 +34,10 @@ const bookingStatusHistoryRoutes = require("./routes/bookings/bookingStatusHisto
 const uploadRoutes = require("./routes/settings/upload.routes.js");
 const dashboardRoutes = require("./routes/dashboard/dashboard.js");
 const quoteRoutes = require("./routes/tours/quoteRoutes");
+const transactionRoutes = require("./routes/financial/transactionRoutes.js");
+const debtRoutes = require("./routes/financial/debtRoutes.js");
+const reportRoutes = require("./routes/financial/reportRoutes.js");
+
 
 const app = express();
 
@@ -70,6 +76,8 @@ app.use("/api/v1/tours-price", tourPriceRoutes);
 app.use("/api/v1/departures", tourDepartureRoutes);
 app.use("/api/v1/tour-expenses", tourExpenseRoutes);
 app.use("/api/v1/tour-logs", tourLogRoutes);
+app.use("/api/v1/tour-itineraries", tourItineraryRoutes);
+app.use("/api/v1/tour-policies", tourPolicyRoutes);
 app.use("/api/v1/quotes", quoteRoutes);
 app.use("/api/v1/roles", roleRoutes);
 app.use("/api/v1/permissions", permissionRoutes);
@@ -80,6 +88,9 @@ app.use("/api/v1/service-bookings", serviceBookingRoutes);
 app.use("/api/v1/bookingStatusHistory", bookingStatusHistoryRoutes);
 app.use("/api/v1/uploads", uploadRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/transactions", transactionRoutes);
+app.use("/api/v1/debts", debtRoutes);
+app.use("/api/v1/reports", reportRoutes);
 
 app.get("/health", (req, res) => {
     res.json({

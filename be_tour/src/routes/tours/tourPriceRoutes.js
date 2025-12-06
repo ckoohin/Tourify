@@ -10,7 +10,15 @@ const {
     createTourPrice,
     updateTourPrice,
     deleteTourPriceFromController,
+    getAllPriceByTourVersionIdFromController
 } = require("../../controllers/tours/tourPriceController.js");
+
+router.get(
+    "/tour-version/:id",
+    authenticate,
+    authorize("toursPrice.manage"),
+    getAllPriceByTourVersionIdFromController
+);
 
 router.get(
     "/:id",

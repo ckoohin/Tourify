@@ -1,5 +1,17 @@
 const { query, getConnection } = require("../../config/db");
 
+async function getAllQuotesByCustomerId(customerId) {
+    try {
+        let params = [customerId];
+        const sql = `SELECT * FROM quotes WHERE customer_id=? AND status='sent'`;
+        const quotes = await query(sql, params);
+        return quotes;
+    } catch (error) {
+        throw error;
+    }
+}
+
+
 async function calculateQuotePrice(data) {
     const {
         tour_version_id,
@@ -311,5 +323,6 @@ module.exports = {
     getQuoteById,
     updateQuoteStatus,
     getAllQuotes,
-    calculateQuotePrice
+    calculateQuotePrice,
+    getAllQuotesByCustomerId
 };

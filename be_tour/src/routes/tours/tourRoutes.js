@@ -15,6 +15,10 @@ const {
     generateTourQRAndUrl,
 } = require("../../controllers/tours/tourController.js");
 
+const TransactionController = require("../../controllers/financial/transactionController.js");
+const AuthMiddleware = require("../../middleware/authMiddleware");
+
+
 router.get(
     "/search/",
     authenticate,
@@ -272,6 +276,13 @@ router.post(
             .withMessage("Slug tối đa 255 ký tự"),
     ],
     cloneTour
+);
+
+router.get(
+  '/:tour_departure_id/summary',
+  AuthMiddleware.authenticate,
+  authorize('reports.view'),
+  TransactionController.getTourTransactionSummary
 );
 
 module.exports = router;

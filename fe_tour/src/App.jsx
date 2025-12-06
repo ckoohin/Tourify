@@ -24,8 +24,6 @@ import AttractionCreate from './pages/attraction/AttractionCreate.jsx';
 import AttractionDetail from './pages/attraction/AttractionDetail.jsx';
 import AttractionEdit from './pages/attraction/AttractionEdit.jsx';
 import BookingList from './pages/booking/BookingList';
-import BookingCreate from './pages/booking/BookingCreate';
-import BookingDetail from './pages/booking/BookingDetail';
 import CustomerList from './pages/customer/CustomerList';
 import CustomerDetail from './pages/customer/CustomerDetail';
 import StaffList from './pages/staff/StaffList';
@@ -45,6 +43,7 @@ import QuoteList from './pages/quote/QuoteList';
 import DepartureList from './pages/operation/DepartureList';
 import DepartureDetail from './pages/operation/DepartureDetail';
 import ServiceList from './components/operations/service/ServiceList.jsx';
+import FinancialPage from './pages/financial/FinancialPage.jsx';
 
 // ... import other pages
 
@@ -80,8 +79,6 @@ function App() {
             
             {/* Booking Management */}
             <Route path="/bookings" element={<BookingList />} />
-            <Route path="/bookings/create" element={<BookingCreate />} />
-            <Route path="/bookings/:id" element={<BookingDetail />} />
             <Route path="/booking-kanban" element={<BookingKanban />} />
             <Route path="/bookings-services" element={<ServiceList />} />
             
@@ -112,6 +109,13 @@ function App() {
             
             {/* Reports */}
             <Route path="/reports" element={<Reports />} />
+            <Route path="/finance/transactions" element={<FinancialPage />} />
+            
+            {/* Schedule Management */}
+            <Route path="/schedules" element={<SchedulePage />} />
+            <Route path="/schedules/create" element={<ScheduleCreate />} />
+            <Route path="/schedules/:id" element={<ScheduleDetail />} />
+
             
             {/* Settings */}
             <Route path="/settings" element={<Settings />} />

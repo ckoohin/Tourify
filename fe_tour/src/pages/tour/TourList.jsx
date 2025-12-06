@@ -5,8 +5,6 @@ import toast from 'react-hot-toast';
 import tourService from '../../services/api/tourService';
 import TourTable from '../../components/tours/TourTable';
 import TourFilter from '../../components/tours/TourFilter';
-// [FIX 1] Bỏ import Modal vì TourForm đã tự xử lý giao diện Modal
-// import Modal from '../../components/ui/Modal'; 
 import TourForm from '../../components/tours/TourForm';
 
 import { showDeleteConfirm } from '../../components/config/toast';

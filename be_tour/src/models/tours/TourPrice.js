@@ -11,6 +11,17 @@ async function getAll() {
     }
 }
 
+async function getAllPriceByTourVersionId(id) {
+    try {
+        let params = [id];
+        const sql = `SELECT id, tour_version_id, price_type, price FROM tour_prices WHERE tour_version_id=?`;
+        const tourPrices = await query(sql, params);
+        return tourPrices;
+    } catch (error) {
+        throw error;
+    }
+}
+
 async function getById(id) {
     try {
         let params = [id];
@@ -114,4 +125,5 @@ module.exports = {
     create: create,
     update: update,
     deleteTourPrice: deleteTourPrice,
+    getAllPriceByTourVersionId: getAllPriceByTourVersionId
 };

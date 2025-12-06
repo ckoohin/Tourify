@@ -9,7 +9,8 @@ const {
     getQuoteHandler,
     listQuotesHandler,
     updateStatusHandler,
-    calculatePriceHandler
+    calculatePriceHandler,
+    getAllQuotesByCustomerIds
 } = require("../../controllers/tours/quoteController");
 
 router.get(
@@ -17,6 +18,13 @@ router.get(
     authenticate,
     authorize("quotes.manage"),
     listQuotesHandler
+);
+
+router.get(
+    "/customer-id/:id",
+    authenticate,
+    authorize("quotes.manage"),
+    getAllQuotesByCustomerIds
 );
 
 router.get(
