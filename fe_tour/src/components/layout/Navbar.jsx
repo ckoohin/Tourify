@@ -28,7 +28,8 @@ const BREADCRUMB_NAMES = {
   'providers': 'Nhà cung cấp',
   'reports': 'Báo cáo',
   'settings': 'Cài đặt',
-  'staff': 'Nhân viên'
+  'staff': 'Nhân viên',
+  'quotes': 'Tạo báo giá'
 };
 
 const Breadcrumbs = () => {

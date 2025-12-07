@@ -632,8 +632,6 @@ const TourForm = ({
                                 <option value="1">Tour thiết kế riêng</option>
                             </select>
                         </div>
-                        <InputGroup label="QR Code URL" name="qr_code" value={formData.qr_code} onChange={handleChange} />
-                        <div className="md:col-span-2"><InputGroup label="Booking URL" name="booking_url" value={formData.booking_url} onChange={handleChange} /></div>
                     </div>
                 </div>
 

@@ -44,7 +44,6 @@ export const SIDEBAR_CONFIG = [
       { label: 'Thông tin chi tiết tour', path: '/tours', permissions: ['tours.view'] },
       { label: 'Quản lý phiên bản tour', path: '/tour-versions', permissions: ['toursVersion.manage'] },
       { label: 'Tạo nhanh báo giá', path: '/quotes', permissions: ['quotes.manage'] },
-      { label: 'Mã QR & Link đặt tour', path: '/admin/tours/qr', permissions: ['tours.share'] }
     ]
   },
   {
@@ -79,14 +78,10 @@ export const SIDEBAR_CONFIG = [
   {
     label: 'Tài chính & Công nợ',
     icon: Wallet,
+    path: '/finance/transactions',
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['finance.transactions', 'finance.debts'],
-    children: [
-      { label: 'Theo dõi thu - chi', path: '/finance/transactions', permissions: ['finance.transactions'] },
-      { label: 'Công nợ phải thu/trả', path: '/finance/debts', permissions: ['finance.debts'] },
-      { label: 'Lịch sử thanh toán', path: '/finance/payments', permissions: ['finance.payments'] },
-      { label: 'Báo cáo lãi lỗ', path: '/finance/pnl', permissions: ['finance.pnl'] }
-    ]
+    permissions: ['finance.transactions', 'finance.debts', 'finance.payments'],
+    children: []
   },
   {
     label: 'Quản lý Nhân sự',
@@ -106,7 +101,7 @@ export const SIDEBAR_CONFIG = [
     permissions: ['suppliers.manage'],
     children: [
       { label: 'Danh sách đối tác', path: '/providers', permissions: ['suppliers.manage'] },
-      { label: 'Đánh giá chất lượng', path: '/admin/suppliers/ratings', permissions: ['suppliers.ratings'] },
+      { label: 'Đánh giá chất lượng', path: '/operations/supplier-ratings', permissions: ['suppliers.ratings'] },
       { label: 'Quản lý hợp đồng', path: '/admin/suppliers/contracts', permissions: ['suppliers.contracts'] }
     ]
   },
@@ -145,29 +140,6 @@ export const SIDEBAR_CONFIG = [
     ]
   },
   {
-    label: 'Quản lý Khách đoàn',
-    icon: Users,
-    allowedRoles: [ROLES.GUIDE],
-    permissions: ['guide.guests'],
-    children: [
-      { label: 'Danh sách khách', path: '/guide/guests', permissions: ['guide.guests'] },
-      { label: 'Xem yêu cầu đặc biệt', path: '/guide/guests/requests', permissions: ['guide.guest_requests'] },
-      { label: 'Xác nhận Check-in', path: '/guide/guests/checkin', permissions: ['guide.checkin'] }
-    ]
-  },
-  {
-    label: 'Quản lý Nhật ký Tour',
-    icon: FileText,
-    allowedRoles: [ROLES.GUIDE],
-    permissions: ['guide.daily_log', 'guide.incidents'],
-    children: [
-      { label: 'Cập nhật diễn biến ngày', path: '/guide/logs/daily', permissions: ['tours.edit'] },
-      { label: 'Ghi nhận sự cố & xử lý', path: '/guide/logs/incidents', permissions: ['guide.incidents'] },
-      { label: 'Ghi nhận phản hồi khách', path: '/guide/logs/feedbacks', permissions: ['guide.feedbacks'] },
-      { label: 'Tải lên hình ảnh thực tế', path: '/guide/logs/gallery', permissions: ['guide.gallery'] }
-    ]
-  },
-  {
     label: 'Đánh giá',
     icon: Star,
     allowedRoles: [ROLES.GUIDE],
@@ -181,17 +153,6 @@ export const SIDEBAR_CONFIG = [
   // 3. VAI TRÒ: NHÀ CUNG CẤP (SUPPLIER)
   // =================================================================
   {
-    label: 'Dịch vụ & Báo giá',
-    icon: Briefcase,
-    allowedRoles: [ROLES.SUPPLIER],
-    permissions: ['supplier.quotes', 'supplier.services'],
-    children: [
-      { label: 'Gửi báo giá', path: '/supplier/quotes', permissions: ['supplier.quotes'] },
-      { label: 'Cập nhật dịch vụ', path: '/supplier/services', permissions: ['supplier.services'] },
-      { label: 'Xác nhận booking', path: '/supplier/bookings', permissions: ['supplier.bookings'] }
-    ]
-  },
-  {
     label: 'Quản lý hợp đồng',
     icon: FileCheck,
     allowedRoles: [ROLES.SUPPLIER],
@@ -201,15 +162,4 @@ export const SIDEBAR_CONFIG = [
       { label: 'Gửi hồ sơ liên quan (hóa đơn)', path: '/supplier/documents', permissions: ['supplier.documents'] }
     ]
   },
-  {
-    label: 'Quản lý công nợ - thanh toán',
-    icon: Wallet,
-    allowedRoles: [ROLES.SUPPLIER],
-    permissions: ['supplier.debts'],
-    children: [
-      { label: 'Xem công nợ hiện tại', path: '/supplier/debts', permissions: ['supplier.debts'] },
-      { label: 'Xem lịch sử thanh toán', path: '/supplier/payment-history', permissions: ['supplier.payment_history'] },
-      { label: 'Gửi xác nhận thanh toán', path: '/supplier/payment-confirm', permissions: ['supplier.payment_confirm'] }
-    ]
-  }
 ];

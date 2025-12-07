@@ -106,7 +106,7 @@ function App() {
             <Route path="/providers" element={<ProviderList />} />
             <Route path="/providers/create" element={<ProviderCreate />} />
             <Route path="/providers/:id/edit" element={<ProviderEdit />} />
-            
+           
             {/* Reports */}
             <Route path="/reports" element={<Reports />} />
             <Route path="/finance/transactions" element={<FinancialPage />} />

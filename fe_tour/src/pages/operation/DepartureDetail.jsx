@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Users, Bus, Receipt, FileText, UserCog, 
   Clock, MapPin, AlertCircle, Edit, ArrowLeft,
-  CheckCircle, XCircle, PlayCircle
+  CheckCircle, PlayCircle, Star, ChevronDown, RefreshCcw, Lock // [NEW] Import icon Lock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -11,13 +11,15 @@ import toast from 'react-hot-toast';
 import departureService from '../../services/api/departureService';
 
 // Components
-import DepartureStatusBadge from '../../components/operations/DepartureStatusBadge';
+import DepartureStatusBadge, { STATUS_CONFIG } from '../../components/operations/DepartureStatusBadge';
 import DepartureFormModal from '../../components/operations/DepartureFormModal'; 
 import GuestList from '../../components/operations/GuestList';
 import ServiceList from '../../components/operations/service/ServiceList';
 import StaffAssignmentManager from '../../components/operations/staff/StaffAssignmentManager';
 import TourLogList from '../../components/operations/log/TourLogList';
 import TourExpenseManager from '../../components/operations/expenses/TourExpenseManager';
+
+import TourSupplierList from '../../components/suppliers/ratings/TourSupplierList';
 
 const DepartureDetail = () => {
   const { id } = useParams();
@@ -29,10 +31,24 @@ const DepartureDetail = () => {
   const [activeTab, setActiveTab] = useState('guests');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // 1. Hàm load dữ liệu (Dùng useCallback để truyền xuống component con)
+  // State cho dropdown trạng thái
+  const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
+  const statusMenuRef = useRef(null);
+
+  // Close status menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (statusMenuRef.current && !statusMenuRef.current.contains(event.target)) {
+        setIsStatusMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // 1. Hàm load dữ liệu chi tiết Departure
   const fetchDepartureDetail = useCallback(async () => {
     try {
-        // Không set loading=true ở đây để tránh nháy màn hình khi refresh ngầm
         const res = await departureService.getById(id);
         if (res.success) {
             setDeparture(res.data);
@@ -47,7 +63,7 @@ const DepartureDetail = () => {
     }
   }, [id]);
 
-  // Load lần đầu
+  // Load dữ liệu khi mount
   useEffect(() => {
     setLoading(true);
     fetchDepartureDetail();
@@ -55,11 +71,14 @@ const DepartureDetail = () => {
 
   // 2. Xử lý cập nhật trạng thái nhanh
   const handleStatusChange = async (newStatus) => {
-      if(!window.confirm(`Bạn có chắc chắn muốn chuyển trạng thái sang "${newStatus}"?`)) return;
+      const statusLabel = STATUS_CONFIG[newStatus]?.label || newStatus;
+      if(!window.confirm(`Bạn có muốn thay đổi trạng thái thành "${statusLabel}"?`)) return;
+      
       try {
           await departureService.updateStatus(id, newStatus);
-          toast.success(`Đã cập nhật trạng thái: ${newStatus}`);
+          toast.success(`Đã cập nhật trạng thái: ${statusLabel}`);
           fetchDepartureDetail();
+          setIsStatusMenuOpen(false);
       } catch (e) {
           toast.error("Lỗi cập nhật trạng thái");
       }
@@ -85,17 +104,27 @@ const DepartureDetail = () => {
       );
   }
 
-  // Xác định quyền hạn (Ví dụ: tour đã hủy/xong thì readonly)
-  const isReadOnly = departure.status === 'cancelled' || departure.status === 'completed';
+  const isReadOnly = false; 
 
-  // Config cho Tabs
   const TABS = [
       { id: 'guests', label: 'Danh sách Khách', icon: Users, count: departure.confirmed_guests },
       { id: 'services', label: 'Dịch vụ & Vận chuyển', icon: Bus, count: (departure.service_bookings?.length || 0) + (departure.transports?.length || 0) },
       { id: 'staff', label: 'Nhân sự', icon: UserCog, count: departure.staff_assignments?.length },
       { id: 'logs', label: 'Nhật ký Tour', icon: FileText },
       { id: 'expenses', label: 'Chi phí & Quyết toán', icon: Receipt },
+      { id: 'ratings', label: 'Đánh giá NCC', icon: Star }, 
   ];
+
+  // Tính toán % tiến độ bán tour
+  const currentGuests = departure.confirmed_guests || 0;
+  const maxGuests = departure.max_guests || 1;
+  const progressPercent = Math.round((currentGuests / maxGuests) * 100);
+
+  const getProgressColor = () => {
+      if (progressPercent >= 100) return 'bg-red-500';
+      if (progressPercent >= 80) return 'bg-orange-500';
+      return 'bg-blue-600';
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 pb-10">
@@ -137,19 +166,37 @@ const DepartureDetail = () => {
                 <div className="flex items-center gap-3">
                     {!isReadOnly && (
                         <>
-                            {departure.status === 'scheduled' && (
-                                <button onClick={() => handleStatusChange('confirmed')} className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-100 flex items-center gap-1.5 transition-colors">
-                                    <CheckCircle size={16}/> Chốt Tour
+                            <div className="relative" ref={statusMenuRef}>
+                                <button 
+                                    onClick={() => setIsStatusMenuOpen(!isStatusMenuOpen)}
+                                    className="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 flex items-center gap-1.5 transition-colors shadow-sm"
+                                >
+                                    <RefreshCcw size={16} className="text-blue-600"/>
+                                    <span>Cập nhật trạng thái</span>
+                                    <ChevronDown size={14} className={`transition-transform ${isStatusMenuOpen ? 'rotate-180' : ''}`}/>
                                 </button>
-                            )}
-                            {departure.status === 'confirmed' && (
-                                <button onClick={() => handleStatusChange('in_progress')} className="px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-100 flex items-center gap-1.5 transition-colors">
-                                    <PlayCircle size={16}/> Khởi hành
-                                </button>
-                            )}
+
+                                {isStatusMenuOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                                        {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                                            <button
+                                                key={key}
+                                                onClick={() => handleStatusChange(key)}
+                                                disabled={departure.status === key}
+                                                className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-slate-50 transition-colors ${departure.status === key ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-700'}`}
+                                            >
+                                                <span className={`w-2 h-2 rounded-full ${config.color.split(' ')[0].replace('bg-', 'bg-').replace('border-', 'bg-')}`}></span>
+                                                {config.label}
+                                                {departure.status === key && <CheckCircle size={14} className="ml-auto"/>}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
                             <button 
                                 onClick={() => setIsEditModalOpen(true)}
-                                className="px-3 py-1.5 border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 flex items-center gap-1.5 transition-colors"
+                                className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm flex items-center gap-1.5 transition-colors"
                             >
                                 <Edit size={16}/> Sửa thông tin
                             </button>
@@ -158,16 +205,20 @@ const DepartureDetail = () => {
                 </div>
             </div>
 
-            {/* Progress Bar Số chỗ */}
+            {/* Progress Bar */}
             <div className="mt-4 max-w-md">
                 <div className="flex justify-between text-xs mb-1">
-                    <span className="text-slate-600 font-medium">Tiến độ bán: <b className="text-slate-900">{departure.confirmed_guests}</b> / {departure.max_guests} khách</span>
-                    <span className="text-slate-500">{Math.round((departure.confirmed_guests/departure.max_guests)*100)}%</span>
+                    <span className="text-slate-600 font-medium">
+                        Số lượng khách: <b className="text-slate-900">{currentGuests}</b> / {maxGuests} chỗ
+                    </span>
+                    <span className={`font-bold ${progressPercent >= 100 ? 'text-red-500' : 'text-blue-600'}`}>
+                        {progressPercent}%
+                    </span>
                 </div>
-                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
                     <div 
-                        className="h-full bg-blue-600 rounded-full transition-all duration-500" 
-                        style={{ width: `${Math.min((departure.confirmed_guests/departure.max_guests)*100, 100)}%` }}
+                        className={`h-full rounded-full transition-all duration-700 ease-out ${getProgressColor()}`}
+                        style={{ width: `${Math.min(progressPercent, 100)}%` }}
                     ></div>
                 </div>
             </div>
@@ -201,7 +252,6 @@ const DepartureDetail = () => {
 
       {/* --- CONTENT SECTION --- */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Notes Alert if exists */}
         {departure.notes && (
             <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3 text-sm text-amber-800">
                 <AlertCircle size={20} className="shrink-0 text-amber-600"/>
@@ -212,42 +262,31 @@ const DepartureDetail = () => {
         )}
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 min-h-[500px]">
-            {/* 1. GUESTS TAB */}
-            {activeTab === 'guests' && (
-                <GuestList 
-                    departureId={id} 
-                    maxGuests={departure.max_guests} // Có thể truyền xuống để hiển thị số chỗ còn trống
-                />
-            )}
-
-            {/* 2. SERVICES TAB */}
+            {activeTab === 'guests' && <GuestList departureId={id} maxGuests={departure.max_guests} />}
             {activeTab === 'services' && <ServiceList departureId={id} />}
-
-            {/* 3. STAFF TAB */}
-            {activeTab === 'staff' && (
-                <StaffAssignmentManager 
-                    departureId={id} 
-                    assignments={departure.staff_assignments || []} 
-                    onRefresh={fetchDepartureDetail} 
-                    departureStatus={departure.status}
-                    departureDates={{
-                        start: departure.departure_date,
-                        end: departure.return_date
-                    }}
-                />
-            )}
-
-            {/* 4. LOGS TAB */}
-            {activeTab === 'logs' && (
-                <TourLogList departureId={id} />
-            )}
-
-            {/* 5. EXPENSES TAB */}
-            {activeTab === 'expenses' && (
-                <TourExpenseManager 
-                    departureId={id} 
-                    isReadOnly={isReadOnly}
-                />
+            {activeTab === 'staff' && <StaffAssignmentManager departureId={id} assignments={departure.staff_assignments || []} onRefresh={fetchDepartureDetail} departureStatus={departure.status} departureDates={{start: departure.departure_date, end: departure.return_date}} />}
+            {activeTab === 'logs' && <TourLogList departureId={id} />}
+            {activeTab === 'expenses' && <TourExpenseManager departureId={id} isReadOnly={isReadOnly} />}
+            
+            {/* [UPDATED] Kiểm tra trạng thái Completed trước khi hiển thị Ratings */}
+            {activeTab === 'ratings' && (
+                departure.status === 'completed' ? (
+                    <TourSupplierList departureId={id} />
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-full py-20 text-center">
+                        <div className="p-4 bg-slate-50 rounded-full mb-3">
+                            <Lock size={32} className="text-slate-400" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-700">Chưa thể đánh giá</h3>
+                        <p className="text-slate-500 max-w-md mt-1 mb-4">
+                            Tính năng đánh giá nhà cung cấp chỉ khả dụng khi chuyến đi đã kết thúc. <br/>
+                            Vui lòng cập nhật trạng thái tour thành <span className="font-bold text-emerald-600">Hoàn thành</span> sau khi tour kết thúc.
+                        </p>
+                        <div className="text-xs text-slate-400 bg-slate-50 px-3 py-1 rounded border border-slate-200">
+                            Trạng thái hiện tại: <strong>{STATUS_CONFIG[departure.status]?.label || departure.status}</strong>
+                        </div>
+                    </div>
+                )
             )}
         </div>
       </main>

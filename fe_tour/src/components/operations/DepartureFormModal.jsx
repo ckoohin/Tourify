@@ -8,7 +8,7 @@ import departureService from '../../services/api/departureService';
 const DepartureFormModal = ({ isOpen, onClose, onSuccess, initialData }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    tour_version_id: '', // Cần dropdown chọn version
+    tour_version_id: '', 
     departure_date: '',
     return_date: '',
     departure_time: '08:00',

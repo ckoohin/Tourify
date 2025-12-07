@@ -1,11 +1,18 @@
 import api from './axios'; 
 
+const getApiBaseUrl = () => {
+    let apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+    if (apiBase.endsWith('/api/v1')) {
+        apiBase = apiBase.replace('/api/v1', '');
+    }
+    return apiBase;
+};
+
 const tourService = {
   // =================================================================
   // 1. QUẢN LÝ TOUR (Cơ bản)
   // =================================================================
   getTours: (params = {}) => {
-    // Hỗ trợ tìm kiếm và lọc
     if (params.keyword) {
       return api.get('/tours/search/', { params: { keyword: params.keyword } });
     }
@@ -37,8 +44,6 @@ const tourService = {
   // =================================================================
   // 4. QUẢN LÝ PHIÊN BẢN TOUR (VERSIONS)
   // =================================================================
-  // Lấy danh sách version của 1 tour
-  // BE: tourVersionController trả về { data: { tourVersions: [] } }
   getVersions: (tourId) => api.get('/tours-version', { params: { tour_id: tourId } }),
   
   createVersion: (data) => api.post('/tours-version', data),
@@ -52,7 +57,6 @@ const tourService = {
   // =================================================================
   getPrices: (params) => api.get('/tours-price', { params }),
 
-  // [MỚI] Hàm gọi API lấy giá theo version ID (Khớp với route BE /tour-version/:id)
   getPricesByVersion: (versionId) => api.get(`/tours-price/tour-version/${versionId}`),
   
   getPriceById: (id) => api.get(`/tours-price/${id}`),
@@ -120,7 +124,27 @@ const tourService = {
 
   updatePolicyOrder: (id, order) => {
     return api.patch(`/tour-policies/${id}/display-order`, { display_order: order });
+  },
+
+/**
+   * Helper: Lấy đường dẫn đầy đủ của ảnh QR Code
+   * Backend lưu đường dẫn tương đối (vd: /qrcodes/abc.png) trong DB
+   */
+  getQrCodeImageUrl: (qrCodePath) => {
+      if (!qrCodePath) return null;
+      // Nếu đã là link đầy đủ (http...) thì trả về luôn, nếu không thì ghép với API URL
+      if (qrCodePath.startsWith('http')) return qrCodePath;
+      return `${getApiBaseUrl()}${qrCodePath}`;
+  },
+
+  /**
+   * Helper: Lấy Booking URL từ dữ liệu tour
+   * Ưu tiên lấy từ DB vì Backend đã sinh ra và lưu chính xác
+   */
+  getBookingUrl: (tour) => {
+      return tour?.booking_url || '';
   }
+
 };
 
 export default tourService;

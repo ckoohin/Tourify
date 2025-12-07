@@ -15,18 +15,14 @@ const BookingDetailModal = ({ isOpen, onClose, booking }) => {
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
-  // Hàm phân tích cú pháp internal_notes để lấy lịch sử và ảnh
   const parseHistory = (notes) => {
     if (!notes) return [];
-    // Chỉ lấy các dòng bắt đầu bằng dấu [ (Format do mình quy định khi lưu log)
     return notes.split('\n')
         .filter(line => line.trim().startsWith('['))
         .map(line => {
-            // Regex để tách URL ảnh: tìm chuỗi bắt đầu bằng http/https sau từ khóa "Ảnh: "
             const imgMatch = line.match(/Ảnh: (https?:\/\/[^\s]+)/);
             const imgUrl = imgMatch ? imgMatch[1] : null;
             
-            // Làm sạch text hiển thị: Xóa phần URL ảnh đi cho gọn
             let text = line;
             if (imgUrl) {
                 text = text.replace(`Ảnh: ${imgUrl}`, '').trim();
@@ -34,12 +30,11 @@ const BookingDetailModal = ({ isOpen, onClose, booking }) => {
                 text = text.replace('Ảnh: Không', '').trim();
             }
             
-            // Xóa dấu chấm hoặc khoảng trắng thừa ở cuối
             if (text.endsWith('.')) text = text.slice(0, -1);
 
             return { text, imgUrl };
         })
-        .reverse(); // Đảo ngược để đưa lịch sử mới nhất lên đầu
+        .reverse(); 
   };
 
   const histories = parseHistory(booking.internal_notes);
