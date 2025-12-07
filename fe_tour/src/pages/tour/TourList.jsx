@@ -206,7 +206,6 @@ const TourList = () => {
         </>
       )}
 
-      {/* [FIX 4] Render TourForm trực tiếp, không bọc Modal nữa */}
       <TourForm 
         isOpen={isModalOpen} 
         onClose={handleCloseModal}

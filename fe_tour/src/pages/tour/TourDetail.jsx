@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Edit, MapPin, Clock, Users, 
   Tag, Globe, Image as ImageIcon,
-  FileText, Layers
+  FileText, Layers, QrCode, Link as LinkIcon, Copy, ExternalLink, Download // [NEW] Import thêm icon
 } from 'lucide-react';
 import toast from 'react-hot-toast'; 
 import tourService from '../../services/api/tourService';
@@ -20,6 +20,7 @@ const TourDetail = () => {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState('');
   
+  // Tabs State
   const [activeTab, setActiveTab] = useState('overview'); 
   const [defaultVersionId, setDefaultVersionId] = useState(null);
 
@@ -28,6 +29,7 @@ const TourDetail = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [categories, setCategories] = useState([]);
 
+  // Fetch Categories & Tour Data
   const fetchData = async () => {
     try {
         const [catRes, tourRes] = await Promise.all([
@@ -81,8 +83,19 @@ const TourDetail = () => {
     return typeof imgItem === 'string' ? imgItem : imgItem.url;
   };
 
+  // [NEW] Helper Copy Link
+  const handleCopyLink = (text) => {
+      if(!text) return;
+      navigator.clipboard.writeText(text);
+      toast.success("Đã sao chép liên kết!");
+  };
+
   if (loading) return <div className="flex justify-center items-center h-screen text-slate-500">Đang tải dữ liệu...</div>;
   if (!tour) return <div className="flex justify-center items-center h-screen text-slate-500">Không tìm thấy tour.</div>;
+
+  // [NEW] Lấy thông tin QR và URL
+  const bookingUrl = tourService.getBookingUrl(tour);
+  const qrCodeUrl = tourService.getQrCodeImageUrl(tour.qr_code);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -141,10 +154,9 @@ const TourDetail = () => {
                 <Clock className="shrink-0 mt-0.5" size={18}/>
                 <div>
                   <p className="font-bold mb-1">Đang quản lý lịch trình của Phiên bản Mặc định (ID: {defaultVersionId || '...'})</p>
-                  <p className="opacity-90">Những thay đổi tại đây sẽ áp dụng cho phiên bản chính của tour. Nếu tour có nhiều phiên bản (theo mùa, lễ tết), vui lòng chọn phiên bản cụ thể ở tab "Phiên bản & Giá".</p>
+                  <p className="opacity-90">Những thay đổi tại đây sẽ áp dụng cho phiên bản chính của tour.</p>
                 </div>
              </div>
-             
              <TourItineraryManager 
                 key={`itinerary-${refreshKey}`} 
                 tourVersionId={defaultVersionId} 
@@ -229,7 +241,71 @@ const TourDetail = () => {
             {renderTabContent()}
         </div>
 
+        {/* Sidebar Info */}
         <div className="space-y-6">
+          
+          {/* [NEW] Box: Chia sẻ & QR Code */}
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b flex items-center gap-2">
+                <QrCode size={18} className="text-purple-600"/> Chia sẻ Tour
+            </h3>
+            
+            <div className="flex flex-col items-center mb-6">
+                <div className="w-40 h-40 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center p-2 mb-2 relative group overflow-hidden">
+                    {qrCodeUrl ? (
+                        <>
+                            <img src={qrCodeUrl} alt="QR Code" className="w-full h-full object-contain" />
+                            <a 
+                                href={qrCodeUrl} 
+                                download={`QR-${tour.code}.png`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                <Download size={24} />
+                                <span className="text-xs font-medium mt-1">Tải xuống</span>
+                            </a>
+                        </>
+                    ) : (
+                        <span className="text-xs text-slate-400 text-center px-2">Chưa có QR. Vui lòng cập nhật tour.</span>
+                    )}
+                </div>
+            </div>
+
+            <div>
+                <label className="text-xs font-bold text-slate-500 uppercase mb-1.5 block flex items-center gap-1">
+                    <LinkIcon size={12}/> Link đặt tour
+                </label>
+                <div className="flex gap-2">
+                    <input 
+                        type="text" 
+                        readOnly 
+                        value={bookingUrl} 
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600 font-mono focus:outline-none truncate"
+                    />
+                    <button 
+                        onClick={() => handleCopyLink(bookingUrl)}
+                        className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors"
+                        title="Sao chép"
+                    >
+                        <Copy size={16}/>
+                    </button>
+                    {bookingUrl && (
+                        <a 
+                            href={bookingUrl} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="p-2 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors"
+                            title="Mở link"
+                        >
+                            <ExternalLink size={16}/>
+                        </a>
+                    )}
+                </div>
+            </div>
+          </div>
+
+          {/* Existing General Info Box */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 sticky top-6">
             <h3 className="font-bold text-slate-800 mb-5 pb-2 border-b">Thông tin chung</h3>
             <ul className="space-y-5 text-sm">

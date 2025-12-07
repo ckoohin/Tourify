@@ -56,6 +56,7 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
   async function getNameAndAllPriceByTourVerSionId(id) {
     const resPrice = await tourService.getPricesByVersion(id);
     const resTourVersionInFo = await tourService.getVersionById(id);
+    console.log(resTourVersionInFo);
     setListPrices(resPrice.data.tourPrices);
     setTourVersionName(resTourVersionInFo.data.tourVersion[0].name);
   }

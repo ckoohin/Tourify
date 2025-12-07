@@ -16,13 +16,6 @@ import TourDetail from './pages/tour/TourDetail';
 import TourCreate from './pages/tour/TourCreate';
 import TourEdit from './pages/tour/TourEdit';
 import CategoryList from './pages/categories/CategoryList';
-import SchedulePage from './pages/schedule/SchedulePage.jsx';
-import ScheduleDetail from './pages/schedule/ScheduleDetail.jsx';
-import ScheduleCreate from './pages/schedule/ScheduleCreate.jsx';
-import AttractionList from './pages/attraction/AttractionList.jsx';
-import AttractionCreate from './pages/attraction/AttractionCreate.jsx';
-import AttractionDetail from './pages/attraction/AttractionDetail.jsx';
-import AttractionEdit from './pages/attraction/AttractionEdit.jsx';
 import BookingList from './pages/booking/BookingList';
 import CustomerList from './pages/customer/CustomerList';
 import CustomerDetail from './pages/customer/CustomerDetail';
@@ -44,6 +37,7 @@ import DepartureList from './pages/operation/DepartureList';
 import DepartureDetail from './pages/operation/DepartureDetail';
 import ServiceList from './components/operations/service/ServiceList.jsx';
 import FinancialPage from './pages/financial/FinancialPage.jsx';
+import FeedbackList from './pages/feedback/FeedbackList.jsx';
 
 // ... import other pages
 
@@ -106,17 +100,15 @@ function App() {
             <Route path="/providers" element={<ProviderList />} />
             <Route path="/providers/create" element={<ProviderCreate />} />
             <Route path="/providers/:id/edit" element={<ProviderEdit />} />
-            
+           
             {/* Reports */}
             <Route path="/reports" element={<Reports />} />
             <Route path="/finance/transactions" element={<FinancialPage />} />
-            
-            {/* Schedule Management */}
-            <Route path="/schedules" element={<SchedulePage />} />
-            <Route path="/schedules/create" element={<ScheduleCreate />} />
-            <Route path="/schedules/:id" element={<ScheduleDetail />} />
 
-            
+            {/* Feedback */}
+            <Route path="/feedbacks" element={<FeedbackList />} />
+
+
             {/* Settings */}
             <Route path="/settings" element={<Settings />} />
           </Route>

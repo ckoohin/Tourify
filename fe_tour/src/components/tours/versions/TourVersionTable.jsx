@@ -86,7 +86,7 @@ const TourVersionTable = ({ versions, tours, onEdit, onDelete }) => {
                                         }`}
                                         title="Quản lý bảng giá"
                                     >
-                                        <DollarSign size={14} />
+                                        
                                         <span className="hidden sm:inline">Bảng giá</span>
                                         {expandedId === ver.id ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}
                                     </button>

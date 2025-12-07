@@ -17,8 +17,6 @@ const GuestList = ({ departureId }) => {
     try {
       const res = await departureService.getGuests(departureId, { limit: 100 });
       if (res.success) {
-        // FIX: Xử lý an toàn để tránh guests bị undefined
-        // Kiểm tra xem dữ liệu nằm ở res.data hay res.data.data (do phân trang)
         const dataList = Array.isArray(res.data) ? res.data : (res.data?.data || []);
         setGuests(dataList);
       } else {
