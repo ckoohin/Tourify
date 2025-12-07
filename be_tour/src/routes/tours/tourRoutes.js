@@ -277,10 +277,10 @@ router.post(
 );
 
 router.get(
-  '/:tour_departure_id/summary',
-  AuthMiddleware.authenticate,
-  authorize('reports.view'),
-  TransactionController.getTourTransactionSummary
+    "/:tour_departure_id/summary",
+    AuthMiddleware.authenticate,
+    authorize("reports.view"),
+    TransactionController.getTourTransactionSummary
 );
 
 module.exports = router;
