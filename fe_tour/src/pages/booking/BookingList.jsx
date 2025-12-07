@@ -178,6 +178,7 @@ const BookingList = () => {
         onSubmit={handleSubmitForm}
         initialData={formModal.data}
         title={formModal.type === 'create' ? 'Tạo Booking Mới' : 'Cập nhật Booking'}
+        action = {formModal.type}
       />
     </div>
   );
