@@ -15,7 +15,6 @@ const StaffAssignmentManager = ({
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
 
-  // Status check: Không cho phép sửa nếu tour đã hủy hoặc hoàn thành
   const isReadOnly = departureStatus === 'cancelled' || departureStatus === 'completed';
 
   const handleCreate = () => {

@@ -43,6 +43,7 @@ const activityCheckinRoutes = require("./routes/tours/activityCheckinRoutes.js")
 const itineraryActivityRoutes = require("./routes/tours/itineraryActivityRoutes.js");
 const activityCheckinJob = require("./controllers/settings/activity.checkin.job.js");
 
+
 const app = express();
 
 app.use(express.static(path.join(__dirname, "public")));

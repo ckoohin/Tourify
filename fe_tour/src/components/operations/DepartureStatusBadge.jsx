@@ -1,6 +1,6 @@
 import React from 'react';
 
-const STATUS_CONFIG = {
+export const STATUS_CONFIG = {
   scheduled: { label: 'Dự kiến', color: 'bg-blue-100 text-blue-700 border-blue-200' },
   confirmed: { label: 'Chắc chắn', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
   in_progress: { label: 'Đang đi', color: 'bg-amber-100 text-amber-700 border-amber-200' },
