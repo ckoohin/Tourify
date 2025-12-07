@@ -42,7 +42,9 @@ const feedbackRoutes = require("./routes/feedback/feedbackRoutes.js");
 const activityCheckinRoutes = require("./routes/tours/activityCheckinRoutes.js");
 const itineraryActivityRoutes = require("./routes/tours/itineraryActivityRoutes.js");
 const activityCheckinJob = require("./controllers/settings/activity.checkin.job.js");
-
+const guestSpecialRequestRoutes = require("./routes/bookings/guestSpecialRequestRoutes.js");
+const tourTransportRoutes = require("./routes/tours/tourTransportRoutes.js");
+const transportGuestAssignmentRoutes = require("./routes/tours/transportGuestAssignmentRoutes.js");
 
 const app = express();
 
@@ -103,6 +105,9 @@ app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/feedbacks", feedbackRoutes);
 app.use("/api/v1/activity-checkins", activityCheckinRoutes);
 app.use("/api/v1/itinerary-activities", itineraryActivityRoutes);
+app.use("/api/v1/guest-special-requests", guestSpecialRequestRoutes);
+app.use("/api/v1/tour-transports", tourTransportRoutes);
+app.use("/api/v1/transport-guest-assignments", transportGuestAssignmentRoutes);
 
 app.get("/health", (req, res) => {
     res.json({
