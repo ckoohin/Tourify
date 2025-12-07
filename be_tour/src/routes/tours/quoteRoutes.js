@@ -10,29 +10,19 @@ const {
     listQuotesHandler,
     updateStatusHandler,
     calculatePriceHandler,
-    getAllQuotesByCustomerIds
+    getCustomerQuotes,
 } = require("../../controllers/tours/quoteController");
 
-router.get(
-    "/",
-    authenticate,
-    authorize("quotes.manage"),
-    listQuotesHandler
-);
+router.get("/", authenticate, authorize("quotes.manage"), listQuotesHandler);
 
 router.get(
     "/customer-id/:id",
     authenticate,
     authorize("quotes.manage"),
-    getAllQuotesByCustomerIds
+    getCustomerQuotes
 );
 
-router.get(
-    "/:id",
-    authenticate,
-    authorize("quotes.manage"),
-    getQuoteHandler
-);
+router.get("/:id", authenticate, authorize("quotes.manage"), getQuoteHandler);
 
 router.post(
     "/calculate",
@@ -98,7 +88,7 @@ router.put(
             .notEmpty()
             .withMessage("Trạng thái không được để trống")
             .isIn(["draft", "sent", "accepted", "rejected", "expired"])
-            .withMessage("Trạng thái không hợp lệ")
+            .withMessage("Trạng thái không hợp lệ"),
     ],
     updateStatusHandler
 );

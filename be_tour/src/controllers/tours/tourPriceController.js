@@ -5,7 +5,7 @@ const {
     create,
     update,
     deleteTourPrice,
-    getAllPriceByTourVersionId
+    getAllPriceByTourVersionId: getPrice,
 } = require("../../models/tours/TourPrice.js");
 
 async function getAllTourPrices(req, res, next) {
@@ -20,10 +20,10 @@ async function getAllTourPrices(req, res, next) {
     }
 }
 
-async function getAllPriceByTourVersionIdFromController(req, res, next) {
+async function getAllTourPricesByTourVersionId(req, res, next) {
     try {
         const { id } = req.params;
-        const tourPrices = await getAllPriceByTourVersionId(id);
+        const tourPrices = await getPrice(id);
         return res.json({
             success: true,
             data: { tourPrices },
@@ -132,5 +132,5 @@ module.exports = {
     createTourPrice: createTourPrice,
     updateTourPrice: updateTourPrice,
     deleteTourPriceFromController: deleteTourPriceFromController,
-    getAllPriceByTourVersionIdFromController: getAllPriceByTourVersionIdFromController
+    getAllTourPricesByTourVersionId: getAllTourPricesByTourVersionId,
 };

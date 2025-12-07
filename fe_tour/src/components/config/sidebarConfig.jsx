@@ -43,7 +43,9 @@ export const SIDEBAR_CONFIG = [
     children: [
       { label: 'Thông tin chi tiết tour', path: '/tours', permissions: ['tours.view'] },
       { label: 'Quản lý phiên bản tour', path: '/tour-versions', permissions: ['toursVersion.manage'] },
+
       { label: 'Tạo nhanh báo giá', path: '/quotes', permissions: ['quotes.manage'] },
+
     ]
   },
   {
@@ -140,13 +142,12 @@ export const SIDEBAR_CONFIG = [
     ]
   },
   {
-    label: 'Đánh giá',
+    label: 'Phản hồi & Đánh giá',
     icon: Star,
     allowedRoles: [ROLES.GUIDE],
+    path: '/Feedbacks',
     permissions: ['guide.ratings'],
-    children: [
-      { label: 'Gửi đánh giá dịch vụ', path: '/guide/ratings/create', permissions: ['guide.ratings'] }
-    ]
+    children: []
   },
 
   // =================================================================

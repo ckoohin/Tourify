@@ -99,6 +99,133 @@ class StaffAssignment {
       throw error;
     }
   }
+  
+  static async getAll({ 
+    page = 1, 
+    limit = 10, 
+    search,
+    role,
+    confirmed,
+    tour_departure_id,
+    staff_id,
+    date_from,
+    date_to,
+    status
+  }) {
+    try {
+      const offset = (page - 1) * limit;
+      let whereConditions = [];
+      let params = [];
+
+      if (search) {
+        whereConditions.push('(s.full_name LIKE ? OR s.staff_code LIKE ? OR td.departure_code LIKE ?)');
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      }
+
+      if (role) {
+        whereConditions.push('sa.role = ?');
+        params.push(role);
+      }
+
+      if (confirmed !== undefined) {
+        whereConditions.push('sa.confirmed = ?');
+        params.push(confirmed);
+      }
+
+      if (tour_departure_id) {
+        whereConditions.push('sa.tour_departure_id = ?');
+        params.push(tour_departure_id);
+      }
+
+      if (staff_id) {
+        whereConditions.push('sa.staff_id = ?');
+        params.push(staff_id);
+      }
+
+      if (date_from) {
+        whereConditions.push('td.departure_date >= ?');
+        params.push(date_from);
+      }
+
+      if (date_to) {
+        whereConditions.push('td.return_date <= ?');
+        params.push(date_to);
+      }
+
+      if (status) {
+        whereConditions.push('td.status = ?');
+        params.push(status);
+      }
+
+      const whereClause = whereConditions.length > 0 
+        ? 'WHERE ' + whereConditions.join(' AND ') 
+        : '';
+
+      const countSql = `
+        SELECT COUNT(*) as total
+        FROM staff_assignments sa
+        INNER JOIN staff s ON sa.staff_id = s.id
+        INNER JOIN tour_departures td ON sa.tour_departure_id = td.id
+        ${whereClause}
+      `;
+      const [countResult] = await query(countSql, params);
+      const total = countResult.total;
+
+      const sql = `
+        SELECT 
+          sa.id,
+          sa.tour_departure_id,
+          sa.staff_id,
+          sa.role,
+          sa.assignment_date,
+          sa.confirmed,
+          sa.confirmed_at,
+          sa.notes,
+          sa.created_at,
+          sa.updated_at,
+          s.staff_code,
+          s.full_name,
+          s.staff_type,
+          s.phone,
+          s.email,
+          td.departure_code,
+          td.departure_date,
+          td.return_date,
+          td.status as tour_status,
+          tv.name as version_name,
+          t.id as tour_id,
+          t.code as tour_code,
+          t.name as tour_name,
+          t.duration_days,
+          t.duration_nights,
+          u.name as created_by_name
+        FROM staff_assignments sa
+        INNER JOIN staff s ON sa.staff_id = s.id
+        INNER JOIN tour_departures td ON sa.tour_departure_id = td.id
+        INNER JOIN tour_versions tv ON td.tour_version_id = tv.id
+        INNER JOIN tours t ON tv.tour_id = t.id
+        LEFT JOIN users u ON sa.created_by = u.id
+        ${whereClause}
+        ORDER BY td.departure_date DESC, sa.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      params.push(limit, offset);
+
+      const assignments = await query(sql, params);
+
+      return {
+        data: assignments,
+        pagination: {
+          currentPage: page,
+          pageSize: limit,
+          totalItems: total,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 
   static async update(id, data) {
     try {

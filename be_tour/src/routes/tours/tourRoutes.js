@@ -14,10 +14,8 @@ const {
     cloneTour,
     generateTourQRAndUrl,
 } = require("../../controllers/tours/tourController.js");
-
 const TransactionController = require("../../controllers/financial/transactionController.js");
 const AuthMiddleware = require("../../middleware/authMiddleware");
-
 
 router.get(
     "/search/",

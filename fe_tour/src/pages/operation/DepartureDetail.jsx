@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Users, Bus, Receipt, FileText, UserCog, 
   Clock, MapPin, AlertCircle, Edit, ArrowLeft,
-  CheckCircle, PlayCircle, Star, ChevronDown, RefreshCcw, Lock // [NEW] Import icon Lock
+  CheckCircle, PlayCircle, Star, ChevronDown, RefreshCcw, Lock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -87,9 +87,9 @@ const DepartureDetail = () => {
   if (loading) {
       return (
         <div className="flex items-center justify-center min-h-screen bg-slate-50">
-            <div className="flex flex-col items-center">
-                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
-                <p className="text-slate-500 font-medium">Đang tải dữ liệu chuyến đi...</p>
+            <div className="flex flex-col items-center gap-3">
+                <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-slate-500 font-medium animate-pulse">Đang tải dữ liệu chuyến đi...</p>
             </div>
         </div>
       );
@@ -97,9 +97,13 @@ const DepartureDetail = () => {
 
   if (!departure) {
       return (
-        <div className="p-10 text-center">
+        <div className="p-10 text-center flex flex-col items-center justify-center min-h-[50vh]">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-400">
+                <AlertCircle size={32} />
+            </div>
             <h3 className="text-xl font-bold text-slate-700">Không tìm thấy chuyến đi</h3>
-            <button onClick={() => navigate(-1)} className="mt-4 text-blue-600 hover:underline">Quay lại</button>
+            <p className="text-slate-500 mt-2 mb-6">Chuyến đi này có thể đã bị xóa hoặc không tồn tại.</p>
+            <button onClick={() => navigate(-1)} className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">Quay lại danh sách</button>
         </div>
       );
   }
@@ -117,77 +121,82 @@ const DepartureDetail = () => {
 
   // Tính toán % tiến độ bán tour
   const currentGuests = departure.confirmed_guests || 0;
-  const maxGuests = departure.max_guests || 1;
+  const maxGuests = departure.max_guests || 1; 
   const progressPercent = Math.round((currentGuests / maxGuests) * 100);
 
   const getProgressColor = () => {
-      if (progressPercent >= 100) return 'bg-red-500';
+      if (progressPercent >= 100) return 'bg-red-500'; 
       if (progressPercent >= 80) return 'bg-orange-500';
-      return 'bg-blue-600';
+      return 'bg-blue-600'; 
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-10">
-      {/* --- HEADER SECTION --- */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            {/* Breadcrumb & Back */}
-            <div className="flex items-center gap-2 text-sm text-slate-500 mb-3">
-                <button onClick={() => navigate('/operation/departures')} className="hover:text-blue-600 flex items-center gap-1">
+    <div className="min-h-screen bg-slate-50 pb-20 font-sans text-slate-800">
+      
+      {/* 1. TOP HEADER (Static - Scrolls away) */}
+      <header className="bg-white border-b border-slate-200 pt-5 pb-5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-2 text-sm text-slate-500 mb-4">
+                <button onClick={() => navigate('/departures')} className="hover:text-blue-600 flex items-center gap-1 transition-colors">
                     <ArrowLeft size={16}/> Danh sách lịch
                 </button>
-                <span>/</span>
-                <span className="font-medium text-slate-800">{departure.departure_code}</span>
-            </div>
+                <span className="text-slate-300">/</span>
+                <span className="font-medium text-slate-700">{departure.departure_code}</span>
+            </nav>
 
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                {/* Title & Basic Info */}
-                <div>
-                    <div className="flex items-center gap-3 mb-1">
-                        <h1 className="text-2xl font-bold text-slate-900">{departure.tour_name}</h1>
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                {/* Title & Info */}
+                <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
+                        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{departure.tour_name}</h1>
                         <DepartureStatusBadge status={departure.status} />
                     </div>
-                    <div className="text-slate-500 text-sm flex flex-wrap gap-x-6 gap-y-2">
-                        <span className="flex items-center gap-1.5">
-                            <Clock size={16} className="text-slate-400"/>
-                            {new Date(departure.departure_date).toLocaleDateString('vi-VN')} - {new Date(departure.return_date).toLocaleDateString('vi-VN')}
-                            <span className="text-xs bg-slate-100 px-1.5 rounded ml-1">
+                    
+                    <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600 mt-2">
+                         <div className="flex items-center gap-2">
+                            <Clock size={16} className="text-blue-500"/>
+                            <span className="font-medium">{new Date(departure.departure_date).toLocaleDateString('vi-VN')}</span>
+                            <span className="text-slate-400">-</span>
+                            <span className="font-medium">{new Date(departure.return_date).toLocaleDateString('vi-VN')}</span>
+                            <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-semibold border border-slate-200 ml-1">
                                 {departure.duration_days}N{departure.duration_nights}Đ
                             </span>
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <MapPin size={16} className="text-slate-400"/>
-                            {departure.meeting_point || 'Chưa cập nhật điểm đón'}
-                        </span>
+                         </div>
+                         <div className="flex items-center gap-2">
+                            <MapPin size={16} className="text-red-500"/>
+                            <span className="truncate max-w-md" title={departure.meeting_point}>{departure.meeting_point || 'Chưa cập nhật điểm đón'}</span>
+                         </div>
                     </div>
                 </div>
 
-                {/* Actions Buttons */}
-                <div className="flex items-center gap-3">
-                    {!isReadOnly && (
-                        <>
+                {/* Right Side: Actions & Stats */}
+                <div className="flex flex-col items-start lg:items-end gap-4 min-w-[280px]">
+                     {/* Action Buttons */}
+                     {!isReadOnly && (
+                        <div className="flex items-center gap-3">
                             <div className="relative" ref={statusMenuRef}>
                                 <button 
                                     onClick={() => setIsStatusMenuOpen(!isStatusMenuOpen)}
-                                    className="px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 flex items-center gap-1.5 transition-colors shadow-sm"
+                                    className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 flex items-center gap-2 transition-all shadow-sm active:scale-95"
                                 >
-                                    <RefreshCcw size={16} className="text-blue-600"/>
-                                    <span>Cập nhật trạng thái</span>
-                                    <ChevronDown size={14} className={`transition-transform ${isStatusMenuOpen ? 'rotate-180' : ''}`}/>
+                                    <RefreshCcw size={16} className={isStatusMenuOpen ? "text-blue-600" : "text-slate-500"}/>
+                                    <span>Trạng thái</span>
+                                    <ChevronDown size={14} className={`transition-transform duration-200 ${isStatusMenuOpen ? 'rotate-180' : ''}`}/>
                                 </button>
-
+                                {/* Dropdown Menu */}
                                 {isStatusMenuOpen && (
-                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden ring-1 ring-black/5">
                                         {Object.entries(STATUS_CONFIG).map(([key, config]) => (
                                             <button
                                                 key={key}
                                                 onClick={() => handleStatusChange(key)}
                                                 disabled={departure.status === key}
-                                                className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-slate-50 transition-colors ${departure.status === key ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-700'}`}
+                                                className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-slate-50 transition-colors ${departure.status === key ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700'}`}
                                             >
-                                                <span className={`w-2 h-2 rounded-full ${config.color.split(' ')[0].replace('bg-', 'bg-').replace('border-', 'bg-')}`}></span>
+                                                <span className={`w-2.5 h-2.5 rounded-full ring-2 ring-white shadow-sm ${config.color.split(' ')[0].replace('bg-', 'bg-').replace('border-', 'bg-')}`}></span>
                                                 {config.label}
-                                                {departure.status === key && <CheckCircle size={14} className="ml-auto"/>}
+                                                {departure.status === key && <CheckCircle size={14} className="ml-auto text-blue-600"/>}
                                             </button>
                                         ))}
                                     </div>
@@ -196,79 +205,89 @@ const DepartureDetail = () => {
 
                             <button 
                                 onClick={() => setIsEditModalOpen(true)}
-                                className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm flex items-center gap-1.5 transition-colors"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-md shadow-blue-200 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2 active:scale-95"
                             >
-                                <Edit size={16}/> Sửa thông tin
+                                <Edit size={16}/> <span>Sửa</span>
                             </button>
-                        </>
+                        </div>
                     )}
-                </div>
-            </div>
 
-            {/* Progress Bar */}
-            <div className="mt-4 max-w-md">
-                <div className="flex justify-between text-xs mb-1">
-                    <span className="text-slate-600 font-medium">
-                        Số lượng khách: <b className="text-slate-900">{currentGuests}</b> / {maxGuests} chỗ
-                    </span>
-                    <span className={`font-bold ${progressPercent >= 100 ? 'text-red-500' : 'text-blue-600'}`}>
-                        {progressPercent}%
-                    </span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
-                    <div 
-                        className={`h-full rounded-full transition-all duration-700 ease-out ${getProgressColor()}`}
-                        style={{ width: `${Math.min(progressPercent, 100)}%` }}
-                    ></div>
+                    {/* Sales Progress */}
+                    <div className="w-full bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div className="flex justify-between text-xs mb-1.5">
+                            <span className="text-slate-500 font-medium">Khách đặt chỗ</span>
+                            <span className={`font-bold ${progressPercent >= 100 ? 'text-red-600' : 'text-blue-600'}`}>
+                                {currentGuests} <span className="text-slate-400 font-normal">/ {maxGuests}</span>
+                            </span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                            <div 
+                                className={`h-full rounded-full transition-all duration-1000 ease-out ${getProgressColor()}`}
+                                style={{ width: `${Math.min(progressPercent, 100)}%` }}
+                            ></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+      </header>
 
-        {/* Navigation Tabs */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-2">
-            <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
-                {TABS.map(tab => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                            activeTab === tab.id 
-                            ? 'border-blue-600 text-blue-600' 
-                            : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-                        }`}
-                    >
-                        <tab.icon size={18} className={activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}/>
-                        {tab.label}
-                        {tab.count !== undefined && (
-                            <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${activeTab === tab.id ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
-                                {tab.count}
-                            </span>
-                        )}
-                    </button>
-                ))}
+      {/* 2. STICKY TABS NAVIGATION */}
+      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex space-x-6 overflow-x-auto scrollbar-hide">
+                {TABS.map(tab => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => {
+                                setActiveTab(tab.id);
+                                window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                            }}
+                            className={`flex items-center gap-2 py-4 text-sm font-medium border-b-2 transition-all whitespace-nowrap select-none ${
+                                isActive 
+                                ? 'border-blue-600 text-blue-600' 
+                                : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
+                            }`}
+                        >
+                            <tab.icon size={18} className={`transition-colors ${isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'}`}/>
+                            {tab.label}
+                            {tab.count !== undefined && (
+                                <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold transition-colors ${
+                                    isActive ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
+                                }`}>
+                                    {tab.count}
+                                </span>
+                            )}
+                        </button>
+                    );
+                })}
             </div>
         </div>
       </div>
 
-      {/* --- CONTENT SECTION --- */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* 3. MAIN CONTENT */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* Notes Alert */}
         {departure.notes && (
-            <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3 text-sm text-amber-800">
-                <AlertCircle size={20} className="shrink-0 text-amber-600"/>
+            <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 text-sm text-amber-900 shadow-sm">
+                <AlertCircle size={20} className="shrink-0 text-amber-600 mt-0.5"/>
                 <div>
-                    <span className="font-bold">Ghi chú điều hành:</span> {departure.notes}
+                    <span className="font-bold block mb-0.5">Ghi chú điều hành:</span> 
+                    <span className="leading-relaxed opacity-90">{departure.notes}</span>
                 </div>
             </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 min-h-[500px]">
+        {/* Dynamic Content Area */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-h-[500px] overflow-hidden">
             {activeTab === 'guests' && <GuestList departureId={id} maxGuests={departure.max_guests} />}
             {activeTab === 'services' && <ServiceList departureId={id} />}
             {activeTab === 'staff' && <StaffAssignmentManager departureId={id} assignments={departure.staff_assignments || []} onRefresh={fetchDepartureDetail} departureStatus={departure.status} departureDates={{start: departure.departure_date, end: departure.return_date}} />}
             {activeTab === 'logs' && <TourLogList departureId={id} />}
             {activeTab === 'expenses' && <TourExpenseManager departureId={id} isReadOnly={isReadOnly} />}
             
-            {/* [UPDATED] Kiểm tra trạng thái Completed trước khi hiển thị Ratings */}
             {activeTab === 'ratings' && (
                 departure.status === 'completed' ? (
                     <TourSupplierList departureId={id} />

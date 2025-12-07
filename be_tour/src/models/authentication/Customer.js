@@ -11,6 +11,21 @@ async function getAll() {
     }
 }
 
+// Chỉ lấy danh sách khách hàng trong bảng quotes với điều kiện status = sent
+async function getAllCustomerInQuotes() {
+    try {
+        let params = [];
+        const sql = `SELECT DISTINCT c.*
+                    FROM customers c
+                    JOIN quotes q ON c.id = q.customer_id
+                    WHERE q.status='sent'`;
+        const customers = await query(sql, params);
+        return customers;
+    } catch (error) {
+        throw error;
+    }
+}
+
 async function getById(id) {
     try {
         let params = [id];
@@ -150,6 +165,7 @@ async function deleteCustomer(id) {
 
 module.exports = {
     getAll: getAll,
+    getAllCustomerInQuotes: getAllCustomerInQuotes,
     getById: getById,
     create: create,
     update: update,

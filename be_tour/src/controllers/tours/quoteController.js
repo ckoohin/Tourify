@@ -5,15 +5,14 @@ const {
     updateQuoteStatus,
     getAllQuotes,
     calculateQuotePrice,
-    getAllQuotesByCustomerId
+    getAllQuotesByCustomerId,
 } = require("../../models/tours/Quote");
 
-async function getAllQuotesByCustomerIds(req, res, next) {
+async function getCustomerQuotes(req, res, next) {
     try {
         const { id } = req.params;
         const quotes = await getAllQuotesByCustomerId(id);
-
-        res.json({
+        return res.json({
             success: true,
             data: { quotes },
         });
@@ -35,7 +34,7 @@ async function createQuoteHandler(req, res, next) {
 
         const quoteData = {
             ...req.body,
-            created_by: req.user.id
+            created_by: req.user.id,
         };
 
         const quote = await createQuote(quoteData);
@@ -77,7 +76,7 @@ async function listQuotesHandler(req, res, next) {
             status: req.query.status,
             customer_id: req.query.customer_id,
             from_date: req.query.from_date,
-            to_date: req.query.to_date
+            to_date: req.query.to_date,
         };
 
         const quotes = await getAllQuotes(filters);
@@ -121,7 +120,7 @@ async function calculatePriceHandler(req, res, next) {
 
         res.json({
             success: true,
-            data: priceData
+            data: priceData,
         });
     } catch (error) {
         next(error);
@@ -134,5 +133,5 @@ module.exports = {
     listQuotesHandler,
     updateStatusHandler,
     calculatePriceHandler,
-    getAllQuotesByCustomerIds
+    getCustomerQuotes,
 };
