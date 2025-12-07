@@ -17,10 +17,6 @@ const {
 const TransactionController = require("../../controllers/financial/transactionController.js");
 const AuthMiddleware = require("../../middleware/authMiddleware");
 
-const TransactionController = require("../../controllers/financial/transactionController.js");
-const AuthMiddleware = require("../../middleware/authMiddleware");
-
-
 router.get(
     "/search/",
     authenticate,

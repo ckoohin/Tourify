@@ -38,7 +38,10 @@ const quoteRoutes = require("./routes/tours/quoteRoutes");
 const transactionRoutes = require("./routes/financial/transactionRoutes.js");
 const debtRoutes = require("./routes/financial/debtRoutes.js");
 const reportRoutes = require("./routes/financial/reportRoutes.js");
-const feedbackRoutes = require("./routes/feedback/feedbackRoutes");
+const feedbackRoutes = require("./routes/feedback/feedbackRoutes.js");
+const activityCheckinRoutes = require("./routes/tours/activityCheckinRoutes.js");
+const itineraryActivityRoutes = require("./routes/tours/itineraryActivityRoutes.js");
+const activityCheckinJob = require("./controllers/settings/activity.checkin.job.js");
 
 const app = express();
 
@@ -64,6 +67,9 @@ const limiter = rateLimit({
     windowMs: 10 * 60 * 1000,
     max: 100,
 });
+
+activityCheckinJob.start();
+
 app.use("/api", limiter);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/tour-categories", tourCategoryRoutes);
@@ -94,6 +100,8 @@ app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/debts", debtRoutes);
 app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/feedbacks", feedbackRoutes);
+app.use("/api/v1/activity-checkins", activityCheckinRoutes);
+app.use("/api/v1/itinerary-activities", itineraryActivityRoutes);
 
 app.get("/health", (req, res) => {
     res.json({
