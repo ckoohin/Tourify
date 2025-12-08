@@ -18,6 +18,7 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
   const [adultPrice, setAdultPrice] = useState(0);
   const [childPrice, setchildPrice] = useState(0);
   const [infantPrice, setInfantPrice] = useState(0);
+  const [seniorPrice, setSeniorPrice] = useState(0);
   const [changeGuest, setChangGuest] = useState(0);
 
   const [activeTab, setActiveTab] = useState('general'); 
@@ -32,6 +33,7 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
     total_adults: 0,
     total_children: 0,
     total_infants: 0,
+    total_senior: 0,
     total_guests: 0,
     unit_price: 0,
     total_amount: 0,
@@ -56,7 +58,6 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
   async function getNameAndAllPriceByTourVerSionId(id) {
     const resPrice = await tourService.getPricesByVersion(id);
     const resTourVersionInFo = await tourService.getVersionById(id);
-    console.log(resTourVersionInFo);
     setListPrices(resPrice.data.tourPrices);
     setTourVersionName(resTourVersionInFo.data.tourVersion[0].name);
   }
@@ -96,6 +97,8 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
             setchildPrice(price.price)
           } else if(price.price_type == 'infant') {
             setInfantPrice(price.price)
+          } else if(price.price_type == 'senior') {
+            setSeniorPrice(price.price);
           }
         })
     }
@@ -113,11 +116,21 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
       if(quotesSelected) {
         const dataFillToForm = quotes.find((quote) => {
           return quote.id == quotesSelected;
-        });
-
+        }); 
         setFormData(prev => ({
           ...prev,
           tour_version_id: dataFillToForm.tour_version_id,
+          total_adults : dataFillToForm.adult_count,
+          total_children: dataFillToForm.child_count,
+          total_infants : dataFillToForm.infant_count,
+          total_senior : dataFillToForm.senior_count,
+          departure_date:`${new Date(dataFillToForm.departure_date).getFullYear()}-${String(new Date(dataFillToForm.departure_date).getMonth()+1).padStart(2,'0')}-${String(new Date(dataFillToForm.departure_date).getDate()).padStart(2,'0')}`,
+          total_guests: Number(dataFillToForm.adult_count) + Number(dataFillToForm.child_count) + Number(dataFillToForm.infant_count) + Number(dataFillToForm.senior_count),
+          total_amount : dataFillToForm.total_amount,
+          unit_price : Number(dataFillToForm.total_amount) / (Number(dataFillToForm.adult_count) + Number(dataFillToForm.child_count) + Number(dataFillToForm.infant_count) + Number(dataFillToForm.senior_count)),
+          discount_amount : dataFillToForm.discount_amount,
+          final_amount : Number(dataFillToForm.total_amount) - Number(dataFillToForm.discount_amount),
+          remaining_amount : Number(dataFillToForm.total_amount) - Number(dataFillToForm.discount_amount)
         }));
       }
     }
@@ -126,19 +139,16 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
   // Auto-calculation Logic
   useEffect(() => {
     if(changeGuest != 0) {
-      const guests = Number(formData.total_adults) + Number(formData.total_children) + Number(formData.total_infants);
+      const guests = Number(formData.total_adults) + Number(formData.total_children) + Number(formData.total_infants) + Number(formData.total_senior);
     
       // Logic tính tiền cơ bản (để hỗ trợ người dùng, có thể sửa tay)
       // Ví dụ: Total = (Adults * UnitPrice) + (Children * UnitPrice * 0.75) ... Tùy logic business
       // Ở đây ta giữ đơn giản: Total nhập tay hoặc tính sơ bộ
-      const totalPrices = Number(adultPrice) * Number(formData.total_adults) + Number(childPrice) * Number(formData.total_children) + Number(infantPrice) * Number(formData.total_infants);
+      const totalPrices = Number(adultPrice) * Number(formData.total_adults) + Number(childPrice) * Number(formData.total_children) + Number(infantPrice) * Number(formData.total_infants) + Number(seniorPrice) * Number(formData.total_senior);
       const unitPrice = totalPrices / guests ? totalPrices / guests : 0;
       const final = totalPrices - Number(formData.discount_amount);
       const remaining = final - Number(formData.paid_amount);
 
-      console.log(guests, totalPrices, unitPrice, final, remaining);
-      
-  
       setFormData(prev => ({
           ...prev,
           total_amount: totalPrices,
@@ -177,6 +187,7 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
             total_adults: 0,
             total_children: 0,
             total_infants: 0,
+            total_senior: 0,
             total_guests: 0,
             unit_price: 0,
             total_amount: 0,
@@ -203,7 +214,7 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if(name == 'total_adults' || name == 'total_children' || name == 'total_infants' || name == 'discount_amount' || name == 'paid_amount') {
+    if(name == 'total_adults' || name == 'total_children' || name == 'total_infants' || name == 'total_senior' || name == 'discount_amount' || name == 'paid_amount') {
       setChangGuest((prev) => prev + 1);
     }
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -366,7 +377,7 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
 
             {/* Tab 2: Hành khách */}
             <div className={activeTab === 'guests' ? 'block' : 'hidden'}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="mb-4">
                       <InputGroup label="Người lớn (>12t)" name="total_adults" type="number" />
                       <span>Giá người lớn: {new Intl.NumberFormat('vi-VN').format(adultPrice)} VND</span>
@@ -378,6 +389,10 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
                     <div className="mb-4">
                       <InputGroup label="Em bé (<2t)" name="total_infants" type="number" />
                       <span>Giá em bé: {new Intl.NumberFormat('vi-VN').format(infantPrice)} VND</span>
+                    </div>
+                    <div className="mb-4">
+                      <InputGroup label="Người cao tuổi (>60t)" name="total_senior" type="number" />
+                      <span>Giá người cao tuổi: {new Intl.NumberFormat('vi-VN').format(seniorPrice)} VND</span>
                     </div>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mt-2">

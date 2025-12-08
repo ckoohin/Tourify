@@ -75,7 +75,7 @@ const BookingTable = ({ bookings, loading, onEdit, onDelete }) => {
                         <div className="flex items-center gap-1 text-gray-700" title="Người lớn / Trẻ em / Em bé">
                             <User size={14}/> 
                             <span>{booking.total_guests}</span>
-                            <span className="text-xs text-gray-400">({booking.total_adults}/{booking.total_children}/{booking.total_infants})</span>
+                            <span className="text-xs text-gray-400">({booking.total_adults}/{booking.total_children}/{booking.total_infants}/{booking.total_senior})</span>
                         </div>
                     </td>
                     <td className="p-4 text-right font-medium text-emerald-600">

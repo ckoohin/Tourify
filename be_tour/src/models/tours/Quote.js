@@ -25,8 +25,8 @@ async function calculateQuotePrice(data) {
 
     try {
         const prices = await query(
-            `SELECT * FROM tour_prices 
-             WHERE tour_version_id = ? 
+            `SELECT * FROM tour_prices
+             WHERE tour_version_id = ?
              AND is_active = 1
              AND (valid_from IS NULL OR valid_from <= ?)
              AND (valid_to IS NULL OR valid_to >= ?)`,
@@ -154,6 +154,8 @@ async function createQuote(data) {
             created_by,
         } = data;
 
+        console.log(departure_date);
+
         const priceData = await calculateQuotePrice({
             tour_version_id,
             departure_date,
@@ -177,6 +179,11 @@ async function createQuote(data) {
                 quote_number,
                 customer_id,
                 tour_version_id,
+                adult_count,
+                child_count,
+                infant_count,
+                senior_count,
+                departure_date,
                 total_amount,
                 discount_amount,
                 final_amount,
@@ -185,11 +192,16 @@ async function createQuote(data) {
                 terms,
                 status,
                 created_by
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 quote_number,
                 customer_id,
                 tour_version_id,
+                adult_count,
+                child_count,
+                infant_count,
+                senior_count,
+                departure_date,
                 subtotal,
                 discount_amount,
                 final_amount,

@@ -33,13 +33,14 @@ async function create(data) {
             total_adults,
             total_children,
             total_infants,
-            // total_guests, 
+            total_senior,
+            // total_guests,
             unit_price,
             total_amount,
             discount_amount,
-            // final_amount, 
+            // final_amount,
             paid_amount,
-            // remaining_amount, 
+            // remaining_amount,
             currency,
             status,
             special_requests,
@@ -52,7 +53,7 @@ async function create(data) {
         } = data;
 
         const sql =
-            "INSERT INTO `bookings`(`booking_code`, `customer_id`, `tour_version_id`, `booking_type`, `departure_date`, `total_adults`, `total_children`, `total_infants`, `unit_price`, `total_amount`, `discount_amount`, `paid_amount`, `currency`, `status`, `special_requests`, `coupon_code`, `internal_notes`, `cancel_reason`, `cancelled_at`, `sales_person_id`, `created_by`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO `bookings`(`booking_code`, `customer_id`, `tour_version_id`, `booking_type`, `departure_date`, `total_adults`, `total_children`, `total_infants`, `total_senior`, `unit_price`, `total_amount`, `discount_amount`, `paid_amount`, `currency`, `status`, `special_requests`, `coupon_code`, `internal_notes`, `cancel_reason`, `cancelled_at`, `sales_person_id`, `created_by`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         const result = await query(sql, [
             booking_code || null,
@@ -63,15 +64,16 @@ async function create(data) {
             total_adults || 0,
             total_children || 0,
             total_infants || 0,
-            // total_guests, 
+            total_senior || 0,
+            // total_guests,
             unit_price || 0,
             total_amount || 0,
             discount_amount || 0,
-            // final_amount, 
+            // final_amount,
             paid_amount || 0,
-            // remaining_amount, 
-            currency || 'VND',
-            status || 'pending',
+            // remaining_amount,
+            currency || "VND",
+            status || "pending",
             special_requests || null,
             coupon_code || null,
             internal_notes || null,
@@ -98,13 +100,13 @@ async function update(data, id) {
             total_adults,
             total_children,
             total_infants,
-            // total_guests, 
+            // total_guests,
             unit_price,
             total_amount,
             discount_amount,
-            // final_amount, 
+            // final_amount,
             paid_amount,
-            // remaining_amount, 
+            // remaining_amount,
             currency,
             status,
             special_requests,
@@ -115,7 +117,6 @@ async function update(data, id) {
             sales_person_id,
             created_by,
         } = data;
-
 
         const sql =
             "UPDATE `bookings` SET `booking_code`=?,`customer_id`=?,`tour_version_id`=?,`booking_type`=?,`departure_date`=?,`total_adults`=?,`total_children`=?,`total_infants`=?,`unit_price`=?,`total_amount`=?,`discount_amount`=?,`paid_amount`=?,`currency`=?,`status`=?,`special_requests`=?,`coupon_code`=?,`internal_notes`=?,`cancel_reason`=?,`cancelled_at`=?,`sales_person_id`=?,`created_by`=? WHERE id=?";
@@ -129,13 +130,13 @@ async function update(data, id) {
             total_adults || 0,
             total_children || 0,
             total_infants || 0,
-            // total_guests, 
+            // total_guests,
             unit_price || 0,
             total_amount || 0,
             discount_amount || 0,
-            // final_amount, 
+            // final_amount,
             paid_amount || 0,
-            // remaining_amount, 
+            // remaining_amount,
             currency || null,
             status || null,
             special_requests || null,
