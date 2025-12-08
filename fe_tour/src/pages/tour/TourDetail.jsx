@@ -159,7 +159,8 @@ const TourDetail = () => {
              </div>
              <TourItineraryManager 
                 key={`itinerary-${refreshKey}`} 
-                tourVersionId={defaultVersionId} 
+                tourVersionId={defaultVersionId}
+                durationDay={tour.duration_days}
              />
           </div>
         );

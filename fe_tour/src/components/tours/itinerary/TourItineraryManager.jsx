@@ -17,7 +17,7 @@ const ACTIVITY_TYPES = [
     { value: 'other', label: 'Khác', icon: Info, color: 'text-slate-600 bg-slate-50 border-slate-100' }
 ];
 
-const TourItineraryManager = ({ tourVersionId }) => {
+const TourItineraryManager = ({ tourVersionId , durationDay}) => {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(false);
   
@@ -49,7 +49,6 @@ const TourItineraryManager = ({ tourVersionId }) => {
     setLoading(true);
     try {
       const res = await tourService.getItineraries(tourVersionId);
-      
       if (res.data?.itineraries) {
         const rawList = res.data.itineraries;
         
@@ -92,6 +91,10 @@ const TourItineraryManager = ({ tourVersionId }) => {
   // --- HANDLERS ---
   const handleOpenCreate = () => {
     const nextDay = itineraries.length > 0 ? Math.max(...itineraries.map(i => i.day_number)) + 1 : 1;
+    if(nextDay > durationDay) {
+      alert(`Không thể thêm ngày ${nextDay}. Tour này chỉ có tổng cộng ${durationDay} ngày ${durationDay - 1} đêm.`);
+      return;
+    }
     setEditingItem({
         day_number: nextDay,
         title: '',
