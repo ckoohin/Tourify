@@ -20,13 +20,16 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
     id_number: '',
     address: '',
     status: 'active',
-    languages: '', 
+    languages: '',
     certifications: '',
     specializations: '',
     driver_license_number: '',
     driver_license_class: '',
-    vehicle_types: ''
-  });
+    vehicle_types: '',
+    experience_years: 0,
+    health_status: '',
+    notes: ''
+    });
 
   // --- FILL DỮ LIỆU KHI EDIT ---
   useEffect(() => {
@@ -56,6 +59,9 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
         id_number: initialData.id_number || '',
         address: initialData.address || '',
         staff_code: initialData.staff_code || '',
+        experience_years: initialData.experience_years || 0,
+        health_status: initialData.health_status || '',
+        notes: initialData.notes || '',
       }));
     }
   }, [initialData]);
@@ -108,11 +114,13 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
     // 3. CHUẨN HÓA PAYLOAD GỬI VỀ SERVER
     const payload = {
         ...formData,
-        // Chuyển chuỗi thành mảng cho các trường tag
         languages: formData.languages ? formData.languages.split(',').map(s => s.trim()).filter(Boolean) : [],
         certifications: formData.certifications ? formData.certifications.split(',').map(s => s.trim()).filter(Boolean) : [],
         specializations: formData.specializations ? formData.specializations.split(',').map(s => s.trim()).filter(Boolean) : [],
         vehicle_types: formData.vehicle_types ? formData.vehicle_types.split(',').map(s => s.trim()).filter(Boolean) : [],
+        experience_years: Number(formData.experience_years) || 0,
+        notes: formData.notes || null,
+        health_status: formData.health_status || null
     };
 
     // Xóa sạch dữ liệu rác nếu chuyển đổi loại nhân viên
@@ -175,19 +183,7 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
        <form onSubmit={handleSubmit} className="space-y-6">
           
           {/* --- NHÓM 1: ĐỊNH DANH & VAI TRÒ --- */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-             <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Mã nhân viên <span className="text-red-500">*</span></label>
-                <input 
-                    name="staff_code" 
-                    value={formData.staff_code} 
-                    onChange={handleChange} 
-                    placeholder="VD: NV001"
-                    className={getInputClass('staff_code')} 
-                />
-                <ErrorText name="staff_code" />
-             </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
              <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Vai trò <span className="text-red-500">*</span></label>
                 <select name="staff_type" value={formData.staff_type} onChange={handleChange} className="w-full border rounded-lg px-3 py-2.5 bg-white border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm">
@@ -361,6 +357,40 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
                 />
                 <ErrorText name="specializations" />
              </div>
+             <div className="mt-4">
+                <label className="block text-xs font-bold text-slate-500 mb-1">Kinh nghiệm (năm)</label>
+                <input
+                    type="number"
+                    name="experience_years"
+                    value={formData.experience_years}
+                    onChange={handleChange}
+                    className={getInputClass('experience_years')}
+                />
+                <ErrorText name="experience_years" />
+                </div>
+                <div className="mt-4">
+  <label className="block text-xs font-bold text-slate-500 mb-1">Tình trạng sức khỏe</label>
+  <input
+      name="health_status"
+      value={formData.health_status}
+      onChange={handleChange}
+      className={getInputClass('health_status')}
+  />
+  <ErrorText name="health_status" />
+</div>
+<div className="mt-4">
+  <label className="block text-xs font-bold text-slate-500 mb-1">Ghi chú</label>
+  <textarea
+      name="notes"
+      value={formData.notes}
+      onChange={handleChange}
+      className={getInputClass('notes')}
+      rows={3}
+  />
+  <ErrorText name="notes" />
+</div>
+
+
           </div>
 
           {/* --- TRẠNG THÁI --- */}

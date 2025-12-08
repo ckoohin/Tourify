@@ -83,7 +83,7 @@ const StaffList = () => {
             setStats(res.data.stats);
         }
     } catch (error) {
-        toast.error("Lỗi tải chi tiết nhân viên");
+        toast.error("Lỗi tải chi tiết nhân viên",error);
         setIsModalOpen(false);
     } finally {
         setIsFetchingDetail(false);
@@ -104,7 +104,7 @@ const StaffList = () => {
   };
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto min-h-screen">
+    <div className="max-w-[1600px] mx-auto min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <div>
             <h1 className="text-2xl font-bold text-slate-800">Quản lý Nhân sự</h1>
@@ -198,12 +198,13 @@ const StaffList = () => {
                 ) : (
                     <StaffForm 
                         onSuccess={(result) => {
-                            const newStaff = result.data || result;
-                            if (window.confirm("Tạo thành công! Bạn có muốn thêm lịch làm việc ngay không?")) {
-                                handleOpenEdit(newStaff); 
-                            } else {
-                                fetchStaff();
-                                handleCloseModal();
+                            fetchStaff();
+                            handleCloseModal();
+                            const newStaff = result?.data || result;
+                            if (newStaff?.id) {
+                                if (window.confirm("Tạo thành công! Bạn có muốn xem chi tiết nhân sự vừa tạo không?")) {
+                                    handleOpenEdit(newStaff); 
+                                }
                             }
                         }}
                         onClose={handleCloseModal}

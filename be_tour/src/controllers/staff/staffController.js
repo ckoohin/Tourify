@@ -1,3 +1,6 @@
+const bcrypt = require('bcrypt');
+const { query, getConnection } = require('../../config/db');
+const { sendEmail } = require('../../services/emailService'); 
 const Staff = require("../../models/staff/Staff");
 const { validationResult } = require("express-validator");
 
@@ -120,7 +123,17 @@ exports.getById = async (req, res, next) => {
   }
 };
 
+const generateTempPassword = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
+  let pass = '';
+  for (let i = 0; i < 12; i++) {
+    pass += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return pass.replace(/(.{4})(.{4})(.{4})/, '$1-$2-$3');
+};
+
 exports.create = async (req, res, next) => {
+  let connection;
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -131,56 +144,163 @@ exports.create = async (req, res, next) => {
       });
     }
 
-    const staffData = req.body;
+    const data = req.body;
+    connection = await getConnection(); 
+    await connection.beginTransaction();
 
-    if (!staffData.staff_code) {
-      staffData.staff_code = await Staff.generateStaffCode(
-        staffData.staff_type
-      );
+    if (!data.staff_code) {
+      data.staff_code = await Staff.generateStaffCode(data.staff_type || 'tour_guide');
     } else {
-      const existing = await Staff.findByCode(staffData.staff_code);
-      if (existing) {
-        return res.status(400).json({
-          success: false,
-          message: "Mã nhân viên đã tồn tại",
-        });
+      const codeExists = await Staff.findByCode(data.staff_code);
+      if (codeExists) {
+        await connection.rollback();
+        return res.status(400).json({ success: false, message: "Mã nhân viên đã tồn tại" });
       }
     }
 
-    const phoneExists = await Staff.findAll(1, 1, { search: staffData.phone });
-    if (phoneExists.data.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Số điện thoại đã được sử dụng",
-      });
+    if (data.phone) {
+      const phoneCheck = await query(
+        `SELECT 1 FROM users WHERE phone = ? UNION SELECT 1 FROM staff WHERE phone = ? LIMIT 1`,
+        [data.phone, data.phone],
+        connection
+      );
+      if (phoneCheck.length > 0) {
+        await connection.rollback();
+        return res.status(400).json({ success: false, message: "Số điện thoại đã được sử dụng" });
+      }
     }
 
-    const staffId = await Staff.create(staffData);
+    if (data.email) {
+      const emailCheck = await query(
+        `SELECT id FROM users WHERE email = ? LIMIT 1`,
+        [data.email],
+        connection
+      );
+      if (emailCheck.length > 0) {
+        await connection.rollback();
+        return res.status(400).json({ success: false, message: "Email đã được sử dụng" });
+      }
+    }
+
+    const tempPassword = generateTempPassword();
+    const hashedPassword = await bcrypt.hash(tempPassword, 12);
+
+    const roleId = data.staff_type === 'driver' ? 4 : 2; 
+
+    const userResult = await query(
+      `INSERT INTO users 
+       (role_id, name, email, password, phone, status, is_active, user_type, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, 1, 1, 2, NOW(), NOW())`,
+      [
+        roleId,
+        data.full_name || 'Nhân viên mới',
+        data.email || null,
+        hashedPassword,
+        data.phone || null,
+      ],
+      connection
+    );
+
+    const userId = userResult.insertId;
+
+    const staffResult = await query(
+      `INSERT INTO staff (
+        user_id, staff_code, staff_type, full_name, birthday, gender,
+        id_number, phone, email, address, languages, certifications,
+        specializations, experience_years, driver_license_number,
+        driver_license_class, vehicle_types, status, health_status, notes,
+        created_at, updated_at
+      ) VALUES (
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW()
+      )`,
+      [
+        userId,
+        data.staff_code,
+        data.staff_type || 'tour_guide',
+        data.full_name,
+        data.birthday || null,
+        data.gender || null,
+        data.id_number || null,
+        data.phone,
+        data.email || null,
+        data.address || null,
+        JSON.stringify(data.languages || []),
+        JSON.stringify(data.certifications || []),
+        JSON.stringify(data.specializations || []),
+        data.experience_years || 0,
+        data.driver_license_number || null,
+        data.driver_license_class || null,
+        JSON.stringify(data.vehicle_types || []),
+        data.status || 'active',
+        data.health_status || null,
+        data.notes || null,
+      ],
+      connection
+    );
+
+    const staffId = staffResult.insertId;
+
+    await connection.commit();
+
+    if (data.email) {
+      const subject = "Chào mừng bạn đến với hệ thống Tourify!";
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; background: #f9f9f9;">
+          <h2 style="color: #1976d2;">Chào mừng bạn đến với Tourify!</h2>
+          <p>Tài khoản nhân viên của bạn đã được tạo thành công bởi quản trị viên.</p>
+          <p>Vui lòng sử dụng thông tin sau để đăng nhập:</p>
+          
+          <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 5px solid #1976d2;">
+            <p><strong>Email:</strong> <code>${data.email}</code></p>
+            <p><strong>Mật khẩu tạm thời:</strong> 
+              <code style="font-size: 1.4em; color: #d32f2f; background: #ffebee; padding: 5px 10px; border-radius: 4px;">
+                ${tempPassword}
+              </code>
+            </p>
+          </div>
+          
+          <p style="color: #d32f2f; font-weight: bold;">
+            Vui lòng đổi mật khẩu ngay sau khi đăng nhập lần đầu!
+          </p>
+          
+          <hr>
+          <p>Trân trọng,<br><strong>Đội ngũ Tourify</strong></p>
+        </div>
+      `;
+
+      try {
+        await sendEmail(data.email, subject, html);
+      } catch (err) {
+        console.error("Gửi email thất bại (không ảnh hưởng kết quả):", err.message);
+      }
+    }
+
     const newStaff = await Staff.findById(staffId);
 
-    // Parse JSON fields
-    const parseJsonArray = (val) => {
-      if (!val) return [];
-      if (Array.isArray(val)) return val;
-      try {
-        return JSON.parse(val);
-      } catch {
-        return val.split(",").map((v) => v.trim());
-      }
+    const parseArray = (field) => {
+      if (!field) return [];
+      try { return JSON.parse(field); } catch { return []; }
     };
 
-    newStaff.languages = parseJsonArray(newStaff.languages);
-    newStaff.certifications = parseJsonArray(newStaff.certifications);
-    newStaff.specializations = parseJsonArray(newStaff.specializations);
-    newStaff.vehicle_types = parseJsonArray(newStaff.vehicle_types);
+    if (newStaff) {
+      newStaff.languages = parseArray(newStaff.languages);
+      newStaff.certifications = parseArray(newStaff.certifications);
+      newStaff.specializations = parseArray(newStaff.specializations);
+      newStaff.vehicle_types = parseArray(newStaff.vehicle_types);
+    }
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: "Tạo nhân viên thành công",
+      message: "Tạo nhân viên thành công! Email đăng nhập đã được gửi.",
       data: { staff: newStaff },
     });
+
   } catch (error) {
-    next(error);
+    if (connection) await connection.rollback();
+    console.error("Lỗi tạo nhân viên:", error);
+    return next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 

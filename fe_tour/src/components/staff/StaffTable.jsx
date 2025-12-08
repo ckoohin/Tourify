@@ -1,5 +1,4 @@
 import React from 'react';
-// Bỏ Link, thêm Edit icon
 import { Edit, Trash2, Star, Phone, Mail, Bus, User, Map } from 'lucide-react';
 import StatusBadge from '../ui/StatusBadge';
 

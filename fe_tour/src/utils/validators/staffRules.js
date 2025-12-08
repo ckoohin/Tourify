@@ -26,13 +26,6 @@ const isValidIdNumber = (id) => {
 export const validateStaff = (data) => {
   const errors = {};
 
-  // --- 1. THÔNG TIN CƠ BẢN (Tất cả đều bắt buộc) ---
-
-  // Mã nhân viên
-  if (!data.staff_code || !data.staff_code.trim()) {
-    errors.staff_code = 'Mã nhân viên là bắt buộc';
-  }
-
   // Họ tên
   if (!data.full_name || !data.full_name.trim()) {
     errors.full_name = 'Họ tên không được để trống';
