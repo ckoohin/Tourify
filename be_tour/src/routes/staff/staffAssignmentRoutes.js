@@ -33,7 +33,7 @@ router.get('/',
 
 router.get('/my-assignments',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('guide.view'),
   StaffAssignmentController.getMyAssignments
 );
 
@@ -64,13 +64,13 @@ router.delete('/:id',
 
 router.get('/my-assignments/:departureId',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('guide.view'),
   StaffAssignmentController.getMyAssignmentDetail
 );
 
 router.get('/my-assignments/stats/summary',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('guide.view'),
   StaffAssignmentController.getMyStats
 );
 
