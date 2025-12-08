@@ -139,24 +139,106 @@ const tourService = {
         });
     },
 
-    /**
-     * Helper: Lấy đường dẫn đầy đủ của ảnh QR Code
-     * Backend lưu đường dẫn tương đối (vd: /qrcodes/abc.png) trong DB
-     */
+
     getQrCodeImageUrl: (qrCodePath) => {
         if (!qrCodePath) return null;
-        // Nếu đã là link đầy đủ (http...) thì trả về luôn, nếu không thì ghép với API URL
         if (qrCodePath.startsWith("http")) return qrCodePath;
         return `${getApiBaseUrl()}${qrCodePath}`;
     },
 
-    /**
-     * Helper: Lấy Booking URL từ dữ liệu tour
-     * Ưu tiên lấy từ DB vì Backend đã sinh ra và lưu chính xác
-     */
     getBookingUrl: (tour) => {
         return tour?.booking_url || "";
     },
+
+    // =================================================================
+    // 9. QUẢN LÝ HOẠT ĐỘNG LỊCH TRÌNH CHI TIẾT (ITINERARY ACTIVITIES)
+    // =================================================================
+    
+    // Lấy hoạt động theo ngày lịch trình (Itinerary ID)
+    getActivitiesByItinerary: (itineraryId) => 
+        api.get(`/itinerary-activities/itinerary/${itineraryId}`),
+
+    // Lấy tất cả hoạt động của một phiên bản tour
+    getActivitiesByTourVersion: (tourVersionId) => 
+        api.get(`/itinerary-activities/tour-version/${tourVersionId}`),
+
+    // Lấy chi tiết một hoạt động
+    getActivityById: (id) => 
+        api.get(`/itinerary-activities/${id}`),
+
+    // Tạo hoạt động mới (Chi tiết giờ giấc, địa điểm...)
+    createActivity: (data) => 
+        api.post('/itinerary-activities', data),
+
+    // Cập nhật hoạt động
+    updateActivity: (id, data) => 
+        api.put(`/itinerary-activities/${id}`, data),
+
+    // Xóa hoạt động
+    deleteActivity: (id) => 
+        api.delete(`/itinerary-activities/${id}`),
+
+    // Cập nhật trạng thái hoạt động (not_started, in_progress, closed, cancelled)
+    updateActivityStatus: (id, status) => 
+        api.patch(`/itinerary-activities/${id}/status`, { status }),
+
+    // Kích hoạt tự động cập nhật trạng thái cho 1 chuyến đi (dựa trên giờ hiện tại)
+    autoUpdateActivityStatus: (departureId) => 
+        api.post(`/itinerary-activities/departures/${departureId}/auto-update-status`),
+
+    // Lấy danh sách hoạt động theo ngày thực tế của chuyến đi (cho màn hình vận hành)
+    getActivitiesByDepartureDate: (departureId, date) => 
+        api.get(`/itinerary-activities/departures/${departureId}/by-date`, { params: { date } }),
+
+
+    // =================================================================
+    // 10. QUẢN LÝ ĐIỂM DANH (ACTIVITY CHECK-IN)
+    // =================================================================
+
+    // Khởi tạo danh sách điểm danh cho toàn bộ khách trong chuyến đi
+    initializeCheckins: (departureId) => 
+        api.post(`/activity-checkins/departures/${departureId}/initialize`),
+
+    // Lấy thống kê điểm danh (Tổng, Đã check-in, Vắng...)
+    getCheckinStats: (departureId) => 
+        api.get(`/activity-checkins/departures/${departureId}/stats`),
+
+    // Lấy danh sách các hoạt động ĐANG DIỄN RA cần điểm danh ngay
+    getActiveCheckins: (departureId) => 
+        api.get(`/activity-checkins/departures/${departureId}/active`),
+
+    // Lấy danh sách hoạt động của ngày HÔM NAY kèm trạng thái điểm danh
+    getTodayCheckinActivities: (departureId) => 
+        api.get(`/activity-checkins/departures/${departureId}/today`),
+
+    // Lấy danh sách check-in chi tiết theo ngày cụ thể
+    getCheckinsByDate: (departureId, date) => 
+        api.get(`/activity-checkins/departures/${departureId}/by-date`, { params: { date } }),
+
+    // Chạy tiến trình tự động (Auto Check-in & Mark Missed) - Dành cho admin/test
+    runAutoCheckinProcess: () => 
+        api.post('/activity-checkins/auto-process'),
+
+    // Lấy danh sách khách của một hoạt động cụ thể để điểm danh
+    getCheckinsByActivity: (departureId, activityId) => 
+        api.get(`/activity-checkins/departures/${departureId}/activities/${activityId}`),
+
+    // Điểm danh hàng loạt (Chọn nhiều khách -> Check-in)
+    bulkCheckIn: (departureId, activityId, guestIds) => 
+        api.post(`/activity-checkins/departures/${departureId}/activities/${activityId}/bulk-checkin`, { guestIds }),
+
+    // Lấy lịch sử điểm danh của một khách hàng
+    getCheckinHistoryByGuest: (guestId) => 
+        api.get(`/activity-checkins/guests/${guestId}`),
+
+    // Điểm danh lẻ từng khách (có thể kèm tọa độ GPS)
+    checkInSingleGuest: (checkinId, location = null) => 
+        api.patch(`/activity-checkins/checkins/${checkinId}/check-in`, { location }),
+
+    // Đánh dấu khách vắng mặt có phép
+    markGuestExcused: (checkinId, excuseReason) => 
+        api.patch(`/activity-checkins/checkins/${checkinId}/excuse`, { excuse_reason: excuseReason }),
+
 };
 
 export default tourService;

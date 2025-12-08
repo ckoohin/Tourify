@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Users, Bus, Receipt, FileText, UserCog, 
   Clock, MapPin, AlertCircle, Edit, ArrowLeft,
-  CheckCircle, PlayCircle, Star, ChevronDown, RefreshCcw, Lock
+  CheckCircle, PlayCircle, Star, ChevronDown, RefreshCcw, Lock,
+  ClipboardCheck // [NEW] Import icon cho tab checkin
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -18,8 +19,9 @@ import ServiceList from '../../components/operations/service/ServiceList';
 import StaffAssignmentManager from '../../components/operations/staff/StaffAssignmentManager';
 import TourLogList from '../../components/operations/log/TourLogList';
 import TourExpenseManager from '../../components/operations/expenses/TourExpenseManager';
-
 import TourSupplierList from '../../components/suppliers/ratings/TourSupplierList';
+
+import ActivityCheckinManager from '../../components/operations/checkin/ActivityCheckinManager'; 
 
 const DepartureDetail = () => {
   const { id } = useParams();
@@ -114,6 +116,8 @@ const DepartureDetail = () => {
       { id: 'guests', label: 'Danh sách Khách', icon: Users, count: departure.confirmed_guests },
       { id: 'services', label: 'Dịch vụ & Vận chuyển', icon: Bus, count: (departure.service_bookings?.length || 0) + (departure.transports?.length || 0) },
       { id: 'staff', label: 'Nhân sự', icon: UserCog, count: departure.staff_assignments?.length },
+      // [NEW] Tab Check-in
+      { id: 'checkin', label: 'Điểm danh', icon: ClipboardCheck },
       { id: 'logs', label: 'Nhật ký Tour', icon: FileText },
       { id: 'expenses', label: 'Chi phí & Quyết toán', icon: Receipt },
       { id: 'ratings', label: 'Đánh giá NCC', icon: Star }, 
@@ -285,6 +289,10 @@ const DepartureDetail = () => {
             {activeTab === 'guests' && <GuestList departureId={id} maxGuests={departure.max_guests} />}
             {activeTab === 'services' && <ServiceList departureId={id} />}
             {activeTab === 'staff' && <StaffAssignmentManager departureId={id} assignments={departure.staff_assignments || []} onRefresh={fetchDepartureDetail} departureStatus={departure.status} departureDates={{start: departure.departure_date, end: departure.return_date}} />}
+            
+            {/* [NEW] Tab Check-in */}
+            {activeTab === 'checkin' && <ActivityCheckinManager departureId={id} />}
+
             {activeTab === 'logs' && <TourLogList departureId={id} />}
             {activeTab === 'expenses' && <TourExpenseManager departureId={id} isReadOnly={isReadOnly} />}
             
