@@ -33,7 +33,7 @@ const BookingList = () => {
         setAllBookings(data);
       }
     } catch (error) {
-      toast.error("Lỗi tải danh sách booking");
+      toast.error("Lỗi tải danh sách booking",error);
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,7 @@ const BookingList = () => {
                toast.success("Đã xóa thành công");
                fetchBookings();
             } catch(err) {
-               toast.error("Xóa thất bại");
+               toast.error("Xóa thất bại",err);
             }
           }}>Xóa</button>
           <button className="bg-gray-200 px-3 py-1 rounded text-sm" onClick={() => toast.dismiss(t.id)}>Hủy</button>
@@ -114,7 +114,7 @@ const BookingList = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className=" bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Quản lý Booking</h1>

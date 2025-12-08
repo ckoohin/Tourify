@@ -14,7 +14,7 @@ const FinancialPage = () => {
   ];
 
   return (
-    <div className="p-6 bg-slate-50 min-h-screen">
+    <div className="bg-slate-50 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Quản lý Tài chính</h1>
       </div>

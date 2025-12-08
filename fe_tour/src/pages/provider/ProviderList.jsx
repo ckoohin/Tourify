@@ -150,7 +150,7 @@ const ProviderList = () => {
   };
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto min-h-screen">
+    <div className="max-w-[1600px] mx-auto min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <div>
             <h1 className="text-2xl font-bold text-slate-800">Quản lý Nhà cung cấp</h1>

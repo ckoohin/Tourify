@@ -109,7 +109,7 @@ const FeedbackList = () => {
   };
 
   return (
-    <div className="p-6 bg-slate-50 min-h-screen font-sans text-slate-800">
+    <div className="bg-slate-50 min-h-screen font-sans text-slate-800">
       
       {/* 1. Header & Actions */}
       <div className="flex justify-between items-end mb-6">

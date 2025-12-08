@@ -4,12 +4,10 @@ import RoleList from './RoleList';
 import PermissionList from './PermissionList';
 
 export default function RBACPage() {
-  // State để chuyển Tab
   const [activeTab, setActiveTab] = useState('roles');
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Breadcrumbs & Title */}
+    <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col gap-1 mb-2">
         <div className="text-sm text-slate-500 mb-1">
           Trang chủ &gt; Quản trị hệ thống &gt; <span className="text-slate-800 font-medium">Vai trò & Phân quyền</span>
