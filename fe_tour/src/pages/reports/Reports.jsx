@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DollarSign, Calendar, Users, TrendingUp } from 'lucide-react';
+import { DollarSign, Calendar, Users, TrendingUp, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver'; 
 
 const API_BASE_URL = 'http://localhost:5000/api/v1/dashboard';
 
@@ -73,7 +75,7 @@ const Reports = () => {
       <div>
         <p className="text-gray-500 text-sm font-medium mb-1">{title}</p>
         <p className={`text-2xl font-bold ${color}`}>
-          {prefix}{typeof value === 'number' && prefix ? formatCurrency(value) : value.toLocaleString()}
+          {prefix}{typeof value === 'number' && prefix ? formatCurrency(value) : (typeof value === 'number' ? value.toLocaleString() : value)}
         </p>
       </div>
       <div className={`${color} bg-opacity-10 p-4 rounded-full`}>
@@ -81,6 +83,45 @@ const Reports = () => {
       </div>
     </div>
   );
+
+  const exportToExcel = () => {
+    const topToursData = dashboardData.toursRevenue
+      .sort((a, b) => Number(b.remaining_amount) - Number(a.remaining_amount))
+      .slice(0, 10)
+      .map((tour, index) => ({
+        'STT': index + 1,
+        'Tên Tour': tour.name,
+        'Doanh Thu (VND)': tour.remaining_amount, 
+      }));
+
+    const bookingStatusData = dashboardData.bookingStatus.map(status => ({
+      'Trạng Thái Gốc': status.booking_status,
+      'Trạng Thái': statusLabels[status.booking_status] || 'Không xác định',
+      'Số Lượng Booking': status.booking_count,
+    }));
+    
+    const wb = XLSX.utils.book_new();
+    
+    const ws1 = XLSX.utils.json_to_sheet(topToursData);
+    XLSX.utils.book_append_sheet(wb, ws1, "Top 10 Tour Doanh Thu");
+    
+    const ws2 = XLSX.utils.json_to_sheet(bookingStatusData);
+    XLSX.utils.book_append_sheet(wb, ws2, "Trạng Thái Booking");
+
+    const overallData = [
+      ['Tổng Doanh Thu', dashboardData.profit],
+      ['Tổng Booking', dashboardData.totalBooking],
+      ['Tổng Khách Hàng', dashboardData.totalCustomer],
+      ['Trung Bình/Booking', dashboardData.totalBooking > 0 ? Math.round(dashboardData.profit / dashboardData.totalBooking) : 0]
+    ];
+    const ws3 = XLSX.utils.aoa_to_sheet(overallData);
+    XLSX.utils.book_append_sheet(wb, ws3, "Tổng Quan");
+
+    const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(data, `BaoCao_Dashboard_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+  };
 
   if (loading) {
     return (
@@ -91,11 +132,21 @@ const Reports = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard Thống Kê Tour</h1>
-          <p className="text-gray-600">Tổng quan về hoạt động kinh doanh</p>
+        
+        <div className="mb-4 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard Thống Kê Tour</h1>
+            <p className="text-gray-600">Tổng quan về hoạt động kinh doanh</p>
+          </div>
+          <button
+            onClick={exportToExcel}
+            className="flex items-center bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow transition-colors"
+          >
+            <Download className="w-5 h-5 mr-2" />
+            Xuất Excel
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -127,8 +178,8 @@ const Reports = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-md p-6 lg:col-span-2">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Doanh Thu Theo Tour</h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={dashboardData.toursRevenue.slice(0, 10)}>
@@ -141,7 +192,7 @@ const Reports = () => {
                   interval={0}
                   tick={{ fontSize: 12 }}
                 />
-                <YAxis />
+                <YAxis tickFormatter={(value) => formatCurrency(value)} />
                 <Tooltip 
                   formatter={(value) => formatCurrency(value)}
                   labelStyle={{ color: '#374151' }}
@@ -151,7 +202,8 @@ const Reports = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="bg-white rounded-lg shadow-md p-6">
+          
+          <div className="bg-white rounded-lg shadow-md p-6 lg:col-span-1">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Trạng Thái Booking</h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -159,11 +211,12 @@ const Reports = () => {
                   data={dashboardData.bookingStatus}
                   cx="50%"
                   cy="50%"
+                  innerRadius={60}
+                  outerRadius={100}
                   labelLine={false}
                   label={({ booking_status, percent }) => 
-                    `${statusLabels[booking_status]} ${(percent * 100).toFixed(0)}%`
+                    `${statusLabels[booking_status]}: ${(percent * 100).toFixed(1)}%`
                   }
-                  outerRadius={80}
                   fill="#8884d8"
                   dataKey="booking_count"
                 >
@@ -171,7 +224,11 @@ const Reports = () => {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                    formatter={(value, name, props) => [value, statusLabels[props.payload.booking_status]]}
+                    labelStyle={{ color: '#374151' }}
+                />
+                <Legend formatter={(value) => statusLabels[value]} />
               </PieChart>
             </ResponsiveContainer>
           </div>
