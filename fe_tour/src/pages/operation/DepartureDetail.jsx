@@ -4,14 +4,12 @@ import {
   Users, Bus, Receipt, FileText, UserCog, 
   Clock, MapPin, AlertCircle, Edit, ArrowLeft,
   CheckCircle, PlayCircle, Star, ChevronDown, RefreshCcw, Lock,
-  ClipboardCheck // [NEW] Import icon cho tab checkin
+  ClipboardCheck, MessageSquare, Briefcase, Grid 
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Services
 import departureService from '../../services/api/departureService';
 
-// Components
 import DepartureStatusBadge, { STATUS_CONFIG } from '../../components/operations/DepartureStatusBadge';
 import DepartureFormModal from '../../components/operations/DepartureFormModal'; 
 import GuestList from '../../components/operations/GuestList';
@@ -20,8 +18,10 @@ import StaffAssignmentManager from '../../components/operations/staff/StaffAssig
 import TourLogList from '../../components/operations/log/TourLogList';
 import TourExpenseManager from '../../components/operations/expenses/TourExpenseManager';
 import TourSupplierList from '../../components/suppliers/ratings/TourSupplierList';
-
 import ActivityCheckinManager from '../../components/operations/checkin/ActivityCheckinManager'; 
+
+import GuestRequestManager from '../../components/operations/guest-requests/GuestRequestManager';
+import TourTransportManager from '../../components/operations/transport/TourTransportManager';
 
 const DepartureDetail = () => {
   const { id } = useParams();
@@ -112,18 +112,6 @@ const DepartureDetail = () => {
 
   const isReadOnly = false; 
 
-  const TABS = [
-      { id: 'guests', label: 'Danh sách Khách', icon: Users, count: departure.confirmed_guests },
-      { id: 'services', label: 'Dịch vụ & Vận chuyển', icon: Bus, count: (departure.service_bookings?.length || 0) + (departure.transports?.length || 0) },
-      { id: 'staff', label: 'Nhân sự', icon: UserCog, count: departure.staff_assignments?.length },
-      // [NEW] Tab Check-in
-      { id: 'checkin', label: 'Điểm danh', icon: ClipboardCheck },
-      { id: 'logs', label: 'Nhật ký Tour', icon: FileText },
-      { id: 'expenses', label: 'Chi phí & Quyết toán', icon: Receipt },
-      { id: 'ratings', label: 'Đánh giá NCC', icon: Star }, 
-  ];
-
-  // Tính toán % tiến độ bán tour
   const currentGuests = departure.confirmed_guests || 0;
   const maxGuests = departure.max_guests || 1; 
   const progressPercent = Math.round((currentGuests / maxGuests) * 100);
@@ -134,10 +122,56 @@ const DepartureDetail = () => {
       return 'bg-blue-600'; 
   };
 
+  // --- CẤU HÌNH NHÓM TAB (2 Cards x 4 Tabs) ---
+  const CLIENT_TABS = [
+      { id: 'guests', label: 'Danh sách Khách', icon: Users, count: departure.confirmed_guests },
+      { id: 'requests', label: 'Yêu cầu', icon: MessageSquare, count: 0 },
+      { id: 'checkin', label: 'Điểm danh', icon: ClipboardCheck },
+      { id: 'logs', label: 'Nhật ký', icon: FileText }
+  ];
+
+  const OPERATION_TABS = [
+      { id: 'services', label: 'Dịch vụ & vận chuyển', icon: Bus, count: (departure.service_bookings?.length || 0) + (departure.transports?.length || 0) },
+      { id: 'staff', label: 'Nhân sự', icon: UserCog, count: departure.staff_assignments?.length },
+      { id: 'expenses', label: 'Chi phí', icon: Receipt },
+      { id: 'ratings', label: 'Đánh giá', icon: Star }
+  ];
+
+  const TabItem = ({ tab, isActive, onClick }) => (
+      <button
+          onClick={onClick}
+          className={`
+              flex flex-col items-center justify-center gap-1.5 py-3 rounded-lg transition-all duration-200 group relative overflow-hidden
+              ${isActive 
+                  ? 'bg-blue-600 text-white shadow-md ring-2 ring-blue-600 ring-offset-1' 
+                  : 'bg-slate-50 text-slate-600 hover:bg-blue-50 hover:text-blue-600 border border-transparent hover:border-blue-100'
+              }
+          `}
+      >
+          <div className="relative">
+              <tab.icon size={20} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} strokeWidth={isActive ? 2.5 : 2} />
+              {/* Badge số lượng (nếu có) */}
+              {tab.count !== undefined && tab.count > 0 && (
+                  <span className={`absolute -top-2 -right-3 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${
+                      isActive ? 'bg-white text-blue-600 border-white' : 'bg-red-500 text-white border-white'
+                  }`}>
+                      {tab.count}
+                  </span>
+              )}
+          </div>
+          <span className="text-[11px] font-bold uppercase tracking-wide">{tab.label}</span>
+          
+          {/* Active Indicator Shape (Optional decoration) */}
+          {isActive && (
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
+          )}
+      </button>
+  );
+
   return (
     <div className="min-h-screen bg-slate-50 pb-20 font-sans text-slate-800">
       
-      {/* 1. TOP HEADER (Static - Scrolls away) */}
+      {/* 1. TOP HEADER (Thông tin cơ bản) */}
       <header className="bg-white border-b border-slate-200 pt-5 pb-5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Breadcrumb */}
@@ -174,9 +208,8 @@ const DepartureDetail = () => {
                     </div>
                 </div>
 
-                {/* Right Side: Actions & Stats */}
+                {/* Right Side: Actions */}
                 <div className="flex flex-col items-start lg:items-end gap-4 min-w-[280px]">
-                     {/* Action Buttons */}
                      {!isReadOnly && (
                         <div className="flex items-center gap-3">
                             <div className="relative" ref={statusMenuRef}>
@@ -188,7 +221,6 @@ const DepartureDetail = () => {
                                     <span>Trạng thái</span>
                                     <ChevronDown size={14} className={`transition-transform duration-200 ${isStatusMenuOpen ? 'rotate-180' : ''}`}/>
                                 </button>
-                                {/* Dropdown Menu */}
                                 {isStatusMenuOpen && (
                                     <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden ring-1 ring-black/5">
                                         {Object.entries(STATUS_CONFIG).map(([key, config]) => (
@@ -215,7 +247,6 @@ const DepartureDetail = () => {
                             </button>
                         </div>
                     )}
-
                     {/* Sales Progress */}
                     <div className="w-full bg-slate-50 p-3 rounded-xl border border-slate-100">
                         <div className="flex justify-between text-xs mb-1.5">
@@ -236,43 +267,54 @@ const DepartureDetail = () => {
         </div>
       </header>
 
-      {/* 2. STICKY TABS NAVIGATION */}
-      <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all">
+      {/* 2. STICKY CARDS NAVIGATION (Card Layout) */}
+      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex space-x-6 overflow-x-auto scrollbar-hide">
-                {TABS.map(tab => {
-                    const isActive = activeTab === tab.id;
-                    return (
-                        <button
-                            key={tab.id}
-                            onClick={() => {
-                                setActiveTab(tab.id);
-                                window.scrollTo({ top: 0, behavior: 'smooth' }); 
-                            }}
-                            className={`flex items-center gap-2 py-4 text-sm font-medium border-b-2 transition-all whitespace-nowrap select-none ${
-                                isActive 
-                                ? 'border-blue-600 text-blue-600' 
-                                : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
-                            }`}
-                        >
-                            <tab.icon size={18} className={`transition-colors ${isActive ? 'text-blue-600' : 'text-slate-400 group-hover:text-slate-600'}`}/>
-                            {tab.label}
-                            {tab.count !== undefined && (
-                                <span className={`ml-1 px-2 py-0.5 rounded-full text-xs font-bold transition-colors ${
-                                    isActive ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
-                                }`}>
-                                    {tab.count}
-                                </span>
-                            )}
-                        </button>
-                    );
-                })}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                
+                {/* CARD 1: KHÁCH HÀNG & YÊU CẦU */}
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-2">
+                    <div className="flex items-center gap-2 px-2 mb-2">
+                        <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><Users size={14}/></div>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Thông tin Khách hàng</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                        {CLIENT_TABS.map(tab => (
+                            <TabItem 
+                                key={tab.id} 
+                                tab={tab} 
+                                isActive={activeTab === tab.id} 
+                                onClick={() => { setActiveTab(tab.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                            />
+                        ))}
+                    </div>
+                </div>
+
+                {/* CARD 2: VẬN HÀNH & DỊCH VỤ */}
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-2">
+                    <div className="flex items-center gap-2 px-2 mb-2">
+                        <div className="p-1.5 bg-purple-50 text-purple-600 rounded-lg"><Briefcase size={14}/></div>
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Vận hành Tour</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                        {OPERATION_TABS.map(tab => (
+                            <TabItem 
+                                key={tab.id} 
+                                tab={tab} 
+                                isActive={activeTab === tab.id} 
+                                onClick={() => { setActiveTab(tab.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                            />
+                        ))}
+                    </div>
+                </div>
+
             </div>
         </div>
       </div>
 
       {/* 3. MAIN CONTENT */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        
         {/* Notes Alert */}
         {departure.notes && (
             <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 text-sm text-amber-900 shadow-sm">
@@ -287,11 +329,27 @@ const DepartureDetail = () => {
         {/* Dynamic Content Area */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-h-[500px] overflow-hidden">
             {activeTab === 'guests' && <GuestList departureId={id} maxGuests={departure.max_guests} />}
-            {activeTab === 'services' && <ServiceList departureId={id} />}
+            
+            {activeTab === 'requests' && <GuestRequestManager departureId={id} />}
+
+            {activeTab === 'services' && (
+                <div className="flex flex-col h-full">
+                    <ServiceList departureId={id} />
+                    <div className="border-t border-slate-200 my-6"></div>
+                    <div className="px-6 pb-6">
+                        <TourTransportManager departureId={id} />
+                    </div>
+                </div>
+            )}
+
             {activeTab === 'staff' && <StaffAssignmentManager departureId={id} assignments={departure.staff_assignments || []} onRefresh={fetchDepartureDetail} departureStatus={departure.status} departureDates={{start: departure.departure_date, end: departure.return_date}} />}
             
-            {/* [NEW] Tab Check-in */}
-            {activeTab === 'checkin' && <ActivityCheckinManager departureId={id} />}
+            {activeTab === 'checkin' && (
+                <ActivityCheckinManager 
+                    departureId={id} 
+                    startDate={departure.departure_date} 
+                />
+            )}
 
             {activeTab === 'logs' && <TourLogList departureId={id} />}
             {activeTab === 'expenses' && <TourExpenseManager departureId={id} isReadOnly={isReadOnly} />}

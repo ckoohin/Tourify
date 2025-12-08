@@ -12,7 +12,6 @@ import {
   Home, 
 } from 'lucide-react';
 
-// --- BREADCRUMBS (GIỮ NGUYÊN) ---
 const BREADCRUMB_NAMES = {
   'dashboard': 'Dashboard',
   'categories': 'Quản lý Danh mục',
@@ -32,6 +31,7 @@ const BREADCRUMB_NAMES = {
   'quotes': 'Tạo báo giá',
   'booking-kanban': 'Trạng thái booking',
   'finance/transactions': 'Tài chính',
+  'feedbacks': 'Phản hồi'
 };
 
 const Breadcrumbs = () => {
