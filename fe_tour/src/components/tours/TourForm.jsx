@@ -442,8 +442,8 @@ const TourForm = ({
                                 {errors.category_id && <p className="text-red-500 text-xs mt-1">{errors.category_id}</p>}
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <InputGroup label="Số ngày" name="duration_days" type="number" min="0" value={formData.duration_days} onChange={handleChange} />
-                                <InputGroup label="Số đêm" name="duration_nights" type="number" min="0" value={formData.duration_nights} onChange={handleChange} />
+                                <InputGroup label="Số ngày" name="duration_days" type="number" min="0" error={errors.duration_days} value={formData.duration_days} onChange={handleChange} />
+                                <InputGroup label="Số đêm" name="duration_nights" type="number" min="0" error={errors.duration_nights} value={formData.duration_nights} onChange={handleChange} />
                             </div>
                         </div>
                     </div>
