@@ -20,7 +20,7 @@ const BREADCRUMB_NAMES = {
   'tour-versions': 'Quản lý Phiên bản Tour',
   'create': 'Tạo mới',
   'edit': 'Chỉnh sửa',
-  'schedules': 'Lịch khởi hành',
+  'departures': 'Lịch khởi hành',
   'attractions': 'Điểm tham quan',
   'bookings': 'Quản lý Booking',
   'customers': 'Khách hàng',
@@ -29,7 +29,9 @@ const BREADCRUMB_NAMES = {
   'reports': 'Báo cáo',
   'settings': 'Cài đặt',
   'staff': 'Nhân viên',
-  'quotes': 'Tạo báo giá'
+  'quotes': 'Tạo báo giá',
+  'booking-kanban': 'Trạng thái booking',
+  'finance/transactions': 'Tài chính',
 };
 
 const Breadcrumbs = () => {

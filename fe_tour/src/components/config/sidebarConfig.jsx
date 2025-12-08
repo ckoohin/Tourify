@@ -28,6 +28,14 @@ export const SIDEBAR_CONFIG = [
   // 1. VAI TRÒ: ADMIN (ĐIỀU HÀNH TOUR)
   // =================================================================
   {
+    label: 'Dashboard tổng quan',
+    icon: BarChart3,
+    allowedRoles: [ROLES.ADMIN],
+    path: '/dashboard',
+    permissions: ['reports.dashboard'],
+    children: []
+  },
+  {
     label: 'Quản lý Danh mục Tour',
     icon: List,
     path: '/categories',
@@ -69,12 +77,10 @@ export const SIDEBAR_CONFIG = [
   {
     label: 'Quản lý Khách hàng',
     icon: Users,
+    path: '/customers',
     allowedRoles: [ROLES.ADMIN],
     permissions: ['customer.manage', 'customers.history'],
     children: [
-      { label: 'Danh sách khách hàng', path: '/customers', permissions: ['customer.manage'] },
-      { label: 'Lịch sử giao dịch nội bộ', path: '/customers/transactions', permissions: ['customers.history'] },     
-      { label: 'Ghi nhận yêu cầu đặc biệt', path: '/admin/customers/requests', permissions: ['customers.requests'] }
     ]
   },
   {
@@ -88,32 +94,27 @@ export const SIDEBAR_CONFIG = [
   {
     label: 'Quản lý Nhân sự',
     icon: UserCog,
+    path: '/staff',
     allowedRoles: [ROLES.ADMIN],
     permissions: ['staff.manage', 'staff.schedules'],
     children: [
-      { label: 'Quản lý hồ sơ nhân sự', path: '/staff', permissions: ['staff.manage'] },
-      { label: 'Lịch làm việc phân công', path: '/operations/staff-allocation', permissions: ['guide.schedule'] },
-      { label: 'Lịch làm việc & Phân công', path: '/admin/staff/schedules', permissions: ['staff.schedules'] }
     ]
   },
   {
     label: 'Quản lý Nhà cung cấp',
     icon: Building2,
+    path: '/providers',
     allowedRoles: [ROLES.ADMIN],
     permissions: ['suppliers.manage'],
     children: [
-      { label: 'Danh sách đối tác', path: '/providers', permissions: ['suppliers.manage'] },
-      { label: 'Đánh giá chất lượng', path: '/operations/supplier-ratings', permissions: ['suppliers.ratings'] },
-      { label: 'Quản lý hợp đồng', path: '/admin/suppliers/contracts', permissions: ['suppliers.contracts'] }
     ]
   },
   {
     label: 'Báo cáo thống kê',
     icon: BarChart3,
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['reports.dashboard', 'reports.detail'],
+    permissions: ['reports.detail'],
     children: [
-      { label: 'Dashboard tổng quan', path: '/dashboard', permissions: ['reports.dashboard'] },
       { label: 'Báo cáo chi tiết', path: '/reports', permissions: ['reports.detail'] },
       { label: 'Tỷ lệ chuyển đổi booking', path: '/admin/reports/conversion', permissions: ['reports.conversion'] }
     ]
@@ -132,16 +133,6 @@ export const SIDEBAR_CONFIG = [
   // 2. VAI TRÒ: HƯỚNG DẪN VIÊN (GUIDE)
   // =================================================================
   {
-    label: 'Quản lý Lịch trình cá nhân',
-    icon: CalendarDays,
-    allowedRoles: [ROLES.GUIDE],
-    permissions: ['guide.schedule', 'guide.tours'],
-    children: [
-      
-      { label: 'Chi tiết tour sắp dẫn', path: '/guide/my-tours', permissions: ['guide.tours'] }
-    ]
-  },
-  {
     label: 'Phản hồi & Đánh giá',
     icon: Star,
     allowedRoles: [ROLES.GUIDE],
@@ -153,14 +144,4 @@ export const SIDEBAR_CONFIG = [
   // =================================================================
   // 3. VAI TRÒ: NHÀ CUNG CẤP (SUPPLIER)
   // =================================================================
-  {
-    label: 'Quản lý hợp đồng',
-    icon: FileCheck,
-    allowedRoles: [ROLES.SUPPLIER],
-    permissions: ['supplier.contracts'],
-    children: [
-      { label: 'Xem hợp đồng', path: '/supplier/contracts', permissions: ['supplier.contracts'] },
-      { label: 'Gửi hồ sơ liên quan (hóa đơn)', path: '/supplier/documents', permissions: ['supplier.documents'] }
-    ]
-  },
 ];
