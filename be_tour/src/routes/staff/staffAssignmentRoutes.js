@@ -31,6 +31,12 @@ router.get('/',
   StaffAssignmentController.getAll
 );
 
+router.get('/my-assignments',
+  AuthMiddleware.authenticate,
+  authorize('tours.view'),
+  StaffAssignmentController.getMyAssignments
+);
+
 router.get('/:id',
   AuthMiddleware.authenticate,
   authorize('tours.view'),
@@ -56,10 +62,16 @@ router.delete('/:id',
   StaffAssignmentController.delete
 );
 
-router.get('/',
+router.get('/my-assignments/:departureId',
   AuthMiddleware.authenticate,
   authorize('tours.view'),
-  StaffAssignmentController.getAll
+  StaffAssignmentController.getMyAssignmentDetail
+);
+
+router.get('/my-assignments/stats/summary',
+  AuthMiddleware.authenticate,
+  authorize('tours.view'),
+  StaffAssignmentController.getMyStats
 );
 
 module.exports = router;

@@ -28,7 +28,7 @@ export const SIDEBAR_CONFIG = [
   // 1. VAI TRÒ: ADMIN (ĐIỀU HÀNH TOUR)
   // =================================================================
   {
-    label: 'Dashboard tổng quan',
+    label: 'Dashboard',
     icon: BarChart3,
     allowedRoles: [ROLES.ADMIN],
     path: '/dashboard',

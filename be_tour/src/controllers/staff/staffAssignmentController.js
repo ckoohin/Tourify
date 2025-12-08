@@ -297,6 +297,133 @@ class StaffAssignmentController {
       });
     }
   }
+  
+  static async getMyAssignments(req, res) {
+    try {
+      const { 
+        page = 1, 
+        limit = 10,
+        status,
+        date_from,
+        date_to,
+        role
+      } = req.query;
+
+      const userId = req.user.id;
+      
+      const [staff] = await require('../../config/db').query(
+        'SELECT id FROM staff WHERE user_id = ?',
+        [userId]
+      );
+
+      if (!staff) {
+        return ApiResponse.error(res, {
+          message: 'Không tìm thấy thông tin nhân viên',
+          statusCode: 404
+        });
+      }
+
+      const result = await StaffAssignment.getMyAssignments(staff.id, {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        status,
+        date_from,
+        date_to,
+        role
+      });
+
+      return ApiResponse.paginate(res, {
+        message: 'Lấy danh sách tour được phân công thành công',
+        data: result.data,
+        page: result.pagination.currentPage,
+        limit: result.pagination.pageSize,
+        total: result.pagination.totalItems
+      });
+    } catch (error) {
+      console.error('Get my assignments error:', error);
+      return ApiResponse.error(res, {
+        message: 'Lỗi khi lấy danh sách tour',
+        errors: error.message
+      });
+    }
+  }
+
+  static async getMyAssignmentDetail(req, res) {
+    try {
+      const { departureId } = req.params;
+
+      const userId = req.user.id;
+      
+      const [staff] = await require('../../config/db').query(
+        'SELECT id FROM staff WHERE user_id = ?',
+        [userId]
+      );
+
+      if (!staff) {
+        return ApiResponse.error(res, {
+          message: 'Không tìm thấy thông tin nhân viên',
+          statusCode: 404
+        });
+      }
+
+      const departure = await StaffAssignment.getMyAssignmentDetail(staff.id, departureId);
+
+      return ApiResponse.success(res, {
+        message: 'Lấy chi tiết tour thành công',
+        data: departure
+      });
+    } catch (error) {
+      console.error('Get my assignment detail error:', error);
+      
+      if (error.message === 'Bạn không được phân công vào tour này') {
+        return ApiResponse.error(res, {
+          message: error.message,
+          statusCode: 403
+        });
+      }
+
+      return ApiResponse.error(res, {
+        message: 'Lỗi khi lấy chi tiết tour',
+        errors: error.message
+      });
+    }
+  }
+
+  static async getMyStats(req, res) {
+    try {
+      const { date_from, date_to } = req.query;
+
+      const userId = req.user.id;
+      
+      const [staff] = await require('../../config/db').query(
+        'SELECT id FROM staff WHERE user_id = ?',
+        [userId]
+      );
+
+      if (!staff) {
+        return ApiResponse.error(res, {
+          message: 'Không tìm thấy thông tin nhân viên',
+          statusCode: 404
+        });
+      }
+
+      const stats = await StaffAssignment.getMyStats(staff.id, {
+        date_from,
+        date_to
+      });
+
+      return ApiResponse.success(res, {
+        message: 'Lấy thống kê thành công',
+        data: stats
+      });
+    } catch (error) {
+      console.error('Get my stats error:', error);
+      return ApiResponse.error(res, {
+        message: 'Lỗi khi lấy thống kê',
+        errors: error.message
+      });
+    }
+  }
 }
 
 module.exports = StaffAssignmentController;
