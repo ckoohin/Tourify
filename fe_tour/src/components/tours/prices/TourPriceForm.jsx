@@ -121,14 +121,14 @@ const TourPriceForm = ({ isOpen, onClose, onSubmit, initialData, tourVersionId }
             {/* Số lượng khách áp dụng */}
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Min Pax</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Số khách tối thiểu</label>
                     <div className="relative">
                         <Users className="absolute left-3 top-2.5 text-slate-400" size={16}/>
                         <input type="number" name="min_pax" value={formData.min_pax} onChange={handleChange} className="w-full pl-9 pr-3 py-2 border rounded-lg" placeholder="VD: 1"/>
                     </div>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Max Pax</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Số khách tối đa</label>
                     <div className="relative">
                         <Users className="absolute left-3 top-2.5 text-slate-400" size={16}/>
                         <input type="number" name="max_pax" value={formData.max_pax} onChange={handleChange} className={`w-full pl-9 pr-3 py-2 border rounded-lg ${errors.max_pax ? 'border-red-500' : ''}`} placeholder="VD: 10"/>

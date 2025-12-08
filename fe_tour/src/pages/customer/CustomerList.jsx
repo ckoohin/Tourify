@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import customerService from '../../services/api/CustomerService';
+import customerService from '../../services/api/customerService';
 import CustomerHeader from '../../components/customers/CustomerHeader';
 import CustomerFilters, { filterAndPaginateCustomers } from '../../components/customers/CustomerFilters'; 
 import CustomerTable from '../../components/customers/CustomerTable';

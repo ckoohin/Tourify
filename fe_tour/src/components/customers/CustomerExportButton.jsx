@@ -2,7 +2,7 @@ import React from 'react';
 import { Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
-import customerService from '../../services/api/CustomerService';
+import customerService from '../../services/api/customerService';
 
 const CustomerExportButton = ({ filters }) => {
   const handleExport = async () => {
