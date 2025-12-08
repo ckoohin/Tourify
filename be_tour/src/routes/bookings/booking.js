@@ -76,6 +76,13 @@ router.post(
             .withMessage("Vui lòng chỉ nhập số")
             .isLength({ max: 11 })
             .withMessage("Trường này tối đa 11 ký tự"),
+        body("total_senior")
+            .optional({ checkFalsy: true })
+            .trim()
+            .isInt()
+            .withMessage("Vui lòng chỉ nhập số")
+            .isLength({ max: 11 })
+            .withMessage("Trường này tối đa 11 ký tự"),
         body("total_guests")
             .optional({ checkFalsy: true })
             .trim()

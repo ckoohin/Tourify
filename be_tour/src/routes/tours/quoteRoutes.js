@@ -64,15 +64,23 @@ router.post(
             .isDate()
             .withMessage("Ngày khởi hành không hợp lệ"),
         body("adult_count")
-            .optional()
+            .optional({ checkFalsy: true })
             .isInt({ min: 0 })
             .withMessage("Số người lớn phải là số nguyên không âm"),
         body("child_count")
-            .optional()
+            .optional({ checkFalsy: true })
             .isInt({ min: 0 })
             .withMessage("Số trẻ em phải là số nguyên không âm"),
+        body("infant_count")
+            .optional({ checkFalsy: true })
+            .isInt({ min: 0 })
+            .withMessage("Số em bé phải là số nguyên không âm"),
+        body("senior_count")
+            .optional({ checkFalsy: true })
+            .isInt({ min: 0 })
+            .withMessage("Số người cao tuổi phải là số nguyên không âm"),
         body("discount_amount")
-            .optional()
+            .optional({ checkFalsy: true })
             .isFloat({ min: 0 })
             .withMessage("Số tiền giảm giá phải là số dương"),
     ],
