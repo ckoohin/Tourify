@@ -57,7 +57,7 @@ const TourTransportManager = ({ departureId }) => {
             {/* Header */}
             <div className="flex justify-between items-center mb-2">
                 <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-                    <Bus size={20} className="text-blue-600"/> Quản lý Vận chuyển
+                    <Bus size={20} className="text-blue-600"/> Phương tiện di chuyển
                 </h3>
                 <button 
                     onClick={() => { setEditingTransport(null); setIsFormOpen(true); }}

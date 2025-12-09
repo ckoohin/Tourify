@@ -25,7 +25,6 @@ import StaffEdit from './pages/staff/StaffEdit';
 import ProviderList from './pages/provider/ProviderList';
 import ProviderCreate from './pages/provider/ProviderCreate';
 import ProviderEdit from './pages/provider/ProviderEdit';
-import Reports from './pages/reports/Reports';
 import Settings from './pages/settings/Settings';
 import NotFound from './pages/NotFound.jsx';
 import RBACPage from './pages/rbac/RBACPage';
@@ -38,6 +37,9 @@ import DepartureDetail from './pages/operation/DepartureDetail';
 import ServiceList from './components/operations/service/ServiceList.jsx';
 import FinancialPage from './pages/financial/FinancialPage.jsx';
 import FeedbackList from './pages/feedback/FeedbackList.jsx';
+import Reports from './pages/reports/Reports.jsx';
+import GuideTourManager from './pages/operation/tour-guide/GuideTourManager.jsx';
+import DepartureDetailGuide from './pages/operation/tour-guide/DepartureDetailGuide.jsx';
 
 // ... import other pages
 
@@ -107,6 +109,9 @@ function App() {
 
             {/* Feedback */}
             <Route path="/feedbacks" element={<FeedbackList />} />
+
+            <Route path="/departures_guide" element={<GuideTourManager />} />
+            <Route  path="/my-assignments/:departureId" element={<DepartureDetailGuide />}/>
 
 
             {/* Settings */}

@@ -3,28 +3,28 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Users, Bus, Receipt, FileText, UserCog, 
   Clock, MapPin, AlertCircle, Edit, ArrowLeft,
-  CheckCircle, PlayCircle, Star, ChevronDown, RefreshCcw, Lock,
-  ClipboardCheck, MessageSquare, Briefcase, Grid 
+  CheckCircle, Star, ChevronDown, RefreshCcw, Lock,
+  ClipboardCheck, MessageSquare, Briefcase
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 
-import departureService from '../../services/api/departureService';
+// --- REAL IMPORTS ---
+import staffAssignmentService from '../../../services/api/staffAssignmentService';
+import departureService from '../../../services/api/departureService';
 
-import DepartureStatusBadge, { STATUS_CONFIG } from '../../components/operations/DepartureStatusBadge';
-import DepartureFormModal from '../../components/operations/DepartureFormModal'; 
-import GuestList from '../../components/operations/GuestList';
-import ServiceList from '../../components/operations/service/ServiceList';
-import StaffAssignmentManager from '../../components/operations/staff/StaffAssignmentManager';
-import TourLogList from '../../components/operations/log/TourLogList';
-import TourExpenseManager from '../../components/operations/expenses/TourExpenseManager';
-import TourSupplierList from '../../components/suppliers/ratings/TourSupplierList';
-import ActivityCheckinManager from '../../components/operations/checkin/ActivityCheckinManager'; 
+import DepartureStatusBadge, { STATUS_CONFIG } from '../../../components/operations/DepartureStatusBadge';
+import DepartureFormModal from '../../../components/operations/DepartureFormModal'; 
+import GuestList from '../../../components/operations/GuestList';
+import StaffAssignmentManager from '../../../components/operations/staff/StaffAssignmentManager';
+import TourLogList from '../../../components/operations/log/TourLogList';
+import TourSupplierList from '../../../components/suppliers/ratings/TourSupplierList';
+import ActivityCheckinManager from '../../../components/operations/checkin/ActivityCheckinManager'; 
+import GuestRequestManager from '../../../components/operations/guest-requests/GuestRequestManager';
+import TourTransportManager from '../../../components/operations/transport/TourTransportManager';
 
-import GuestRequestManager from '../../components/operations/guest-requests/GuestRequestManager';
-import TourTransportManager from '../../components/operations/transport/TourTransportManager';
-
-const DepartureDetail = () => {
-  const { id } = useParams();
+const DepartureDetailGuide = () => {
+  // Lấy departureId từ URL (khớp với route /my-assignments/:departureId)
+  const { departureId } = useParams();
   const navigate = useNavigate();
   
   // State
@@ -49,21 +49,29 @@ const DepartureDetail = () => {
   }, []);
 
   // 1. Hàm load dữ liệu chi tiết Departure
+  // Dùng API getMyAssignmentDetail để đảm bảo Guide có quyền truy cập
   const fetchDepartureDetail = useCallback(async () => {
+    if (!departureId) return;
+
     try {
-        const res = await departureService.getById(id);
+        const res = await staffAssignmentService.getMyAssignmentDetail(departureId);
+        
         if (res.success) {
             setDeparture(res.data);
         } else {
-            toast.error("Không tải được thông tin chuyến đi");
+            toast.error(res.message || "Không tải được thông tin chuyến đi");
+            // Nếu lỗi 403 (Forbidden), đẩy về trang danh sách
+            if (res.status === 403) {
+                navigate('/departures_guide');
+            }
         }
     } catch (e) {
         console.error(e);
-        toast.error("Lỗi kết nối máy chủ");
+        toast.error("Lỗi kết nối hoặc không có quyền truy cập");
     } finally {
         setLoading(false);
     }
-  }, [id]);
+  }, [departureId, navigate]);
 
   // Load dữ liệu khi mount
   useEffect(() => {
@@ -77,12 +85,14 @@ const DepartureDetail = () => {
       if(!window.confirm(`Bạn có muốn thay đổi trạng thái thành "${statusLabel}"?`)) return;
       
       try {
-          await departureService.updateStatus(id, newStatus);
+          // Guide cập nhật trạng thái tour thông qua departureService
+          await departureService.updateStatus(departureId, newStatus);
           toast.success(`Đã cập nhật trạng thái: ${statusLabel}`);
           fetchDepartureDetail();
           setIsStatusMenuOpen(false);
       } catch (e) {
-          toast.error("Lỗi cập nhật trạng thái");
+          console.error(e);
+          toast.error(e.response?.data?.message || "Lỗi cập nhật trạng thái");
       }
   };
 
@@ -105,11 +115,12 @@ const DepartureDetail = () => {
             </div>
             <h3 className="text-xl font-bold text-slate-700">Không tìm thấy chuyến đi</h3>
             <p className="text-slate-500 mt-2 mb-6">Chuyến đi này có thể đã bị xóa hoặc không tồn tại.</p>
-            <button onClick={() => navigate(-1)} className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">Quay lại danh sách</button>
+            <button onClick={() => navigate('/departures_guide')} className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">Quay lại danh sách</button>
         </div>
       );
   }
 
+  // Guide có thể chỉnh sửa trạng thái và thông tin cơ bản
   const isReadOnly = false; 
 
   const currentGuests = departure.confirmed_guests || 0;
@@ -122,18 +133,17 @@ const DepartureDetail = () => {
       return 'bg-blue-600'; 
   };
 
-  // --- CẤU HÌNH NHÓM TAB (2 Cards x 4 Tabs) ---
+  // --- CẤU HÌNH NHÓM TAB ---
   const CLIENT_TABS = [
       { id: 'guests', label: 'Danh sách Khách', icon: Users, count: departure.confirmed_guests },
       { id: 'requests', label: 'Yêu cầu', icon: MessageSquare, count: 0 },
-      { id: 'checkin', label: 'Điểm danh', icon: ClipboardCheck },
+      
       { id: 'logs', label: 'Nhật ký', icon: FileText }
   ];
 
   const OPERATION_TABS = [
-      { id: 'services', label: 'Dịch vụ', icon: Bus, count: (departure.service_bookings?.length || 0) + (departure.transports?.length || 0) },
-      { id: 'staff', label: 'Nhân sự', icon: UserCog, count: departure.staff_assignments?.length },
-      { id: 'expenses', label: 'Chi phí', icon: Receipt },
+    { id: 'checkin', label: 'Điểm danh', icon: ClipboardCheck },
+      { id: 'services', label: 'Phương tiện', icon: Bus, count: (departure.service_bookings?.length || 0) + (departure.transports?.length || 0) },
       { id: 'ratings', label: 'Đánh giá', icon: Star }
   ];
 
@@ -161,7 +171,6 @@ const DepartureDetail = () => {
           </div>
           <span className="text-[11px] font-bold uppercase tracking-wide">{tab.label}</span>
           
-          {/* Active Indicator Shape (Optional decoration) */}
           {isActive && (
               <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
           )}
@@ -170,14 +179,15 @@ const DepartureDetail = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20 font-sans text-slate-800">
+      <Toaster position="top-right" />
       
-      {/* 1. TOP HEADER (Thông tin cơ bản) */}
+      {/* 1. TOP HEADER */}
       <header className="bg-white border-b border-slate-200 pt-5 pb-5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm text-slate-500 mb-4">
-                <button onClick={() => navigate('/departures')} className="hover:text-blue-600 flex items-center gap-1 transition-colors">
-                    <ArrowLeft size={16}/> Danh sách lịch
+                <button onClick={() => navigate('/departures_guide')} className="hover:text-blue-600 flex items-center gap-1 transition-colors">
+                    <ArrowLeft size={16}/> Danh sách nhiệm vụ
                 </button>
                 <span className="text-slate-300">/</span>
                 <span className="font-medium text-slate-700">{departure.departure_code}</span>
@@ -212,41 +222,12 @@ const DepartureDetail = () => {
                 <div className="flex flex-col items-start lg:items-end gap-4 min-w-[280px]">
                      {!isReadOnly && (
                         <div className="flex items-center gap-3">
-                            <div className="relative" ref={statusMenuRef}>
-                                <button 
-                                    onClick={() => setIsStatusMenuOpen(!isStatusMenuOpen)}
-                                    className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 flex items-center gap-2 transition-all shadow-sm active:scale-95"
-                                >
-                                    <RefreshCcw size={16} className={isStatusMenuOpen ? "text-blue-600" : "text-slate-500"}/>
-                                    <span>Trạng thái</span>
-                                    <ChevronDown size={14} className={`transition-transform duration-200 ${isStatusMenuOpen ? 'rotate-180' : ''}`}/>
-                                </button>
-                                {isStatusMenuOpen && (
-                                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden ring-1 ring-black/5">
-                                        {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-                                            <button
-                                                key={key}
-                                                onClick={() => handleStatusChange(key)}
-                                                disabled={departure.status === key}
-                                                className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-slate-50 transition-colors ${departure.status === key ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-700'}`}
-                                            >
-                                                <span className={`w-2.5 h-2.5 rounded-full ring-2 ring-white shadow-sm ${config.color.split(' ')[0].replace('bg-', 'bg-').replace('border-', 'bg-')}`}></span>
-                                                {config.label}
-                                                {departure.status === key && <CheckCircle size={14} className="ml-auto text-blue-600"/>}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
 
-                            <button 
-                                onClick={() => setIsEditModalOpen(true)}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-md shadow-blue-200 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2 active:scale-95"
-                            >
-                                <Edit size={16}/> <span>Sửa</span>
-                            </button>
+                            {/* Nút Sửa */}
+    
                         </div>
                     )}
+                    
                     {/* Sales Progress */}
                     <div className="w-full bg-slate-50 p-3 rounded-xl border border-slate-100">
                         <div className="flex justify-between text-xs mb-1.5">
@@ -267,7 +248,7 @@ const DepartureDetail = () => {
         </div>
       </header>
 
-      {/* 2. STICKY CARDS NAVIGATION (Card Layout) */}
+      {/* 2. STICKY NAVIGATION */}
       <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -328,35 +309,41 @@ const DepartureDetail = () => {
 
         {/* Dynamic Content Area */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-h-[500px] overflow-hidden">
-            {activeTab === 'guests' && <GuestList departureId={id} maxGuests={departure.max_guests} />}
+            {activeTab === 'guests' && <GuestList departureId={departureId} maxGuests={departure.max_guests} />}
             
-            {activeTab === 'requests' && <GuestRequestManager departureId={id} />}
+            {activeTab === 'requests' && <GuestRequestManager departureId={departureId} />}
 
             {activeTab === 'services' && (
                 <div className="flex flex-col h-full">
-                    <ServiceList departureId={id} />
                     <div className="border-t border-slate-200 my-6"></div>
                     <div className="px-6 pb-6">
-                        <TourTransportManager departureId={id} />
+                        <TourTransportManager departureId={departureId} />
                     </div>
                 </div>
             )}
 
-            {activeTab === 'staff' && <StaffAssignmentManager departureId={id} assignments={departure.staff_assignments || []} onRefresh={fetchDepartureDetail} departureStatus={departure.status} departureDates={{start: departure.departure_date, end: departure.return_date}} />}
+            {activeTab === 'staff' && (
+                <StaffAssignmentManager 
+                    departureId={departureId} 
+                    assignments={departure.staff_assignments || []} 
+                    onRefresh={fetchDepartureDetail} 
+                    departureStatus={departure.status} 
+                    departureDates={{start: departure.departure_date, end: departure.return_date}} 
+                />
+            )}
             
             {activeTab === 'checkin' && (
                 <ActivityCheckinManager 
-                    departureId={id} 
+                    departureId={departureId} 
                     startDate={departure.departure_date} 
                 />
             )}
 
-            {activeTab === 'logs' && <TourLogList departureId={id} />}
-            {activeTab === 'expenses' && <TourExpenseManager departureId={id} isReadOnly={isReadOnly} />}
+            {activeTab === 'logs' && <TourLogList departureId={departureId} />}
             
             {activeTab === 'ratings' && (
                 departure.status === 'completed' ? (
-                    <TourSupplierList departureId={id} />
+                    <TourSupplierList departureId={departureId} />
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full py-20 text-center">
                         <div className="p-4 bg-slate-50 rounded-full mb-3">
@@ -387,4 +374,4 @@ const DepartureDetail = () => {
   );
 };
 
-export default DepartureDetail;
+export default DepartureDetailGuide;

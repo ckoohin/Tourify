@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { X, Globe2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { SIDEBAR_CONFIG, ROLES } from '../../components/config/sidebarConfig';
+import { SIDEBAR_CONFIG } from '../../components/config/sidebarConfig';
 import SidebarItem from './sidebar/SidebarItem';
 
 export default function Sidebar({ isOpen, toggleSidebar }) {
@@ -22,31 +22,48 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
   const menuItems = useMemo(() => {
     const filterMenu = (items) => {
       return items.reduce((acc, item) => {
+        // 1. Lọc các menu con trước (đệ quy)
         let validChildren = [];
         if (item.children && item.children.length > 0) {
           validChildren = filterMenu(item.children);
         }
 
-        let isVisible = false;
+        // 2. LOGIC PHÂN QUYỀN MỚI (STRICT MODE)
+        // Yêu cầu thỏa mãn CẢ Role VÀ Permission (nếu được khai báo)
+        
+        let isRoleSatisfied = true;
+        let isPermissionSatisfied = true;
 
+        // Kiểm tra Role (nếu item có quy định allowedRoles)
+        if (item.allowedRoles && item.allowedRoles.length > 0) {
+            if (!item.allowedRoles.includes(currentRole)) {
+                isRoleSatisfied = false;
+            }
+        }
+
+        // Kiểm tra Permission (nếu item có quy định permissions)
         if (item.permissions && item.permissions.length > 0) {
-           if (hasPermission(item.permissions)) {
-             isVisible = true;
-           }
-        } 
-        else {
-           if (item.allowedRoles && item.allowedRoles.length > 0) {
-             if (item.allowedRoles.includes(currentRole)) {
-               isVisible = true;
-             }
-           } else {
-             isVisible = true;
+           if (!hasPermission(item.permissions)) {
+             isPermissionSatisfied = false;
            }
         }
 
+        // Kết hợp điều kiện: Phải thỏa mãn cả hai
+        const isVisible = isRoleSatisfied && isPermissionSatisfied;
+
+        // 3. Quyết định thêm vào menu
         if (validChildren.length > 0) {
-           acc.push({ ...item, children: validChildren });
+           // Nếu có menu con hợp lệ, hiển thị cha và gán con mới
+           // (Đôi khi cha không có perm nhưng con có perm thì vẫn nên hiện cha để mở được con? 
+           // Tùy logic, ở đây ta ưu tiên logic cha phải hiện thì mới xét con hoặc ngược lại.
+           // Thường thì nếu cha bị ẩn theo Role, thì con cũng không nên truy cập được).
+           
+           if (isVisible) {
+               acc.push({ ...item, children: validChildren });
+           }
         } else if (isVisible) {
+           // Nếu không có menu con, check xem bản thân nó có được hiện không
+           // Và phải là mục lá (có path) hoặc mục cha rỗng (ít gặp)
            if (!item.children || item.children.length === 0 || item.path) {
               acc.push(item);
            }

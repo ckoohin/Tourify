@@ -4,6 +4,6 @@ const { getCloudinarySignature } = require('../../controllers/settings/upload.co
 const { authorize } = require('../../middleware/authorize');
 const { authenticate } = require('../../middleware/authMiddleware');
 
-router.post('/signature', authenticate, authorize('tours.manage'), getCloudinarySignature);
+router.post('/signature', authenticate, authorize('tours.manage', 'guide.view'), getCloudinarySignature);
 
 module.exports = router;

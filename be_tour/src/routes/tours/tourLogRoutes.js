@@ -21,39 +21,39 @@ const tourLogValidators = {
 
 router.post('/',
   AuthMiddleware.authenticate,
-  authorize('tours.edit'),
+  authorize('tours.edit', 'guide.view'),
   tourLogValidators.create,
   TourLogController.create
 );
 
 router.get('/departure/:departureId/stats',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   TourLogController.getStats
 );
 
 router.get('/departure/:departureId',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   TourLogController.getByDepartureId
 );
 
 router.get('/:id',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   TourLogController.getById
 );
 
 router.put('/:id',
   AuthMiddleware.authenticate,
-  authorize('tours.edit'),
+  authorize('tours.edit', 'guide.view'),
   tourLogValidators.update,
   TourLogController.update
 );
 
 router.delete('/:id',
   AuthMiddleware.authenticate,
-  authorize('tours.delete'),
+  authorize('tours.delete', 'guide.view'),
   TourLogController.delete
 );
 

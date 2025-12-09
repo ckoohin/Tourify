@@ -77,40 +77,37 @@ const TourForm = ({
                 ...initialData,
                 is_customizable: String(initialData.is_customizable ?? '0'),
                 images: Array.isArray(initialData.images) ? initialData.images.map(img => img.url || img) : [],
-                // [FIX] Đảm bảo created_by luôn có giá trị khi load edit
                 created_by: initialData.created_by || currentUserId || 1, 
                 itineraries: [],
                 policies: []
             };
 
-            // Nếu là Edit Mode, cần fetch thêm Itineraries và Policies để hiển thị
-            if (!isCloneMode) {
-                try {
-                    // 1. Get Default Version ID to fetch Itineraries
-                    const verRes = await tourService.getVersions(initialData.id);
-                    const versions = verRes.data?.tourVersions || verRes.data?.versions || [];
-                    const defaultVer = versions.find(v => v.is_default) || versions[0];
+            // Fetch Itineraries & Policies để hiển thị
+            try {
+                // 1. Get Default Version ID to fetch Itineraries
+                const verRes = await tourService.getVersions(initialData.id);
+                const versions = verRes.data?.tourVersions || verRes.data?.versions || [];
+                const defaultVer = versions.find(v => v.is_default) || versions[0];
 
-                    if (defaultVer) {
-                        const itinRes = await tourService.getItineraries(defaultVer.id);
-                        // [FIX] Parse JSON activities/meals nếu cần thiết (tùy backend trả về)
-                        const rawItineraries = itinRes.data?.itineraries || [];
-                        baseData.itineraries = rawItineraries.map(it => ({
-                            ...it,
-                            activities: typeof it.activities === 'string' ? JSON.parse(it.activities) : (it.activities || []),
-                            meals: typeof it.meals === 'string' ? JSON.parse(it.meals) : (it.meals || {})
-                        })).sort((a, b) => a.day_number - b.day_number);
-                    }
-
-                    // 2. Get Policies
-                    const polRes = await tourService.getPolicies(initialData.id);
-                    baseData.policies = (polRes.data?.policies || []).sort((a, b) => a.display_order - b.display_order);
-
-                } catch (error) {
-                    console.error("Lỗi load dữ liệu mở rộng:", error);
-                    toast.error("Không thể tải đầy đủ thông tin chi tiết");
+                if (defaultVer) {
+                    const itinRes = await tourService.getItineraries(defaultVer.id);
+                    const rawItineraries = itinRes.data?.itineraries || [];
+                    baseData.itineraries = rawItineraries.map(it => ({
+                        ...it,
+                        activities: typeof it.activities === 'string' ? JSON.parse(it.activities) : (it.activities || []),
+                        meals: typeof it.meals === 'string' ? JSON.parse(it.meals) : (it.meals || {})
+                    })).sort((a, b) => a.day_number - b.day_number);
                 }
+
+                // 2. Get Policies
+                const polRes = await tourService.getPolicies(initialData.id);
+                baseData.policies = (polRes.data?.policies || []).sort((a, b) => a.display_order - b.display_order);
+
+            } catch (error) {
+                console.error("Lỗi load dữ liệu mở rộng:", error);
+                toast.error("Không thể tải đầy đủ thông tin chi tiết");
             }
+            
             setFormData(baseData);
         } else {
             setFormData({ ...initialFormState, code: generateTourCode() });
@@ -129,6 +126,7 @@ const TourForm = ({
         setFormData(prev => ({
             ...prev,
             name: value,
+            // Giữ nguyên logic: tự động tạo slug nếu là tạo mới/clone hoặc slug cũ là rỗng
             slug: (!initialData || isCloneMode || !prev.slug) ? newSlug : prev.slug
         }));
     } else {
@@ -148,7 +146,7 @@ const TourForm = ({
     }
   };
 
-  // --- HANDLERS: ITINERARY (Local State) ---
+  // --- HANDLERS: ITINERARY ---
   const addItineraryDay = () => {
     const nextDay = formData.itineraries.length + 1;
     setFormData(prev => ({
@@ -156,7 +154,6 @@ const TourForm = ({
         itineraries: [
             ...prev.itineraries,
             { 
-                // ID tạm thời để React key hoạt động, sẽ bị loại bỏ khi gửi API
                 tempId: Date.now(), 
                 day_number: nextDay, 
                 title: '', 
@@ -177,12 +174,11 @@ const TourForm = ({
 
   const removeItinerary = (index) => {
     const newItineraries = formData.itineraries.filter((_, i) => i !== index);
-    // Recalculate day numbers
     const reordered = newItineraries.map((item, idx) => ({ ...item, day_number: idx + 1 }));
     setFormData(prev => ({ ...prev, itineraries: reordered }));
   };
 
-  // --- HANDLERS: POLICY (Local State) ---
+  // --- HANDLERS: POLICY ---
   const addPolicy = () => {
     setFormData(prev => ({
         ...prev,
@@ -215,7 +211,7 @@ const TourForm = ({
     e.preventDefault();
     setIsSubmitting(true);
 
-    // 1. Validate Basic Info
+    // 1. Validate Form (Kiểm tra dữ liệu đầu vào)
     const validationErrors = validateTour(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -226,7 +222,7 @@ const TourForm = ({
     }
 
     try {
-        // 2. Prepare Payload for Tour
+        // 2. Prepare Standard Payload (Dữ liệu cho Update/Create)
         const tourPayload = {
             ...formData,
             category_id: Number(formData.category_id),
@@ -235,31 +231,53 @@ const TourForm = ({
             min_group_size: Number(formData.min_group_size) || 1,
             max_group_size: Number(formData.max_group_size) || 20,
             is_customizable: formData.is_customizable === '1' ? '1' : '0',
-            created_by: Number(formData.created_by || initialData?.created_by || currentUserId || 1)
+            created_by: Number(formData.created_by || currentUserId || 1)
         };
 
-        let tourId = initialData?.id;
-        let defaultVersionId = null;
+        let tourId = null;
 
-        // 3. Save TOUR (Create or Update)
-        if (initialData && !isCloneMode) {
+        // 3. LOGIC XỬ LÝ: CLONE vs UPDATE vs CREATE
+        if (isCloneMode && initialData) {
+            // === LOGIC CLONE TOUR ===
+            
+            // Bước A: Chuẩn bị payload đúng format route yêu cầu (new_code, new_name, new_slug)
+            const clonePayload = {
+                new_code: formData.code,
+                new_name: formData.name,
+                new_slug: formData.slug || slugify(formData.name)
+            };
+
+            // Bước B: Gọi API cloneTour
+            const res = await tourService.cloneTour(initialData.id, clonePayload);
+            
+            // Bước C: Lấy ID của tour mới được tạo
+            tourId = res.data?.tour?.id || res.data?.id || res.data?.data?.id;
+
+            if (!tourId) throw new Error("Backend clone thành công nhưng không trả về ID mới.");
+
+            // Bước D: Cập nhật lại Tour mới với dữ liệu form hiện tại
+            await tourService.updateTour(tourId, tourPayload);
+
+        } else if (initialData) {
+            // === LOGIC UPDATE TOUR ===
+            tourId = initialData.id;
             await tourService.updateTour(tourId, tourPayload);
         } else {
+            // === LOGIC CREATE NEW TOUR ===
             const res = await tourService.createTour(tourPayload);
-            // Lấy ID tour vừa tạo
             tourId = res.data?.tour?.id || res.data?.id; 
         }
 
-        if (!tourId) throw new Error("Không lấy được ID Tour sau khi lưu");
+        if (!tourId) throw new Error("Không xác định được ID Tour để lưu dữ liệu chi tiết.");
 
-        // 4. Get or Create Default Version
+        // 4. XỬ LÝ VERSION MẶC ĐỊNH & LỊCH TRÌNH
         // (Chúng ta cần ID version để lưu lịch trình)
         const verRes = await tourService.getVersions(tourId);
         const versions = verRes.data?.tourVersions || verRes.data?.versions || [];
-        let defaultVer = versions.find(v => v.is_default);
+        let defaultVersionId = versions.find(v => v.is_default)?.id;
 
-        if (!defaultVer) {
-            // Nếu chưa có version nào, tạo mới
+        // Nếu chưa có version (trường hợp tạo mới hoặc clone không copy version), tạo mới
+        if (!defaultVersionId) {
             const verPayload = { 
                 tour_id: tourId, 
                 name: "Phiên bản tiêu chuẩn", 
@@ -268,18 +286,16 @@ const TourForm = ({
                 is_active: true 
             };
             const newVerRes = await tourService.createVersion(verPayload);
-            defaultVersionId = newVerRes.data?.tourVersion?.id;
-        } else {
-            defaultVersionId = defaultVer.id;
+            defaultVersionId = newVerRes.data?.tourVersion?.id || newVerRes.data?.id;
         }
 
-        // 5. Save Itineraries (Logic: Xóa cũ -> Thêm mới)
-        // Đây là cách an toàn nhất để đồng bộ mảng lịch trình
+        // 5. LƯU LỊCH TRÌNH (ITINERARIES)
+        // Chiến lược: Xóa hết cũ -> Thêm mới từ Form để đảm bảo đồng bộ 100%
         if (defaultVersionId) {
-            // Xóa tất cả lịch trình cũ của version này
+            // Xóa tất cả lịch trình cũ (quan trọng khi Clone để tránh duplicate hoặc rác)
             await tourService.deleteAllItineraries(defaultVersionId);
             
-            // Thêm mới từng ngày từ formData
+            // Thêm mới từng ngày
             if (formData.itineraries.length > 0) {
                 await Promise.all(formData.itineraries.map(it => 
                     tourService.createItinerary({
@@ -296,9 +312,9 @@ const TourForm = ({
             }
         }
 
-        // 6. Save Policies (Logic: Xóa cũ -> Thêm mới)
+        // 6. LƯU CHÍNH SÁCH (POLICIES)
+        // Chiến lược: Xóa hết cũ -> Thêm mới
         if (tourId) {
-             // Lấy danh sách cũ để xóa
              const existingPolicies = await tourService.getPolicies(tourId);
              const pList = existingPolicies.data?.policies || [];
              
@@ -315,15 +331,15 @@ const TourForm = ({
                         policy_type: p.policy_type,
                         title: p.title,
                         content: p.content,
-                        display_order: idx + 1, // Tự động đánh số thứ tự
+                        display_order: idx + 1,
                         is_active: true
                     })
                  ));
              }
         }
 
-        toast.success(initialData && !isCloneMode ? "Cập nhật tour và dữ liệu chi tiết thành công!" : "Tạo tour mới thành công!");
-        onSuccess(); // Gọi hàm refresh list từ cha
+        toast.success(isCloneMode ? "Sao chép tour thành công!" : (initialData ? "Cập nhật thành công!" : "Tạo mới thành công!"));
+        onSuccess();
         onClose();
 
     } catch (error) {
@@ -368,7 +384,7 @@ const TourForm = ({
                     <Info className="text-purple-600 shrink-0 mt-0.5" size={20} />
                     <div className="text-sm text-purple-800">
                         <p className="font-bold mb-1">Chế độ sao chép:</p>
-                        <p>Hệ thống sẽ tạo một tour mới với toàn bộ thông tin, hình ảnh, lịch trình và chính sách từ tour gốc. Mã tour và đường dẫn sẽ được tạo mới.</p>
+                        <p>Hệ thống sẽ tạo bản sao từ tour gốc. Bạn có thể chỉnh sửa thông tin cho tour mới ngay tại đây.</p>
                     </div>
                 </div>
             </div>
@@ -393,7 +409,6 @@ const TourForm = ({
                     }`}
                 >
                     <tab.icon size={18}/> {tab.label}
-                    {/* Badge count for arrays */}
                     {tab.id === 'itinerary' && formData.itineraries.length > 0 && 
                         <span className="bg-blue-100 text-blue-600 text-[10px] px-1.5 py-0.5 rounded-full">{formData.itineraries.length}</span>}
                     {tab.id === 'policy' && formData.policies.length > 0 && 
@@ -642,7 +657,7 @@ const TourForm = ({
         <div className="px-6 py-4 border-t bg-white flex justify-between items-center z-20">
             <div>
                 {initialData && !isCloneMode && (
-                    <button type="button" onClick={() => { setIsCloneMode(true); setFormData(p => ({...p, name: `${p.name} (Copy)`, code: generateTourCode(), status: 'draft'})); }} className="flex items-center gap-2 px-4 py-2 text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg font-medium transition-colors">
+                    <button type="button" onClick={() => { setIsCloneMode(true); setFormData(p => ({...p, name: `${p.name} (Copy)`, code: generateTourCode(), slug: slugify(`${p.name} (Copy)`), status: 'draft'})); }} className="flex items-center gap-2 px-4 py-2 text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg font-medium transition-colors">
                         <Copy size={18} /> Sao chép Tour
                     </button>
                 )}
@@ -652,7 +667,7 @@ const TourForm = ({
                 
                 <button 
                     type="submit" 
-                    form={isCloneMode ? "cloneForm" : "tourForm"} 
+                    form="tourForm" 
                     disabled={isSubmitting || uploading} 
                     className={`px-8 py-2.5 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-blue-200 hover:-translate-y-0.5 transition-all ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:shadow-blue-300'}`}
                 >
