@@ -117,6 +117,12 @@ const TourForm = ({
       loadFullData();
     }
   }, [isOpen, initialData, currentUserId]); 
+  
+  useEffect(() => {
+    if (!isOpen) {
+        setIsCloneMode(false); // reset khi đóng modal
+    }
+}, [isOpen]);
 
   // --- HANDLERS: BASIC FORM ---
   const handleChange = (e) => {
@@ -238,34 +244,19 @@ const TourForm = ({
 
         // 3. LOGIC XỬ LÝ: CLONE vs UPDATE vs CREATE
         if (isCloneMode && initialData) {
-            // === LOGIC CLONE TOUR ===
-            
-            // Bước A: Chuẩn bị payload đúng format route yêu cầu (new_code, new_name, new_slug)
             const clonePayload = {
                 new_code: formData.code,
                 new_name: formData.name,
                 new_slug: formData.slug || slugify(formData.name)
             };
 
-            // Bước B: Gọi API cloneTour
+            // Backend sẽ clone toàn bộ: tour + version + itineraries + policies + images
             const res = await tourService.cloneTour(initialData.id, clonePayload);
-            
-            // Bước C: Lấy ID của tour mới được tạo
-            tourId = res.data?.tour?.id || res.data?.id || res.data?.data?.id;
 
-            if (!tourId) throw new Error("Backend clone thành công nhưng không trả về ID mới.");
-
-            // Bước D: Cập nhật lại Tour mới với dữ liệu form hiện tại
-            await tourService.updateTour(tourId, tourPayload);
-
-        } else if (initialData) {
-            // === LOGIC UPDATE TOUR ===
-            tourId = initialData.id;
-            await tourService.updateTour(tourId, tourPayload);
-        } else {
-            // === LOGIC CREATE NEW TOUR ===
-            const res = await tourService.createTour(tourPayload);
-            tourId = res.data?.tour?.id || res.data?.id; 
+            toast.success("Sao chép tour thành công!");
+            onSuccess();
+            onClose();
+            return; // QUAN TRỌNG: DỪNG LUÔN, KHÔNG chạy tiếp các bước update/itinerary/policy
         }
 
         if (!tourId) throw new Error("Không xác định được ID Tour để lưu dữ liệu chi tiết.");
@@ -657,7 +648,7 @@ const TourForm = ({
         <div className="px-6 py-4 border-t bg-white flex justify-between items-center z-20">
             <div>
                 {initialData && !isCloneMode && (
-                    <button type="button" onClick={() => { setIsCloneMode(true); setFormData(p => ({...p, name: `${p.name} (Copy)`, code: generateTourCode(), slug: slugify(`${p.name} (Copy)`), status: 'draft'})); }} className="flex items-center gap-2 px-4 py-2 text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg font-medium transition-colors">
+                    <button type="button" onClick={() => { setIsCloneMode(true); setFormData(p => ({...p, code: generateTourCode(), status: 'draft'})); }} className="flex items-center gap-2 px-4 py-2 text-purple-700 bg-purple-50 hover:bg-purple-100 rounded-lg font-medium transition-colors">
                         <Copy size={18} /> Sao chép Tour
                     </button>
                 )}

@@ -136,32 +136,32 @@ class StaffAssignmentController {
     }
   }
 
-  // static async confirm(req, res) {
-  //   try {
-  //     const { id } = req.params;
+  static async confirm(req, res) {
+    try {
+      const { id } = req.params;
 
-  //     const existingAssignment = await StaffAssignment.getById(id);
-  //     if (!existingAssignment) {
-  //       return ApiResponse.error(res, {
-  //         message: "Không tìm thấy phân công",
-  //         statusCode: 404,
-  //       });
-  //     }
+      const existingAssignment = await StaffAssignment.getById(id);
+      if (!existingAssignment) {
+        return ApiResponse.error(res, {
+          message: "Không tìm thấy phân công",
+          statusCode: 404,
+        });
+      }
 
-  //     const assignment = await StaffAssignment.confirm(id);
+      const assignment = await StaffAssignment.confirm(id);
 
-  //     return ApiResponse.success(res, {
-  //       message: "Xác nhận phân công thành công",
-  //       data: assignment,
-  //     });
-  //   } catch (error) {
-  //     console.error("Confirm staff assignment error:", error);
-  //     return ApiResponse.error(res, {
-  //       message: "Lỗi khi xác nhận phân công",
-  //       errors: error.message,
-  //     });
-  //   }
-  // }
+      return ApiResponse.success(res, {
+        message: "Xác nhận phân công thành công",
+        data: assignment,
+      });
+    } catch (error) {
+      console.error("Confirm staff assignment error:", error);
+      return ApiResponse.error(res, {
+        message: "Lỗi khi xác nhận phân công",
+        errors: error.message,
+      });
+    }
+  }
 
   static async delete(req, res) {
     try {

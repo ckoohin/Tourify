@@ -248,22 +248,22 @@ class StaffAssignment {
     }
   }
 
-  // static async confirm(id) {
-  //   try {
-  //     const sql = `
-  //       UPDATE staff_assignments
-  //       SET 
-  //         confirmed = 1,
-  //         confirmed_at = CURRENT_TIMESTAMP,
-  //         updated_at = CURRENT_TIMESTAMP
-  //       WHERE id = ?
-  //     `;
-  //     await query(sql, [id]);
-  //     return await this.getById(id);
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
+  static async confirm(id) {
+    try {
+      const sql = `
+        UPDATE staff_assignments
+        SET 
+          confirmed = 1,
+          confirmed_at = CURRENT_TIMESTAMP,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `;
+      await query(sql, [id]);
+      return await this.getById(id);
+    } catch (error) {
+      throw error;
+    }
+  }
 
   static async delete(id) {
     try {
