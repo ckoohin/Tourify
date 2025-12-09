@@ -50,11 +50,11 @@ router.put('/:id',
   StaffAssignmentController.update
 );
 
-router.patch('/:id/confirm',
-  AuthMiddleware.authenticate,
-  authorize('tours.edit'),
-  StaffAssignmentController.confirm
-);
+// router.patch('/:id/confirm',
+//   AuthMiddleware.authenticate,
+//   authorize('tours.edit'),
+//   StaffAssignmentController.confirm
+// );
 
 router.delete('/:id',
   AuthMiddleware.authenticate,
