@@ -30,7 +30,7 @@ export const SIDEBAR_CONFIG = [
   {
     label: 'Dashboard',
     icon: BarChart3,
-    allowedRoles: [ROLES.ADMIN],
+    allowedRoles: [ROLES.ADMIN, ROLES.GUIDE, ROLES.SUPPLIER],
     path: '/dashboard',
     permissions: ['reports.dashboard'],
     children: []
@@ -132,10 +132,20 @@ export const SIDEBAR_CONFIG = [
   // =================================================================
   // 2. VAI TRÒ: HƯỚNG DẪN VIÊN (GUIDE)
   // =================================================================
+
+  {
+    label: ' Vận hành tour',
+    icon: CalendarDays,
+    allowedRoles: [ROLES.GUIDE],
+    path: '/departures_guide',
+    permissions: ['guide.view'],
+    children: []
+  },
+
   {
     label: 'Phản hồi & Đánh giá',
     icon: Star,
-    allowedRoles: [ROLES.GUIDE],
+    allowedRoles: [ROLES.ADMIN],
     path: '/Feedbacks',
     permissions: ['guide.ratings'],
     children: []

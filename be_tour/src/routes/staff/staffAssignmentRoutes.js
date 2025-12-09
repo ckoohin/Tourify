@@ -27,7 +27,7 @@ router.post('/',
 
 router.get('/',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   StaffAssignmentController.getAll
 );
 
@@ -39,7 +39,7 @@ router.get('/my-assignments',
 
 router.get('/:id',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   StaffAssignmentController.getById
 );
 
@@ -52,7 +52,7 @@ router.put('/:id',
 
 router.patch('/:id/confirm',
   AuthMiddleware.authenticate,
-  authorize('tours.edit'),
+  authorize('tours.edit', 'guide.view'),
   StaffAssignmentController.confirm
 );
 

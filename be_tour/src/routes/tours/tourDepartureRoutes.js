@@ -33,13 +33,13 @@ const tourDepartureValidators = {
 
 router.get('/', 
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   TourDepartureController.getAll
 );
 
 router.get('/:id', 
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   TourDepartureController.getById
 );
 
@@ -71,26 +71,26 @@ router.patch('/:id/status',
 
 router.get('/:id/guests',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   TourDepartureController.getGuests
 );
 
 router.patch('/:id/guests/:guestId/check-in',
   AuthMiddleware.authenticate,
-  authorize('tours.edit'),
+  authorize('tours.edit', 'guide.view'),
   TourDepartureController.checkInGuest
 );
 
 router.patch('/:id/guests/:guestId/assign-room',
   AuthMiddleware.authenticate,
-  authorize('tours.edit'),
+  authorize('tours.edit', 'guide.view'),
   tourDepartureValidators.assignRoom,
   TourDepartureController.assignRoom
 );
 
 router.get('/:departureId/services',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view',),
   ServiceBookingController.getByDepartureId
 );
 
@@ -114,25 +114,25 @@ router.get('/:departureId/expenses/compare-budget',
 
 router.get('/:departureId/logs',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   TourLogController.getByDepartureId
 );
 
 router.get('/:departureId/logs/by-date',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   TourLogController.getByDate
 );
 
 router.get('/:departureId/logs/incidents-feedback',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   TourLogController.getIncidentsAndFeedback
 );
 
 router.get('/:departureId/logs/stats',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   TourLogController.getStats
 );
 

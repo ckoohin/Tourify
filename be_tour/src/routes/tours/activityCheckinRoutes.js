@@ -26,7 +26,7 @@ const excuseValidation = [
 router.post(
   '/departures/:departureId/initialize',
   AuthMiddleware.authenticate,
-  authorize('tours.edit'),
+  authorize('tours.edit', 'guide.view'),
   ActivityCheckinController.initializeCheckins
 );
 
@@ -34,7 +34,7 @@ router.post(
 router.get(
   '/departures/:departureId/stats',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   ActivityCheckinController.getStats
 );
 
@@ -42,7 +42,7 @@ router.get(
 router.get(
   '/departures/:departureId/active',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   ActivityCheckinController.getActiveCheckins
 );
 
@@ -50,7 +50,7 @@ router.get(
 router.get(
   '/departures/:departureId/today',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   ActivityCheckinController.getTodayActivities
 );
 
@@ -58,7 +58,7 @@ router.get(
 router.get(
   '/departures/:departureId/by-date',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   ActivityCheckinController.getByDate
 );
 
@@ -66,7 +66,7 @@ router.get(
 router.post(
   '/auto-process',
   AuthMiddleware.authenticate,
-  authorize('tours.edit'),
+  authorize('tours.edit', 'guide.view'),
   ActivityCheckinController.runAutoProcessing
 );
 
@@ -74,7 +74,7 @@ router.post(
 router.get(
   '/departures/:departureId/activities/:activityId',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   ActivityCheckinController.getByActivity
 );
 
@@ -82,7 +82,7 @@ router.get(
 router.post(
   '/departures/:departureId/activities/:activityId/bulk-checkin',
   AuthMiddleware.authenticate,
-  authorize('tours.edit'),
+  authorize('tours.edit', 'guide.view'),
   bulkCheckinValidation,
   ActivityCheckinController.bulkCheckIn
 );
@@ -91,7 +91,7 @@ router.post(
 router.get(
   '/guests/:guestId',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   ActivityCheckinController.getByGuest
 );
 
@@ -99,7 +99,7 @@ router.get(
 router.patch(
   '/checkins/:checkinId/check-in',
   AuthMiddleware.authenticate,
-  authorize('tours.edit'),
+  authorize('tours.edit', 'guide.view'),
   ActivityCheckinController.checkInGuest
 );
 
@@ -107,7 +107,7 @@ router.patch(
 router.patch(
   '/checkins/:checkinId/excuse',
   AuthMiddleware.authenticate,
-  authorize('tours.edit'),
+  authorize('tours.edit', 'guide.view'),
   excuseValidation,
   ActivityCheckinController.markExcused
 );

@@ -96,35 +96,35 @@ const bulkAssignmentValidation = [
 router.get(
     "/transport/:transportId/used-seats",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     getUsedSeats
 );
 
 router.get(
     "/transport/:transportId",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     getAssignmentsByTransport
 );
 
 router.get(
     "/guest/:guestId",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     getAssignmentsByGuest
 );
 
 router.get(
     "/:id",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     getAssignmentById
 );
 
 router.post(
     "/",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     assignmentValidation,
     createAssignment
 );
@@ -132,7 +132,7 @@ router.post(
 router.post(
     "/bulk",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     bulkAssignmentValidation,
     bulkCreateAssignments
 );
@@ -140,7 +140,7 @@ router.post(
 router.put(
     "/:id",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     [
         body("seat_number")
             .optional({ checkFalsy: true })
@@ -160,7 +160,7 @@ router.put(
 router.delete(
     "/:id",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     deleteAssignment
 );
 

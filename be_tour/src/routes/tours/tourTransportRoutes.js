@@ -113,21 +113,21 @@ const transportValidation = [
 router.get(
     "/:id/available-seats",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     getAvailableSeats
 );
 
 router.get(
     "/tour-departure/:tourDepartureId",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     getTransportsByTourDeparture
 );
 
 router.get(
     "/:id",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     getTransportById
 );
 
@@ -142,7 +142,7 @@ router.post(
 router.put(
     "/:id",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage",),
     [
         body("transport_type")
             .optional()

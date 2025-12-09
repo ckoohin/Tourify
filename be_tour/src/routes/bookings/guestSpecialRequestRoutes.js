@@ -59,49 +59,49 @@ const requestValidation = [
 router.get(
     "/stats",
     AuthMiddleware.authenticate,
-    authorize("bookings.view"),
+    authorize("bookings.view", "guide.view"),
     getRequestStats
 );
 
 router.get(
     "/pending",
     AuthMiddleware.authenticate,
-    authorize("bookings.view"),
+    authorize("bookings.view", "guide.view"),
     getPendingRequests
 );
 
 router.get(
     "/tour-departure/:tourDepartureId",
     AuthMiddleware.authenticate,
-    authorize("tours.manage"),
+    authorize("tours.manage", "guide.view"),
     getRequestsByTourDeparture
 );
 
 router.get(
     "/booking/:bookingId",
     AuthMiddleware.authenticate,
-    authorize("bookings.view"),
+    authorize("bookings.view", "guide.view"),
     getRequestsByBooking
 );
 
 router.get(
     "/guest/:guestId",
     AuthMiddleware.authenticate,
-    authorize("bookings.view"),
+    authorize("bookings.view", "guide.view"),
     getRequestsByGuest
 );
 
 router.get(
     "/:id",
     AuthMiddleware.authenticate,
-    authorize("bookings.view"),
+    authorize("bookings.view", "guide.view"),
     getRequestById
 );
 
 router.post(
     "/",
     AuthMiddleware.authenticate,
-    authorize("booking.manage"),
+    authorize("booking.manage", "guide.view"),
     requestValidation,
     createRequest
 );
@@ -109,7 +109,7 @@ router.post(
 router.put(
     "/:id",
     AuthMiddleware.authenticate,
-    authorize("booking.manage"),
+    authorize("booking.manage", "guide.view"),
     [
         body("request_type")
             .optional()
@@ -131,7 +131,7 @@ router.put(
 router.patch(
     "/:id/status",
     AuthMiddleware.authenticate,
-    authorize("booking.manage"),
+    authorize("booking.manage", "guide.view"),
     [
         body("status")
             .notEmpty()
@@ -150,7 +150,7 @@ router.patch(
 router.delete(
     "/:id",
     AuthMiddleware.authenticate,
-    authorize("booking.manage"),
+    authorize("booking.manage", "guide.view"),
     deleteRequest
 );
 

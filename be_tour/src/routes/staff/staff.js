@@ -187,13 +187,13 @@ router.delete(
 
 router.get('/:staffId/schedule',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   StaffAssignmentController.getStaffSchedule
 );
 
 router.get('/:staffId/availability',
   AuthMiddleware.authenticate,
-  authorize('tours.view'),
+  authorize('tours.view', 'guide.view'),
   StaffAssignmentController.checkAvailability
 );
 
