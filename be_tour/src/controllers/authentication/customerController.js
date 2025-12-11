@@ -5,8 +5,13 @@ const {
     create,
     update,
     deleteCustomer,
+    createCustomersFromBooking,
+    getCustomersFromBooking,
+    checkAvailableSlots,
+    removeGuestFromBooking
 } = require("../../models/authentication/Customer.js");
 const { validationResult } = require("express-validator");
+const ApiResponse = require("../../utils/apiResponse");
 
 async function getAllCustomers(req, res, next) {
     try {

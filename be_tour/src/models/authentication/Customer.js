@@ -1,323 +1,326 @@
-const { query } = require("../../config/db");
+const { query, getConnection } = require("../../config/db");
 
 async function getAll() {
-    try {
-        let params = [];
-        const sql = "SELECT * FROM `customers`";
-        const customers = await query(sql, params);
-        return customers;
-    } catch (error) {
-        throw error;
-    }
+  try {
+    let params = [];
+    const sql = "SELECT * FROM `customers`";
+    const customers = await query(sql, params);
+    return customers;
+  } catch (error) {
+    throw error;
+  }
 }
 
 // Chỉ lấy danh sách khách hàng trong bảng quotes với điều kiện status = sent
 async function getAllCustomerInQuotes() {
-    try {
-        let params = [];
-        const sql = `SELECT DISTINCT c.*
+  try {
+    let params = [];
+    const sql = `SELECT DISTINCT c.*
                     FROM customers c
                     JOIN quotes q ON c.id = q.customer_id
                     WHERE q.status='sent'`;
-        const customers = await query(sql, params);
-        return customers;
-    } catch (error) {
-        throw error;
-    }
+    const customers = await query(sql, params);
+    return customers;
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function getById(id) {
-    try {
-        let params = [id];
-        const sql = "SELECT * FROM `customers` WHERE id=?";
-        const customer = await query(sql, params);
-        return customer;
-    } catch (error) {
-        throw error;
-    }
+  try {
+    let params = [id];
+    const sql = "SELECT * FROM `customers` WHERE id=?";
+    const customer = await query(sql, params);
+    return customer;
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function create(data) {
-    try {
-        const {
-            user_id,
-            customer_code,
-            customer_type,
-            full_name,
-            email,
-            phone,
-            id_number,
-            birthday,
-            gender,
-            nationality,
-            address,
-            city,
-            country,
-            company_name,
-            tax_code,
-            notes,
-            customer_source,
-            assigned_to,
-            is_vip,
-            is_blacklist,
-        } = data;
+  try {
+    const {
+      user_id,
+      customer_code,
+      customer_type,
+      full_name,
+      email,
+      phone,
+      id_number,
+      birthday,
+      gender,
+      nationality,
+      address,
+      city,
+      country,
+      company_name,
+      tax_code,
+      notes,
+      customer_source,
+      assigned_to,
+      is_vip,
+      is_blacklist,
+    } = data;
 
-        const sql =
-            "INSERT INTO `customers`(`user_id`, `customer_code`, `customer_type`, `full_name`, `email`, `phone`, `id_number`, `birthday`, `gender`, `nationality`, `address`, `city`, `country`, `company_name`, `tax_code`, `notes`, `customer_source`, `assigned_to`, `is_vip`, `is_blacklist`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const sql =
+      "INSERT INTO `customers`(`user_id`, `customer_code`, `customer_type`, `full_name`, `email`, `phone`, `id_number`, `birthday`, `gender`, `nationality`, `address`, `city`, `country`, `company_name`, `tax_code`, `notes`, `customer_source`, `assigned_to`, `is_vip`, `is_blacklist`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        const result = await query(sql, [
-            user_id || null,
-            customer_code || null,
-            customer_type || null,
-            full_name || null,
-            email || null,
-            phone || null,
-            id_number || null,
-            birthday || null,
-            gender || null,
-            nationality || null,
-            address || null,
-            city || null,
-            country || null,
-            company_name || null,
-            tax_code || null,
-            notes || null,
-            customer_source || null,
-            assigned_to || null,
-            is_vip || null,
-            is_blacklist || null,
-        ]);
+    const result = await query(sql, [
+      user_id || null,
+      customer_code || null,
+      customer_type || null,
+      full_name || null,
+      email || null,
+      phone || null,
+      id_number || null,
+      birthday || null,
+      gender || null,
+      nationality || null,
+      address || null,
+      city || null,
+      country || null,
+      company_name || null,
+      tax_code || null,
+      notes || null,
+      customer_source || null,
+      assigned_to || null,
+      is_vip || null,
+      is_blacklist || null,
+    ]);
 
-        return result.insertId;
-    } catch (error) {
-        throw error;
-    }
+    return result.insertId;
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function update(data, id) {
-    try {
-        const {
-            user_id,
-            customer_code,
-            customer_type,
-            full_name,
-            email,
-            phone,
-            id_number,
-            birthday,
-            gender,
-            nationality,
-            address,
-            city,
-            country,
-            company_name,
-            tax_code,
-            notes,
-            customer_source,
-            assigned_to,
-            is_vip,
-            is_blacklist,
-        } = data;
+  try {
+    const {
+      user_id,
+      customer_code,
+      customer_type,
+      full_name,
+      email,
+      phone,
+      id_number,
+      birthday,
+      gender,
+      nationality,
+      address,
+      city,
+      country,
+      company_name,
+      tax_code,
+      notes,
+      customer_source,
+      assigned_to,
+      is_vip,
+      is_blacklist,
+    } = data;
 
-        const sql =
-            "UPDATE `customers` SET `user_id`=?,`customer_code`=?,`customer_type`=?,`full_name`=?,`email`=?,`phone`=?,`id_number`=?,`birthday`=?,`gender`=?,`nationality`=?,`address`=?,`city`=?,`country`=?,`company_name`=?,`tax_code`=?,`notes`=?,`customer_source`=?,`assigned_to`=?,`is_vip`=?,`is_blacklist`=? WHERE id=?";
+    const sql =
+      "UPDATE `customers` SET `user_id`=?,`customer_code`=?,`customer_type`=?,`full_name`=?,`email`=?,`phone`=?,`id_number`=?,`birthday`=?,`gender`=?,`nationality`=?,`address`=?,`city`=?,`country`=?,`company_name`=?,`tax_code`=?,`notes`=?,`customer_source`=?,`assigned_to`=?,`is_vip`=?,`is_blacklist`=? WHERE id=?";
 
-        const result = await query(sql, [
-            user_id || null,
-            customer_code || null,
-            customer_type || null,
-            full_name || null,
-            email || null,
-            phone || null,
-            id_number || null,
-            birthday || null,
-            gender || null,
-            nationality || null,
-            address || null,
-            city || null,
-            country || null,
-            company_name || null,
-            tax_code || null,
-            notes || null,
-            customer_source || null,
-            assigned_to || null,
-            is_vip || null,
-            is_blacklist || null,
-            id,
-        ]);
+    const result = await query(sql, [
+      user_id || null,
+      customer_code || null,
+      customer_type || null,
+      full_name || null,
+      email || null,
+      phone || null,
+      id_number || null,
+      birthday || null,
+      gender || null,
+      nationality || null,
+      address || null,
+      city || null,
+      country || null,
+      company_name || null,
+      tax_code || null,
+      notes || null,
+      customer_source || null,
+      assigned_to || null,
+      is_vip || null,
+      is_blacklist || null,
+      id,
+    ]);
 
-        return result.affectedRows > 0;
-    } catch (error) {
-        throw error;
-    }
+    return result.affectedRows > 0;
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function deleteCustomer(id) {
-    try {
-        const sql = "DELETE FROM `customers` WHERE id=?";
-        const result = await query(sql, [id]);
+  try {
+    const sql = "DELETE FROM `customers` WHERE id=?";
+    const result = await query(sql, [id]);
 
-        return result.affectedRows > 0;
-    } catch (error) {
-        throw error;
-    }
+    return result.affectedRows > 0;
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function createCustomersFromBooking(bookingId, guestsData, userId) {
-    const connection = await getConnection();
-    try {
-        await connection.beginTransaction();
+  const connection = await getConnection();
+  try {
+    await connection.beginTransaction();
 
-        const [bookings] = await connection.execute(
-            `SELECT b.*, tv.tour_id, td.id as tour_departure_id
+    const [bookings] = await connection.execute(
+      `SELECT b.*, tv.tour_id, td.id as tour_departure_id
              FROM bookings b
              LEFT JOIN tour_versions tv ON b.tour_version_id = tv.id
              LEFT JOIN tour_departures td ON td.tour_version_id = tv.id 
                 AND td.departure_date = b.departure_date
              WHERE b.id = ?`,
-            [bookingId]
-        );
+      [bookingId]
+    );
 
-        if (!bookings || bookings.length === 0) {
-            throw new Error("Booking không tồn tại");
-        }
+    if (!bookings || bookings.length === 0) {
+      throw new Error("Booking không tồn tại");
+    }
 
-        const booking = bookings[0];
-        
-        if (!booking.tour_departure_id) {
-            throw new Error("Chưa có tour departure cho booking này");
-        }
+    const booking = bookings[0];
 
-        const totalGuestsInBooking = booking.total_guests;
-        const totalGuestsToCreate = guestsData.length;
+    if (!booking.tour_departure_id) {
+      throw new Error("Chưa có tour departure cho booking này");
+    }
 
-        if (totalGuestsToCreate > totalGuestsInBooking) {
-            throw new Error(
-                `Số lượng khách vượt quá booking (Đã đặt: ${totalGuestsInBooking}, Đang tạo: ${totalGuestsToCreate})`
-            );
-        }
+    const totalGuestsInBooking = booking.total_guests;
+    const totalGuestsToCreate = guestsData.length;
 
-        const createdGuests = [];
+    if (totalGuestsToCreate > totalGuestsInBooking) {
+      throw new Error(
+        `Số lượng khách vượt quá booking (Đã đặt: ${totalGuestsInBooking}, Đang tạo: ${totalGuestsToCreate})`
+      );
+    }
 
-        for (const guestData of guestsData) {
-            let customerId = guestData.customer_id;
-            if (!customerId) {
-                const [existingCustomers] = await connection.execute(
-                    `SELECT id FROM customers 
+    const createdGuests = [];
+
+    for (const guestData of guestsData) {
+      const safe = (v) => (v === undefined ? null : v);
+      let customerId = guestData.customer_id;
+      if (!customerId) {
+        const [existingCustomers] = await connection.execute(
+          `SELECT id FROM customers 
                      WHERE (email = ? AND email IS NOT NULL) 
                         OR (phone = ? AND phone IS NOT NULL)
                      LIMIT 1`,
-                    [guestData.email || null, guestData.phone || null]
-                );
+          [guestData.email || null, guestData.phone || null]
+        );
 
-                if (existingCustomers.length > 0) {
-                    customerId = existingCustomers[0].id;
-                } else {
-                    const customerCode = `CUS${Date.now()}${Math.floor(Math.random() * 1000)}`;
-                    const [customerResult] = await connection.execute(
-                        `INSERT INTO customers 
+        if (existingCustomers.length > 0) {
+          customerId = existingCustomers[0].id;
+        } else {
+          const fullName =
+            `${guestData.first_name || ""} ${guestData.last_name || ""}`.trim() ||
+            null;
+          const customerCode = `CUS${Date.now()}${Math.floor(Math.random() * 1000)}`;
+          const [customerResult] = await connection.execute(
+            `INSERT INTO customers 
                         (customer_code, customer_type, full_name, email, phone, 
                          id_number, birthday, gender, nationality, address, city, 
                          country, notes, created_at, updated_at)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-                        [
-                            customerCode,
-                            guestData.customer_type || 'individual',
-                            guestData.full_name,
-                            guestData.email || null,
-                            guestData.phone || null,
-                            guestData.id_number || null,
-                            guestData.birthday || null,
-                            guestData.gender || null,
-                            guestData.nationality || 'Vietnam',
-                            guestData.address || null,
-                            guestData.city || null,
-                            guestData.country || 'Vietnam',
-                            guestData.notes || null
-                        ]
-                    );
-                    customerId = customerResult.insertId;
-                }
-            }
+            [
+              customerCode,
+              safe(guestData.customer_type) || "individual",
+              fullName,
+              safe(guestData.email),
+              safe(guestData.phone),
+              safe(guestData.id_number),
+              safe(guestData.birthday),
+              safe(guestData.gender),
+              safe(guestData.nationality) || "Vietnam",
+              safe(guestData.address),
+              safe(guestData.city),
+              safe(guestData.country) || "Vietnam",
+              safe(guestData.notes),
+            ]
+          );
+          customerId = customerResult.insertId;
+        }
+      }
 
-            const [bookingGuestResult] = await connection.execute(
-                `INSERT INTO booking_guests 
+      const [bookingGuestResult] = await connection.execute(
+        `INSERT INTO booking_guests 
                 (booking_id, guest_type, title, first_name, last_name, 
                  birthday, gender, nationality, id_number, id_issue_date, id_expiry_date,
                  phone, email, is_primary_contact, special_requests, medical_notes, 
                  created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-                [
-                    bookingId,
-                    guestData.guest_type || 'adult',
-                    guestData.title || 'Mr',
-                    guestData.first_name,
-                    guestData.last_name,
-                    guestData.birthday || null,
-                    guestData.gender || null,
-                    guestData.nationality || 'Vietnam',
-                    guestData.id_number || null,
-                    guestData.id_issue_date || null,
-                    guestData.id_expiry_date || null,
-                    guestData.phone || null,
-                    guestData.email || null,
-                    guestData.is_primary_contact || 0,
-                    guestData.special_requests || null,
-                    guestData.medical_notes || null
-                ]
-            );
+        [
+          bookingId,
+          guestData.guest_type || "adult",
+          guestData.title || "Mr",
+          guestData.first_name,
+          guestData.last_name,
+          guestData.birthday || null,
+          guestData.gender || null,
+          guestData.nationality || "Vietnam",
+          guestData.id_number || null,
+          guestData.id_issue_date || null,
+          guestData.id_expiry_date || null,
+          guestData.phone || null,
+          guestData.email || null,
+          guestData.is_primary_contact || 0,
+          guestData.special_requests || null,
+          guestData.medical_notes || null,
+        ]
+      );
 
-            const bookingGuestId = bookingGuestResult.insertId;
+      const bookingGuestId = bookingGuestResult.insertId;
 
-            const [departureGuestResult] = await connection.execute(
-                `INSERT INTO tour_departure_guests 
+      const [departureGuestResult] = await connection.execute(
+        `INSERT INTO tour_departure_guests 
                 (tour_departure_id, booking_id, booking_guest_id, 
                  checked_in, attendance_status, notes, created_at, updated_at)
                 VALUES (?, ?, ?, 0, 'confirmed', ?, NOW(), NOW())`,
-                [
-                    booking.tour_departure_id,
-                    bookingId,
-                    bookingGuestId,
-                    guestData.notes || null
-                ]
-            );
+        [
+          booking.tour_departure_id,
+          bookingId,
+          bookingGuestId,
+          guestData.notes || null,
+        ]
+      );
 
-            createdGuests.push({
-                customer_id: customerId,
-                booking_guest_id: bookingGuestId,
-                tour_departure_guest_id: departureGuestResult.insertId,
-                full_name: `${guestData.first_name} ${guestData.last_name}`,
-                guest_type: guestData.guest_type || 'adult'
-            });
-        }
+      createdGuests.push({
+        customer_id: customerId,
+        booking_guest_id: bookingGuestId,
+        tour_departure_guest_id: departureGuestResult.insertId,
+        full_name: `${guestData.first_name} ${guestData.last_name}`,
+        guest_type: guestData.guest_type || "adult",
+      });
+    }
 
-        const [departureUpdate] = await connection.execute(
-            `UPDATE tour_departures 
+    const [departureUpdate] = await connection.execute(
+      `UPDATE tour_departures 
              SET confirmed_guests = confirmed_guests + ?
              WHERE id = ?`,
-            [guestsData.length, booking.tour_departure_id]
-        );
+      [guestsData.length, booking.tour_departure_id]
+    );
 
-        await connection.commit();
-        
-        return {
-            booking_id: bookingId,
-            tour_departure_id: booking.tour_departure_id,
-            guests_created: createdGuests.length,
-            guests: createdGuests
-        };
+    await connection.commit();
 
-    } catch (error) {
-        await connection.rollback();
-        throw error;
-    } finally {
-        connection.release();
-    }
+    return {
+      booking_id: bookingId,
+      tour_departure_id: booking.tour_departure_id,
+      guests_created: createdGuests.length,
+      guests: createdGuests,
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 async function getCustomersFromBooking(bookingId) {
-    try {
-        const sql = `
+  try {
+    const sql = `
             SELECT 
                 c.id as customer_id,
                 c.full_name as customer_full_name,
@@ -349,17 +352,16 @@ async function getCustomersFromBooking(bookingId) {
             ORDER BY bg.guest_type, bg.id
         `;
 
-        const guests = await query(sql, [bookingId]);
-        return guests;
-
-    } catch (error) {
-        throw error;
-    }
+    const guests = await query(sql, [bookingId]);
+    return guests;
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function checkAvailableSlots(bookingId) {
-    try {
-        const sql = `
+  try {
+    const sql = `
             SELECT 
                 b.total_adults,
                 b.total_children,
@@ -375,98 +377,95 @@ async function checkAvailableSlots(bookingId) {
             GROUP BY b.id
         `;
 
-        const [result] = await query(sql, [bookingId]);
+    const [result] = await query(sql, [bookingId]);
 
-        if (!result) {
-            throw new Error("Booking không tồn tại");
-        }
-
-        return {
-            booking_id: bookingId,
-            total_capacity: {
-                adults: result.total_adults,
-                children: result.total_children,
-                infants: result.total_infants,
-                total: result.total_guests
-            },
-            added: {
-                adults: result.added_adults || 0,
-                children: result.added_children || 0,
-                infants: result.added_infants || 0,
-                total: result.total_added || 0
-            },
-            available: {
-                adults: result.total_adults - (result.added_adults || 0),
-                children: result.total_children - (result.added_children || 0),
-                infants: result.total_infants - (result.added_infants || 0),
-                total: result.total_guests - (result.total_added || 0)
-            }
-        };
-
-    } catch (error) {
-        throw error;
+    if (!result) {
+      throw new Error("Booking không tồn tại");
     }
+
+    return {
+      booking_id: bookingId,
+      total_capacity: {
+        adults: result.total_adults,
+        children: result.total_children,
+        infants: result.total_infants,
+        total: result.total_guests,
+      },
+      added: {
+        adults: result.added_adults || 0,
+        children: result.added_children || 0,
+        infants: result.added_infants || 0,
+        total: result.total_added || 0,
+      },
+      available: {
+        adults: result.total_adults - (result.added_adults || 0),
+        children: result.total_children - (result.added_children || 0),
+        infants: result.total_infants - (result.added_infants || 0),
+        total: result.total_guests - (result.total_added || 0),
+      },
+    };
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function removeGuestFromBooking(bookingGuestId, userId) {
-    const connection = await getConnection();
-    try {
-        await connection.beginTransaction();
+  const connection = await getConnection();
+  try {
+    await connection.beginTransaction();
 
-        const [guests] = await connection.execute(
-            `SELECT booking_id, guest_type FROM booking_guests WHERE id = ?`,
-            [bookingGuestId]
-        );
+    const [guests] = await connection.execute(
+      `SELECT booking_id, guest_type FROM booking_guests WHERE id = ?`,
+      [bookingGuestId]
+    );
 
-        if (!guests || guests.length === 0) {
-            throw new Error("Khách không tồn tại");
-        }
+    if (!guests || guests.length === 0) {
+      throw new Error("Khách không tồn tại");
+    }
 
-        const guest = guests[0];
+    const guest = guests[0];
 
-        await connection.execute(
-            `DELETE FROM tour_departure_guests WHERE booking_guest_id = ?`,
-            [bookingGuestId]
-        );
+    await connection.execute(
+      `DELETE FROM tour_departure_guests WHERE booking_guest_id = ?`,
+      [bookingGuestId]
+    );
 
-        await connection.execute(
-            `DELETE FROM booking_guests WHERE id = ?`,
-            [bookingGuestId]
-        );
+    await connection.execute(`DELETE FROM booking_guests WHERE id = ?`, [
+      bookingGuestId,
+    ]);
 
-        await connection.execute(
-            `UPDATE tour_departures td
+    await connection.execute(
+      `UPDATE tour_departures td
              JOIN bookings b ON b.departure_date = td.departure_date
              SET td.confirmed_guests = td.confirmed_guests - 1
              WHERE b.id = ? AND td.confirmed_guests > 0`,
-            [guest.booking_id]
-        );
+      [guest.booking_id]
+    );
 
-        await connection.commit();
+    await connection.commit();
 
-        return {
-            success: true,
-            booking_guest_id: bookingGuestId,
-            booking_id: guest.booking_id
-        };
-
-    } catch (error) {
-        await connection.rollback();
-        throw error;
-    } finally {
-        connection.release();
-    }
+    return {
+      success: true,
+      booking_guest_id: bookingGuestId,
+      booking_id: guest.booking_id,
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 module.exports = {
-    getAll: getAll,
-    getAllCustomerInQuotes: getAllCustomerInQuotes,
-    getById: getById,
-    create: create,
-    update: update,
-    deleteCustomer: deleteCustomer,
-    createCustomersFromBooking,
-    getCustomersFromBooking,
-    checkAvailableSlots,
-    removeGuestFromBooking
+  getAll: getAll,
+  getAllCustomerInQuotes: getAllCustomerInQuotes,
+  getById: getById,
+  create: create,
+  update: update,
+  deleteCustomer: deleteCustomer,
+  createCustomersFromBooking,
+  getCustomersFromBooking,
+  checkAvailableSlots,
+  removeGuestFromBooking,
 };
