@@ -35,27 +35,33 @@ export const SIDEBAR_CONFIG = [
     permissions: ['reports.dashboard'],
     children: []
   },
-  {
-    label: 'Quản lý Danh mục Tour',
-    icon: List,
-    path: '/categories',
-    allowedRoles: [ROLES.ADMIN],
-    permissions: ['categories.manage'], 
-    children: [] 
-  },
+
   {
     label: 'Quản lý Tour',
     icon: Map,
     allowedRoles: [ROLES.ADMIN],
-    permissions: ['tours.view', 'tours.manage', 'toursVersion.manage', 'quotes.manage'], 
+    permissions: ['tours.view', 'tours.manage', 'toursVersion.manage', 'quotes.manage', 'categories.manage'], 
     children: [
+      {label: 'Quản lý Danh mục Tour', path: '/categories', allowedRoles: [ROLES.ADMIN], permissions: ['categories.manage'] },
       { label: 'Thông tin chi tiết tour', path: '/tours', permissions: ['tours.view'] },
       { label: 'Quản lý phiên bản tour', path: '/tour-versions', permissions: ['toursVersion.manage'] },
-
-      { label: 'Tạo nhanh báo giá', path: '/quotes', permissions: ['quotes.manage'] },
+      
 
     ]
   },
+
+   {
+    label: 'Quản lý Booking',
+    icon: Ticket,
+    allowedRoles: [ROLES.ADMIN],
+    permissions: ['bookings.create', 'booking.manage', 'bookingStatus.manage'],
+    children: [
+      { label: 'Tạo nhanh báo giá', path: '/quotes', permissions: ['quotes.manage'] },
+      { label: 'Quản lý booking', path: '/bookings', permissions: ['booking.manage'] },
+      { label: 'Quản lý lịch sử trạng thái booking', path: '/booking-kanban', permissions: ['bookingStatus.manage'] },
+    ]
+  },
+
   {
     label: 'Lịch khởi hành & Vận hành',
     icon: CalendarDays,
@@ -64,16 +70,7 @@ export const SIDEBAR_CONFIG = [
     permissions: ['schedules.manage', 'assignments.manage', 'departures.checkin'],
     children: []
   },
-  {
-    label: 'Quản lý Booking',
-    icon: Ticket,
-    allowedRoles: [ROLES.ADMIN],
-    permissions: ['bookings.create', 'booking.manage', 'bookingStatus.manage'],
-    children: [
-      { label: 'Quản lý booking', path: '/bookings', permissions: ['booking.manage'] },
-      { label: 'Quản lý lịch sử trạng thái booking', path: '/booking-kanban', permissions: ['bookingStatus.manage'] },
-    ]
-  },
+ 
   {
     label: 'Quản lý Khách hàng',
     icon: Users,
@@ -84,7 +81,7 @@ export const SIDEBAR_CONFIG = [
     ]
   },
   {
-    label: 'Tài chính & Công nợ',
+    label: 'Quản lí tài chính',
     icon: Wallet,
     path: '/finance/transactions',
     allowedRoles: [ROLES.ADMIN],
@@ -121,12 +118,11 @@ export const SIDEBAR_CONFIG = [
   },
   {
     label: 'Hệ thống & Phân quyền',
+    path: '/admin/roles',
     icon: Shield,
     allowedRoles: [ROLES.ADMIN],
     permissions: ['roles.view', 'permissions.view'],
-    children: [
-      { label: 'Vai trò & Quyền hạn', path: '/admin/roles', permissions: ['roles.view'] }
-    ]
+    children: []
   },
 
   // =================================================================

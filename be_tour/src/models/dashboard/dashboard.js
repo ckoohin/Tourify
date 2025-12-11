@@ -3,7 +3,7 @@ const { query } = require("../../config/db");
 async function getProfit() {
     try {
         let params = [];
-        const sql = "SELECT SUM(remaining_amount) AS profit FROM bookings";
+        const sql = "SELECT SUM(final_amount) AS profit FROM bookings";
         const profit = await query(sql, params);
         return profit;
     } catch (error) {
