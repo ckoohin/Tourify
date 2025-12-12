@@ -26,6 +26,38 @@ const customerService = {
             responseType: "blob",
         });
     },
+
+    /**
+     * @param {number} booking_id ID của Booking
+     * @param {Array<Object>} guests Danh sách khách lẻ
+     * @returns {Promise<Object>} 
+     */
+    createGuestsFromBooking: (booking_id, guests) => 
+        api.post("/customer/from-booking", { booking_id, guests }),
+
+    /**
+     * (Route: GET /customer/from-booking/:booking_id)
+     * @param {number} bookingId 
+     * @returns {Promise<Object>}
+     */
+    getGuestsFromBooking: (booking_id) => 
+        api.get(`/customer/from-booking/${booking_id}`),
+
+    /**
+     * (Route: GET /customer/booking-slots/:booking_id)
+     * @param {number} bookingId 
+     * @returns {Promise<Object>} 
+     */
+    checkBookingSlots: (booking_id) => 
+        api.get(`/customer/booking-slots/${booking_id}`),
+
+    /**
+     * (Route: DELETE /customer/booking-guest/:booking_guest_id)
+     * @param {number} bookingGuestId 
+     * @returns {Promise<Object>}
+     */
+    deleteGuestFromBooking: (bookingGuestId) =>
+        api.delete(`/customer/booking-guest/${bookingGuestId}`),
 };
 
 export default customerService;

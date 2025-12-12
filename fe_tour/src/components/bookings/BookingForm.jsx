@@ -70,14 +70,11 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
   function handleChangeQuotes(e) {
     setQuotesSelected(e.target.value);
 
-    // Clear error khi user nhập
     if (errors.quotesSelected) {
         setErrors(prev => ({ ...prev, quotesSelected: null }));
     }
   }
 
-  // thêm ds KH khi mở form
-  // thêm danh sách báo giá khi chọn khách hàng
   
   useEffect(() => {
     getAllCustomers();
@@ -104,7 +101,6 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
     }
   }, [listPrices])
 
-  // Lấy giá, tên của tour version đó
   useEffect(() => {
     if(formData.tour_version_id) {
         getNameAndAllPriceByTourVerSionId(formData.tour_version_id);
@@ -136,14 +132,11 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
     }
   }, [quotesSelected])
 
-  // Auto-calculation Logic
   useEffect(() => {
     if(changeGuest != 0) {
       const guests = Number(formData.total_adults) + Number(formData.total_children) + Number(formData.total_infants) + Number(formData.total_senior);
     
-      // Logic tính tiền cơ bản (để hỗ trợ người dùng, có thể sửa tay)
-      // Ví dụ: Total = (Adults * UnitPrice) + (Children * UnitPrice * 0.75) ... Tùy logic business
-      // Ở đây ta giữ đơn giản: Total nhập tay hoặc tính sơ bộ
+
       const totalPrices = Number(adultPrice) * Number(formData.total_adults) + Number(childPrice) * Number(formData.total_children) + Number(infantPrice) * Number(formData.total_infants) + Number(seniorPrice) * Number(formData.total_senior);
       const unitPrice = totalPrices / guests ? totalPrices / guests : 0;
       const final = totalPrices - Number(formData.discount_amount);
@@ -165,18 +158,18 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
 
   }, [changeGuest]);
 
-  // Reset form khi mở modal
+
   useEffect(() => {
     if (isOpen) {
       setErrors({});
       setActiveTab('general');
       if (initialData) {
         const formatted = { ...initialData };
-        // Format date cho input type="date"
+
         if (formatted.departure_date) formatted.departure_date = formatted.departure_date.split('T')[0];
         setFormData(formatted);
       } else {
-        // Default values cho Create
+
         setFormData({
             booking_code: `BK-${Date.now()}`,
             customer_id: '',
@@ -218,7 +211,7 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
       setChangGuest((prev) => prev + 1);
     }
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error khi user nhập
+
     if (errors[name]) {
         setErrors(prev => ({ ...prev, [name]: null }));
     }
@@ -227,7 +220,6 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // 1. Gọi hàm validate
     let validationErrors ;
     if(action == 'create') {
       validationErrors = validateBooking(formData, quotesSelected);
@@ -235,12 +227,10 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
       validationErrors = validateBooking(formData);
     }
     
-    // 2. Kiểm tra lỗi
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       toast.error("Vui lòng kiểm tra lại thông tin");
       
-      // Tự động chuyển tab đến nơi có lỗi đầu tiên (Optional enhancement)
       if (validationErrors.booking_code || validationErrors.customer_id) setActiveTab('general');
       else if (validationErrors.total_adults) setActiveTab('guests');
       else if (validationErrors.total_amount) setActiveTab('finance');
@@ -248,13 +238,11 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
       return;
     }
 
-    // 3. Submit nếu không có lỗi
     onSubmit(formData);
   };
 
   if (!isOpen) return null;
 
-  // Helper render input có lỗi
   const InputGroup = ({ label, name, type = "text", required = false, ...props }) => (
     <div className="mb-4">
       <label className="block text-sm font-medium text-slate-700 mb-1">
