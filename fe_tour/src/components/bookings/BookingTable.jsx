@@ -4,12 +4,10 @@ import StatusBadge from '../ui/StatusBadge';
 
 const BookingTable = ({ bookings, loading, onEdit, onDelete }) => {
 
-  // Helper format tiền tệ
   const formatCurrency = (amount, currency = 'VND') => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: currency }).format(amount);
   };
 
-  // Helper format ngày
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('vi-VN');
