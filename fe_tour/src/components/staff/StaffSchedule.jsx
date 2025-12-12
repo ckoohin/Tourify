@@ -7,7 +7,6 @@ const StaffSchedule = ({ staffId }) => {
   const [loading, setLoading] = useState(false);
   const [viewDate, setViewDate] = useState(new Date().toISOString().split('T')[0]); // YYYY-MM-DD
   
-  // Form state
   const [isAdding, setIsAdding] = useState(false);
   const [newSchedule, setNewSchedule] = useState({
     schedule_date: '',

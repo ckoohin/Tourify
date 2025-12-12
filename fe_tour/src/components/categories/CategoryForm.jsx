@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2 } from 'lucide-react';
-import toast from 'react-hot-toast'; // Import Toast
+import toast from 'react-hot-toast'; 
 import tourCategoryService from '../../services/api/tourCategoryService';
 import { generateSlug, validateCategory } from '../../utils/validators/categoryRules'; 
 
@@ -18,7 +18,6 @@ const CategoryForm = ({ isOpen, onClose, editData, onSuccess }) => {
     is_active: true
   });
 
-  // Reset form khi mở modal
   useEffect(() => {
     if (isOpen) {
       fetchParents();
@@ -68,7 +67,6 @@ const CategoryForm = ({ isOpen, onClose, editData, onSuccess }) => {
     setFormData(prev => ({
       ...prev,
       name,
-      // Nếu đang tạo mới thì tự động tạo slug
       slug: isEdit ? prev.slug : generateSlug(name)
     }));
   };
@@ -76,7 +74,6 @@ const CategoryForm = ({ isOpen, onClose, editData, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 1. Tự động fill slug
     const finalSlug = formData.slug || generateSlug(formData.name);
     
     const dataToValidate = {
@@ -84,10 +81,8 @@ const CategoryForm = ({ isOpen, onClose, editData, onSuccess }) => {
         slug: finalSlug
     };
 
-    // 2. Validate dữ liệu
     const errors = validateCategory(dataToValidate, editData?.id);
 
-    // Hiển thị lỗi validate bằng Toast Error
     if (Object.keys(errors).length > 0) {
         Object.values(errors).forEach(err => {
             toast.error(err, { className: 'my-toast-error' });
@@ -97,7 +92,6 @@ const CategoryForm = ({ isOpen, onClose, editData, onSuccess }) => {
 
     setLoading(true);
 
-    // 3. Chuẩn bị payload
     const payload = {
         ...dataToValidate,
         parent_id: formData.parent_id === '' ? null : Number(formData.parent_id),
@@ -113,16 +107,14 @@ const CategoryForm = ({ isOpen, onClose, editData, onSuccess }) => {
       }
 
       if (res.success) {
-        // Thông báo thành công
         toast.success(isEdit ? 'Cập nhật thành công!' : 'Tạo danh mục thành công!', {
             className: 'my-toast-success'
         });
         
-        onSuccess(dataToValidate, isEdit); // Reload list
-        onClose();   // Đóng modal
+        onSuccess(dataToValidate, isEdit); 
+        onClose();   
       }
     } catch (error) {
-      // Thông báo lỗi API
       const msg = error.response?.data?.message || error.message;
       toast.error('Lỗi: ' + msg, {
           className: 'my-toast-error'

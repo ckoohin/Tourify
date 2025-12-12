@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Import services
 import serviceBookingService from '../../../services/api/serviceBookingService';
 import supplierRatingService from '../../../services/api/supplierRatingService';
 import tourDepartureService from '../../../services/api/departureService'; 
@@ -18,11 +17,11 @@ const SupplierRatingPage = () => {
   
   const [loading, setLoading] = useState(true);
   const [departure, setDeparture] = useState(null);
-  const [suppliers, setSuppliers] = useState([]); // List unique suppliers
-  const [ratingsMap, setRatingsMap] = useState({}); // { supplierId: ratingScore }
+  const [suppliers, setSuppliers] = useState([]); 
+  const [ratingsMap, setRatingsMap] = useState({}); 
   
-  const [selectedSupplier, setSelectedSupplier] = useState(null); // Cho Modal
-  const [filter, setFilter] = useState('all'); // all | pending | rated
+  const [selectedSupplier, setSelectedSupplier] = useState(null); 
+  const [filter, setFilter] = useState('all'); 
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -32,26 +31,21 @@ const SupplierRatingPage = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 1. Gọi song song các API cần thiết
       const [depRes, serviceRes, ratingRes] = await Promise.all([
         tourDepartureService.getById(departureId),
         serviceBookingService.getByDepartureId(departureId),
         supplierRatingService.getByTourDeparture(departureId)
       ]);
 
-      // 2. Xử lý thông tin Tour
       if (depRes.data && depRes.data.success) {
           setDeparture(depRes.data.data);
       }
 
-      // 3. Xử lý danh sách Nhà cung cấp từ Service Bookings
       if (serviceRes.data) {
-         // API trả về list bookings, ta cần gom nhóm theo Supplier ID
          const bookings = serviceRes.data.data || serviceRes.data;
          const uniqueMap = new Map();
          
          bookings.forEach(bk => {
-             // Chỉ lấy những booking đã confirm hoặc completed (đã sử dụng dịch vụ)
              if (bk.status === 'confirmed' || bk.status === 'completed') {
                  if (!uniqueMap.has(bk.supplier_id)) {
                      uniqueMap.set(bk.supplier_id, {
@@ -64,17 +58,15 @@ const SupplierRatingPage = () => {
                  }
                  const sup = uniqueMap.get(bk.supplier_id);
                  sup.total_services += 1;
-                 sup.services_list.push(bk.service_name || 'Dịch vụ'); // Giả sử có trường service_name
+                 sup.services_list.push(bk.service_name || 'Dịch vụ'); 
              }
          });
          setSuppliers(Array.from(uniqueMap.values()));
       }
 
-      // 4. Xử lý trạng thái đánh giá cũ
       if (ratingRes.data && ratingRes.data.data && ratingRes.data.data.ratings) {
          const map = {};
          ratingRes.data.data.ratings.forEach(r => {
-             // Nếu đã có đánh giá loại 'overall' thì coi như NCC này đã được đánh giá
              if (r.rating_type === 'overall') {
                  map[r.supplier_id] = Number(r.rating);
              }
@@ -90,7 +82,6 @@ const SupplierRatingPage = () => {
     }
   };
 
-  // Logic lọc và tìm kiếm
   const filteredSuppliers = suppliers.filter(sup => {
       const matchesSearch = sup.company_name.toLowerCase().includes(searchTerm.toLowerCase());
       const isRated = !!ratingsMap[sup.id];
@@ -102,7 +93,6 @@ const SupplierRatingPage = () => {
       return matchesSearch && matchesFilter;
   });
 
-  // Tính toán tiến độ
   const progress = suppliers.length > 0 ? (Object.keys(ratingsMap).length / suppliers.length) * 100 : 0;
 
   if (loading) {
@@ -294,7 +284,7 @@ const SupplierRatingPage = () => {
           onClose={() => setSelectedSupplier(null)}
           supplier={selectedSupplier}
           tourDepartureId={departureId}
-          onSuccess={fetchData} // Refresh data after submit
+          onSuccess={fetchData} 
       />
     </div>
   );

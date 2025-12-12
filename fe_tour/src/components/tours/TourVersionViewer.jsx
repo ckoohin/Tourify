@@ -32,13 +32,10 @@ const TourVersionViewer = ({ tourId }) => {
       if (!tourId) return;
       setLoading(true);
       try {
-        // 1. Lấy danh sách version
         const verRes = await tourService.getVersions(tourId);
         
-        // [FIXED] BE trả về { success: true, data: { tourVersions: [...] } }
         let verList = [];
         if (verRes.success) {
-            // Ưu tiên lấy theo key đúng của BE là tourVersions
             if (verRes.data && Array.isArray(verRes.data.tourVersions)) {
                 verList = verRes.data.tourVersions;
             } else if (Array.isArray(verRes.data)) {
@@ -48,14 +45,10 @@ const TourVersionViewer = ({ tourId }) => {
 
         setVersions(verList);
 
-        // 2. Lấy giá cho từng version
         if (verList.length > 0) {
             const pricePromises = verList.map(v => 
-                // [FIXED] Dùng hàm chuyên biệt lấy giá theo version ID
                 tourService.getPricesByVersion(v.id)
                 .then(res => {
-                    // [FIXED] BE trả về { success: true, data: { tourPrices: [...] } }
-                    // Cần lấy đúng key tourPrices
                     const pData = res.success 
                         ? (res.data.tourPrices || res.data || []) 
                         : [];

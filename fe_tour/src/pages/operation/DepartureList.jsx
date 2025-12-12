@@ -16,11 +16,9 @@ const DepartureList = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   
-  // Filters
   const [filterStatus, setFilterStatus] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // [NEW] Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
@@ -28,27 +26,22 @@ const DepartureList = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 1. Lấy danh sách Lịch khởi hành
       const res = await departureService.getAll({ 
         status: filterStatus || undefined,
         search: searchTerm || undefined,
-        page: currentPage,       // [NEW] Thêm page
-        limit: itemsPerPage      // [NEW] Thêm limit
+        page: currentPage,     
+        limit: itemsPerPage      
       });
       
       if (res.success) {
-        // Xử lý dữ liệu trả về từ API phân trang
         const dataList = res.data?.data || res.data || [];
         const initialList = Array.isArray(dataList) ? dataList : [];
         
-        // [NEW] Cập nhật tổng số bản ghi để tính số trang
         const total = res.data?.pagination?.totalItems || res.pagination?.totalItems || res.total || 0;
         setTotalItems(total);
 
-        // Hiển thị dữ liệu ban đầu ngay lập tức
         setDepartures(initialList);
 
-        // 2. [LOGIC GUEST LIST] Cập nhật số lượng khách chính xác (như đã làm trước đó)
         const updatedList = await Promise.all(initialList.map(async (item) => {
             try {
                 const guestRes = await departureService.getGuests(item.id, { limit: 1 });
@@ -81,7 +74,6 @@ const DepartureList = () => {
     }
   };
 
-  // Reload khi filter hoặc page thay đổi
   useEffect(() => {
     fetchData();
   }, [filterStatus, currentPage, itemsPerPage]); 
@@ -286,7 +278,6 @@ const DepartureList = () => {
             </table>
         </div>
 
-        {/* [NEW] Pagination Footer */}
         {totalItems > 0 && (
             <div className="p-4 border-t border-slate-200 bg-slate-50/50 mt-auto">
                 <Pagination

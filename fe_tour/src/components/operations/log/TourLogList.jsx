@@ -14,16 +14,12 @@ const TourLogList = ({ departureId }) => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Sử dụng getByDepartureId để khớp với route backend '/departure/:id'
       const [logRes, statRes] = await Promise.all([
           tourLogService.getByDepartureId(departureId, { log_type: filterType || undefined, limit: 50 }),
           tourLogService.getStats(departureId)
       ]);
       
-      // FIX: Kiểm tra logRes.success trực tiếp (vì axios interceptor đã trả về body)
       if (logRes && logRes.success) {
-         // Cấu trúc trả về: { success: true, data: { data: [Array], pagination: {} } }
-         // Nên danh sách log nằm ở logRes.data.data
          setLogs(logRes.data?.data || []); 
       }
 
@@ -33,7 +29,6 @@ const TourLogList = ({ departureId }) => {
 
     } catch (error) {
       console.error("Error fetching logs:", error);
-      // Không toast lỗi 500 để tránh spam, chỉ hiện UI loading hoặc empty
     } finally {
       setLoading(false);
     }

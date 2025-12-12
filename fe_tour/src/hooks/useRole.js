@@ -27,11 +27,9 @@ export function useRoles() {
     try {
       if (!authService.isAuthenticated()) return;
 
-      // FIX: Xóa /api/v1
       const response = await ApiHelper.get('/roles');
 
       if (response.success && response.data) {
-        // Xử lý dữ liệu trả về (mảng hoặc object phân trang)
         const rawRoles = Array.isArray(response.data) ? response.data : (response.data.data || []);
 
         const rolesWithCount = await Promise.all(
@@ -57,7 +55,6 @@ export function useRoles() {
 
   const createRole = async (data) => {
     try {
-      // FIX: Xóa /api/v1
       const res = await ApiHelper.post('/roles', data);
       if (res.success) {
         await fetchRoles();
@@ -74,7 +71,6 @@ export function useRoles() {
   const updateRole = async (id, data) => {
     try {
       const updateData = { name: data.name, slug: data.slug, description: data.description };
-      // FIX: Xóa /api/v1 và dùng PUT
       const res = await ApiHelper.put(`/roles/${id}`, updateData);
       if (res.success) {
         await fetchRoles();
@@ -91,7 +87,6 @@ export function useRoles() {
   const deleteRole = async (role) => {
     if (!role?.id || !confirm(`Xóa vai trò "${role.name}"?`)) return;
     try {
-      // FIX: Xóa /api/v1
       const res = await ApiHelper.delete(`/roles/${role.id}`);
       if (res.success) {
         await fetchRoles();
@@ -110,7 +105,6 @@ export function useRoles() {
          alert('Quyền đã tồn tại');
          return false;
       }
-      // FIX: Xóa /api/v1 và gửi mảng permissionIds
       const res = await ApiHelper.post(`/roles/${roleId}/permissions`, {
         permissionIds: [Number(permissionId)], 
       });
@@ -127,7 +121,6 @@ export function useRoles() {
 
   const revokePermissionFromRole = async (roleId, permissionId) => {
     try {
-      // FIX: Xóa /api/v1 và dùng DELETE kèm body data
       const res = await ApiHelper.delete(`/roles/${roleId}/permissions`, {
         data: {
             permissionIds: [Number(permissionId)]

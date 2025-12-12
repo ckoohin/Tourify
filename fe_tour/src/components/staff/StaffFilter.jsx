@@ -14,7 +14,6 @@ const StaffFilter = ({ filters, onChange }) => {
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row gap-4 items-end">
-      {/* Tìm kiếm */}
       <div className="flex-1 w-full relative">
         <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Tìm kiếm</label>
         <div className="relative">
@@ -29,7 +28,6 @@ const StaffFilter = ({ filters, onChange }) => {
         </div>
       </div>
 
-      {/* Lọc Loại nhân viên */}
       <div className="w-full md:w-48">
         <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Vai trò</label>
         <select 
@@ -46,7 +44,6 @@ const StaffFilter = ({ filters, onChange }) => {
         </select>
       </div>
 
-      {/* Lọc Trạng thái */}
       <div className="w-full md:w-40">
         <label className="text-xs font-bold text-slate-500 uppercase mb-1 block">Trạng thái</label>
         <select 

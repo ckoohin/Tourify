@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Star, CheckCircle, AlertCircle, Building, Filter, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Import services
+
 import serviceBookingService from '../../../services/api/serviceBookingService';
 import supplierRatingService from '../../../services/api/supplierRatingService';
 import RatingModal from './RatingModal';
@@ -10,9 +10,9 @@ import RatingModal from './RatingModal';
 const TourSupplierList = ({ departureId }) => {
   const [loading, setLoading] = useState(true);
   const [suppliers, setSuppliers] = useState([]);
-  const [ratingsMap, setRatingsMap] = useState({}); // { supplierId: { score, label... } }
+  const [ratingsMap, setRatingsMap] = useState({}); 
   const [selectedSupplier, setSelectedSupplier] = useState(null);
-  const [filter, setFilter] = useState('all'); // all | pending | rated
+  const [filter, setFilter] = useState('all'); 
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -22,19 +22,15 @@ const TourSupplierList = ({ departureId }) => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // 1. Lấy danh sách NCC từ Service Bookings
       const serviceRes = await serviceBookingService.getByDepartureId(departureId);
       let services = [];
       
-      // Xử lý linh hoạt response service
       if (serviceRes.data) { 
          services = Array.isArray(serviceRes.data) ? serviceRes.data : (serviceRes.data.data || []);
       }
 
-      // Gom nhóm Supplier
       const uniqueMap = new Map();
       services.forEach(item => {
-          // Lấy ID NCC
           const supId = item.supplier_id || item.supplier?.id;
           
           if(supId && !uniqueMap.has(supId)) {
@@ -53,15 +49,12 @@ const TourSupplierList = ({ departureId }) => {
       });
       setSuppliers(Array.from(uniqueMap.values()));
 
-      // 2. Lấy danh sách đánh giá đã có
       const ratingRes = await supplierRatingService.getByTourDeparture(departureId);
       
-      // [FIX] Xử lý linh hoạt cấu trúc response để tránh lỗi không tìm thấy dữ liệu
       const ratingsData = ratingRes.data?.ratings || ratingRes.data?.data?.ratings || [];
       
       if (Array.isArray(ratingsData)) {
          const map = {};
-         // Gom nhóm rating theo supplier_id
          const bySupplier = {};
          ratingsData.forEach(r => {
              const sId = r.supplier_id;
@@ -69,18 +62,15 @@ const TourSupplierList = ({ departureId }) => {
              bySupplier[sId].push(r);
          });
 
-         // Logic xác định điểm số hiển thị
          Object.keys(bySupplier).forEach(supId => {
              const list = bySupplier[supId];
              const overall = list.find(r => r.rating_type === 'overall');
              
-             // Chuyển key supId thành số để khớp với id của supplier
              const key = Number(supId);
 
              if (overall) {
                  map[key] = { score: Number(overall.rating), isPartial: false, count: list.length };
              } else {
-                 // Nếu chưa có overall, lấy điểm trung bình
                  const avg = list.reduce((sum, item) => sum + parseFloat(item.rating), 0) / list.length;
                  map[key] = { score: avg, isPartial: true, count: list.length };
              }
@@ -96,25 +86,22 @@ const TourSupplierList = ({ departureId }) => {
     }
   };
 
-  // Logic lọc và tìm kiếm
   const filteredSuppliers = suppliers.filter(sup => {
-      // Kiểm tra xem đã có đánh giá chưa
       const isRated = !!ratingsMap[sup.id];
       const matchesSearch = sup.company_name.toLowerCase().includes(searchTerm.toLowerCase());
       
       if (!matchesSearch) return false;
       
-      if (filter === 'rated') return isRated;   // Đã xong: Phải có trong ratingsMap
-      if (filter === 'pending') return !isRated; // Chưa xong: Không có trong ratingsMap
+      if (filter === 'rated') return isRated;   
+      if (filter === 'pending') return !isRated; 
       
-      return true; // All
+      return true; 
   });
 
   if (loading) return <div className="p-10 text-center text-slate-500">Đang tải danh sách nhà cung cấp...</div>;
 
   return (
     <div className="p-6">
-        {/* Header Section: Title & Filters */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <h3 className="text-lg font-bold text-slate-800">Đánh giá Nhà cung cấp trong Tour</h3>
             

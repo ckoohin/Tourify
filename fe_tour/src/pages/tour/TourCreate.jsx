@@ -5,10 +5,8 @@ import TourForm from '../../components/tours/TourForm';
 const TourCreatePage = () => {
   const navigate = useNavigate();
 
-  // Callback khi tạo thành công
   const handleCreateSuccess = (newTour) => {
     alert('Tạo mới thành công! Chuyển sang trang chỉnh sửa để thêm ảnh.');
-    // ID của tour mới tạo (kiểm tra log xem là id hay insertId)
     const newId = newTour.id || newTour.insertId; 
     navigate(`/tours/edit/${newId}`);
   };

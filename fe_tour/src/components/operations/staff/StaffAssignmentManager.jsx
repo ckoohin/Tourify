@@ -32,7 +32,7 @@ const StaffAssignmentManager = ({
     try {
       await staffAssignmentService.delete(id);
       toast.success('Đã xóa phân công');
-      onRefresh && onRefresh(); // Gọi hàm refresh của component cha
+      onRefresh && onRefresh(); 
     } catch (error) {
       toast.error('Lỗi khi xóa phân công');
     }

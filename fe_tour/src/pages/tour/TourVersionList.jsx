@@ -8,11 +8,10 @@ import Pagination from '../../components/ui/Pagination';
 
 const TourVersionList = () => {
   const [versions, setVersions] = useState([]);
-  const [allVersions, setAllVersions] = useState([]); // Dữ liệu gốc để lọc client-side
-  const [tours, setTours] = useState([]); // Danh sách tour để map tên
+  const [allVersions, setAllVersions] = useState([]); 
+  const [tours, setTours] = useState([]); 
   const [loading, setLoading] = useState(true);
 
-  // Filters & Pagination
   const [filters, setFilters] = useState({
     page: 1, 
     limit: 10,
@@ -21,21 +20,17 @@ const TourVersionList = () => {
   });
   const [total, setTotal] = useState(0);
 
-  // Modal
   const [modal, setModal] = useState({ open: false, data: null });
 
-  // 1. Fetch Data (Tours & Versions)
   useEffect(() => {
     const initData = async () => {
         setLoading(true);
         try {
-            // Lấy danh sách tour để đổ vào dropdown và map tên
             const tourRes = await tourService.getTours();
             const tourData = tourRes.success ? (tourRes.data.tours || []) : [];
             setTours(tourData);
 
-            // Lấy danh sách version (Toàn bộ)
-            const verRes = await tourService.getVersions(); // Không truyền ID để lấy hết
+            const verRes = await tourService.getVersions(); 
             if (verRes.success) {
                 setAllVersions(verRes.data.tourVersions || []);
             }
@@ -48,16 +43,13 @@ const TourVersionList = () => {
     initData();
   }, []);
 
-  // 2. Logic Lọc & Phân trang (Client-side)
   useEffect(() => {
     let result = [...allVersions];
 
-    // Lọc theo Tour
     if (filters.tour_id) {
         result = result.filter(v => String(v.tour_id) === filters.tour_id);
     }
 
-    // Lọc theo tên version
     if (filters.search) {
         const term = filters.search.toLowerCase();
         result = result.filter(v => v.name.toLowerCase().includes(term));
@@ -65,14 +57,12 @@ const TourVersionList = () => {
 
     setTotal(result.length);
 
-    // Phân trang
     const start = (filters.page - 1) * filters.limit;
     const end = start + filters.limit;
     setVersions(result.slice(start, end));
 
   }, [allVersions, filters]);
 
-  // Handlers
   const handleCreate = () => setModal({ open: true, data: null });
   const handleEdit = (ver) => setModal({ open: true, data: ver });
 
@@ -167,13 +157,12 @@ const TourVersionList = () => {
         </div>
       )}
 
-      {/* Modal Form */}
       <TourVersionForm 
         isOpen={modal.open}
         onClose={() => setModal({ ...modal, open: false })}
         onSubmit={handleSubmit}
         initialData={modal.data}
-        tours={tours} // Truyền danh sách tour để chọn
+        tours={tours} 
       />
     </div>
   );

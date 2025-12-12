@@ -11,7 +11,6 @@ const CategoryList = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Hàm load dữ liệu
   const fetchCategories = async () => {
     setLoading(true);
     try {
@@ -80,7 +79,6 @@ const CategoryList = () => {
   return (
     <div className="h-screen flex flex-col bg-slate-50">
       
-      {/* 1. Header Toolbar - Layout 1 hàng */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-4 shrink-0 flex flex-col md:flex-row items-center justify-between gap-4 sticky top-0 z-20">
         
         {/* Title Section */}

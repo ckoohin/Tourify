@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Danh sách loại hoạt động khớp với ENUM trong Database
 const ACTIVITY_TYPES = [
     { value: 'sightseeing', label: 'Tham quan', icon: Camera, color: 'text-blue-600 bg-blue-50 border-blue-100' },
     { value: 'transportation', label: 'Di chuyển', icon: Bus, color: 'text-orange-600 bg-orange-50 border-orange-100' },
@@ -23,9 +22,8 @@ const TourItineraryForm = ({
   isSubmitting, 
   title 
 }) => {
-  const [activeTab, setActiveTab] = useState('general'); // general | activities
+  const [activeTab, setActiveTab] = useState('general'); 
 
-  // Cấu trúc mặc định ĐẦY ĐỦ cho một hoạt động (Tránh lỗi undefined khi submit)
   const defaultActivity = {
       activity_name: '',
       activity_type: 'sightseeing',
@@ -34,8 +32,8 @@ const TourItineraryForm = ({
       location: '',
       description: '',
       check_in_required: false,
-      check_in_window_before: 30, // Mặc định 30 phút
-      check_in_window_after: 15,  // Mặc định 15 phút
+      check_in_window_before: 30, 
+      check_in_window_after: 15,  
       auto_check_in: false,
       activity_status: 'not_started'
   };
@@ -53,7 +51,6 @@ const TourItineraryForm = ({
   const [formData, setFormData] = useState(defaultFormState);
   const [errors, setErrors] = useState({});
 
-  // Khởi tạo dữ liệu khi mở form (Edit mode)
   useEffect(() => {
     if (initialData) {
       let mergedMeals = { breakfast: false, lunch: false, dinner: false };
@@ -71,7 +68,6 @@ const TourItineraryForm = ({
               if (typeof act === 'string') {
                   return { ...defaultActivity, activity_name: act };
               }
-              // Merge với default để đảm bảo có đủ trường (tránh undefined)
               return { ...defaultActivity, ...act };
           });
       }

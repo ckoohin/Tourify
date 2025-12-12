@@ -16,21 +16,16 @@ const TransactionList = () => {
       console.log("Đang gọi API transaction...");
       const res = await transactionService.getAll({ ...filter, limit: 50 });
       
-      // LOG DỮ LIỆU ĐỂ KIỂM TRA
       console.log("Dữ liệu Transaction trả về:", res);
 
       if (res.success) {
-        // [FIX] Xử lý linh hoạt các trường hợp cấu trúc dữ liệu
         let dataList = [];
         
         if (Array.isArray(res.data)) {
-            // Trường hợp 1: Trả về mảng trực tiếp
             dataList = res.data;
         } else if (res.data?.data && Array.isArray(res.data.data)) {
-            // Trường hợp 2: Có phân trang (res.data.data)
             dataList = res.data.data;
         } else if (res.data?.transactions && Array.isArray(res.data.transactions)) {
-             // Trường hợp 3: Tên biến là transactions
             dataList = res.data.transactions;
         }
 

@@ -14,7 +14,6 @@ const TourImages = ({ tourId }) => {
     try {
         await tourService.uploadImage(formData);
         alert('Upload thành công');
-        // Refresh lại list ảnh...
     } catch (error) {
         alert('Lỗi upload');
     }

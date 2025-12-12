@@ -31,7 +31,6 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
     notes: ''
     });
 
-  // --- FILL DỮ LIỆU KHI EDIT ---
   useEffect(() => {
     if (initialData) {
       const arrayToString = (arr) => {
@@ -71,7 +70,6 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
     const newData = { ...formData, [name]: value };
     setFormData(newData);
     
-    // Xóa lỗi realtime khi người dùng nhập
     if (errors[name]) {
         setErrors(prev => {
             const newErrors = { ...prev };
@@ -83,9 +81,7 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // 1. LỌC DỮ LIỆU ĐỂ VALIDATE CHÍNH XÁC
-    // Tạo bản sao để validate, loại bỏ các trường không cần thiết dựa trên loại nhân viên
+
     let dataToValidate = { ...formData };
     
     if (formData.staff_type !== 'driver') {
@@ -93,16 +89,13 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
         delete dataToValidate.driver_license_class;
         delete dataToValidate.vehicle_types;
     } else {
-        // Nếu là tài xế thì có thể không bắt buộc ngoại ngữ (tùy logic validator của bạn)
-        // Nhưng nếu validator bắt buộc thì cứ để nguyên
+
     }
 
-    // 2. GỌI HÀM VALIDATE
     const validationErrors = validateStaff(dataToValidate);
     
     if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
-        // Gom lỗi lại thành thông báo
         const errorMsg = Object.values(validationErrors).join('\n- ');
         toast.error(`Vui lòng kiểm tra lại thông tin:\n- ${errorMsg}`, { duration: 5000 });
         return;
@@ -111,7 +104,6 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
     setLoading(true);
     const toastId = toast.loading('Đang xử lý...');
     
-    // 3. CHUẨN HÓA PAYLOAD GỬI VỀ SERVER
     const payload = {
         ...formData,
         languages: formData.languages ? formData.languages.split(',').map(s => s.trim()).filter(Boolean) : [],
@@ -123,7 +115,6 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
         health_status: formData.health_status || null
     };
 
-    // Xóa sạch dữ liệu rác nếu chuyển đổi loại nhân viên
     if (payload.staff_type !== 'driver') {
         payload.driver_license_number = null;
         payload.driver_license_class = null;
@@ -140,13 +131,11 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
         toast.success("Thêm mới nhân viên thành công!", { id: toastId });
       }
       
-      // Callback
       if (onSuccess) onSuccess(result.data || result);
       if (onClose) onClose();
 
     } catch (error) {
       console.error(error);
-      // Tắt loading và hiện lỗi
       toast.dismiss(toastId);
       
       const resData = error.response?.data;
@@ -161,7 +150,6 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
     }
   };
 
-  // --- HELPER UI ---
   const ErrorText = ({ name }) => errors[name] && (
     <p className="text-xs text-red-600 mt-1 flex items-center gap-1 font-medium animate-pulse">
         <AlertCircle size={12} /> {errors[name]}
@@ -182,7 +170,6 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
        
        <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* --- NHÓM 1: ĐỊNH DANH & VAI TRÒ --- */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
              <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Vai trò <span className="text-red-500">*</span></label>
@@ -207,7 +194,6 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
              </div>
           </div>
 
-          {/* --- NHÓM 2: LIÊN HỆ & CÁ NHÂN --- */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
              <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Điện thoại <span className="text-red-500">*</span></label>
@@ -275,12 +261,10 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
                 <ErrorText name="address" />
           </div>
 
-          {/* --- NHÓM 3: THÔNG TIN CHUYÊN MÔN (Điều kiện hiển thị) --- */}
           <div className="p-5 bg-slate-50 rounded-lg border border-slate-200">
              <h3 className="font-bold text-slate-800 mb-4 border-b pb-2 text-sm uppercase">Thông tin chuyên môn</h3>
              
              {formData.staff_type === 'driver' ? (
-                // Form cho Tài xế
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">Hạng bằng lái <span className="text-red-500">*</span></label>
@@ -316,7 +300,6 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
                     </div>
                 </div>
              ) : (
-                // Form cho HDV / Khác
                 <div className="grid grid-cols-1 gap-5">
                     <div>
                         <label className="block text-xs font-bold text-slate-500 mb-1">
@@ -393,7 +376,6 @@ const StaffForm = ({ staffId, initialData, onClose, onSuccess, isInModal = false
 
           </div>
 
-          {/* --- TRẠNG THÁI --- */}
           <div>
             <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Trạng thái làm việc</label>
             <select name="status" value={formData.status} onChange={handleChange} className="w-full border rounded-lg px-3 py-2.5 bg-white border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-sm">

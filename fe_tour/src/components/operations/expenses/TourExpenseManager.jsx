@@ -59,7 +59,6 @@ const TourExpenseManager = ({ departureId, isReadOnly = false }) => {
 
   return (
     <div className="space-y-6 pb-10">
-      {/* 1. Phần So sánh Ngân sách (Dashboard) */}
       <section>
         <div className="flex items-center justify-between mb-4 px-2">
             <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -75,7 +74,6 @@ const TourExpenseManager = ({ departureId, isReadOnly = false }) => {
 
       <hr className="border-slate-200" />
 
-      {/* 2. Phần Danh sách chi tiết */}
       <section>
         <div className="flex items-center justify-between mb-4 px-2">
             <h3 className="text-lg font-bold text-slate-800">Chi tiết Khoản chi</h3>
@@ -97,14 +95,12 @@ const TourExpenseManager = ({ departureId, isReadOnly = false }) => {
         />
       </section>
 
-      {/* Modal Form */}
       <TourExpenseForm 
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onSuccess={fetchData}
         initialData={selectedExpense}
         departureId={departureId}
-        // Truyền danh mục từ budget xuống để gợi ý trong form
         budgetCategories={budgetComparison?.details?.map(d => d.category) || []}
       />
     </div>

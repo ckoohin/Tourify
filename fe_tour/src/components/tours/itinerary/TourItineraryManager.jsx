@@ -7,7 +7,6 @@ import tourService from '../../../services/api/tourService';
 import toast from 'react-hot-toast';
 import TourItineraryForm from './TourItineraryForm'; 
 
-// Cấu hình loại hoạt động (Copy từ Form để đồng bộ hiển thị)
 const ACTIVITY_TYPES = [
     { value: 'sightseeing', label: 'Tham quan', icon: Camera, color: 'text-blue-600 bg-blue-50 border-blue-100' },
     { value: 'transportation', label: 'Di chuyển', icon: Bus, color: 'text-orange-600 bg-orange-50 border-orange-100' },
@@ -21,11 +20,9 @@ const TourItineraryManager = ({ tourVersionId , durationDay}) => {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(false);
   
-  // State quản lý hiển thị Modal Form
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null); 
   
-  // --- HELPER: Parse JSON an toàn ---
   const safeParseJSON = (data, fallback) => {
     if (typeof data === 'object' && data !== null) {
         return data;
@@ -42,7 +39,6 @@ const TourItineraryManager = ({ tourVersionId , durationDay}) => {
     return fallback;
   };
 
-  // --- FETCH DATA ---
   const fetchItineraries = async () => {
     if (!tourVersionId) return;
 

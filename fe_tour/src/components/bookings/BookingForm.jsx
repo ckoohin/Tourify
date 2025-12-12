@@ -287,7 +287,6 @@ const BookingForm = ({ isOpen, onClose, onSubmit, initialData, title, action, cu
                     className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                 >
                     <tab.icon size={16} /> {tab.label}
-                    {/* Dot báo lỗi trong tab */}
                     {Object.keys(errors).some(k => {
                         if(tab.id === 'general' && ['booking_code', 'customer_id', 'tour_version_id', 'departure_date'].includes(k)) return true;
                         if(tab.id === 'finance' && ['total_amount', 'unit_price'].includes(k)) return true;

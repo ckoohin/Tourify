@@ -55,10 +55,8 @@ const QuoteDetailModal = ({ isOpen, onClose, quote }) => {
                     </div>
                 </div>
 
-                {/* Right: QR & Actions */}
                 <div className="w-full md:w-64 flex flex-col items-center space-y-6">
                     
-                    {/* [MỚI] Sử dụng Component QuoteQR */}
                     <div className="text-center">
                         <p className="text-xs text-slate-500 mb-2">Quét mã để xem online</p>
                         <QuoteQR 

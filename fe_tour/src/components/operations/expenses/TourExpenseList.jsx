@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { Edit, Trash2, FileText, CheckCircle, Clock, X, Eye } from 'lucide-react';
 
-// FIX: Thêm " = []" vào sau expenses để đảm bảo nó luôn là mảng, tránh lỗi undefined
 const TourExpenseList = ({ expenses = [], loading, onEdit, onDelete }) => {
-  // State để lưu ảnh đang xem (nếu có)
   const [previewImage, setPreviewImage] = useState(null);
 
   if (loading) return <div className="text-center py-10">Đang tải danh sách...</div>;
@@ -64,7 +62,6 @@ const TourExpenseList = ({ expenses = [], loading, onEdit, onDelete }) => {
                   </td>
                   <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {/* Nút Xem Hóa Đơn - Thay đổi logic mở popup */}
                           {item.receipt_url && (
                               <button 
                                   onClick={() => setPreviewImage(item.receipt_url)}
@@ -99,11 +96,10 @@ const TourExpenseList = ({ expenses = [], loading, onEdit, onDelete }) => {
         </div>
       </div>
 
-      {/* Modal Popup Xem Ảnh */}
       {previewImage && (
         <div 
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
-          onClick={() => setPreviewImage(null)} // Click ra ngoài để đóng
+          onClick={() => setPreviewImage(null)} 
         >
           <div className="relative max-w-4xl max-h-[90vh] w-full flex justify-center" onClick={(e) => e.stopPropagation()}>
             <img 
@@ -112,7 +108,6 @@ const TourExpenseList = ({ expenses = [], loading, onEdit, onDelete }) => {
               className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
             />
             
-            {/* Nút đóng */}
             <button 
               onClick={() => setPreviewImage(null)}
               className="absolute -top-10 right-0 md:-right-10 text-white/70 hover:text-white p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"

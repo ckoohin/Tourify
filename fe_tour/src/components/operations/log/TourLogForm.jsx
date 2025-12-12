@@ -55,7 +55,6 @@ const TourLogForm = ({ isOpen, onClose, onSuccess, initialData, departureId }) =
       const files = Array.from(e.target.files);
       if (files.length === 0) return;
 
-      // Sử dụng hook để upload nhiều ảnh
       const urls = await uploadMultipleImages(files, 'tour_logs');
       if (urls.length > 0) {
           setFormData(prev => ({ ...prev, images: [...prev.images, ...urls] }));

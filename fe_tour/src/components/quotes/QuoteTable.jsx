@@ -12,7 +12,6 @@ const QuoteTable = ({ quotes, onView, onUpdateStatus }) => {
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
-  // Cấu hình hiển thị cho từng trạng thái
   const STATUS_CONFIG = {
     draft: { label: 'Bản nháp', className: 'bg-slate-100 text-slate-600 border-slate-200' },
     sent: { label: 'Đã gửi', className: 'bg-blue-100 text-blue-700 border-blue-200' },
@@ -62,7 +61,6 @@ const QuoteTable = ({ quotes, onView, onUpdateStatus }) => {
                                 {formatDate(quote.created_at)}
                             </td>
                             <td className="px-4 py-3 text-center">
-                                {/* CUSTOM STATUS SELECT */}
                                 <div className="relative inline-block w-full max-w-[110px]">
                                     <select
                                         value={quote.status}

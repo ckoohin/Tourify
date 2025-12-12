@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import tourService from '../../services/api/tourService';
 
-// Components
 import TourForm from '../../components/tours/TourForm';
 import TourImages from '../../components/tours/TourImages';
 import TourVersions from '../../components/tours/TourVersions';
@@ -14,12 +13,10 @@ const TourEditPage = () => {
   const [tourData, setTourData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Hàm fetch dữ liệu tổng
   const fetchTourData = async () => {
     try {
       const res = await tourService.getTourById(id);
       if (res.success) {
-        // Xử lý dữ liệu trả về từ Backend (do dùng raw query nên có thể là mảng)
         const data = Array.isArray(res.data.tour) ? res.data.tour[0] : res.data.tour;
         setTourData(data);
       }
@@ -77,7 +74,7 @@ const TourEditPage = () => {
           initialData={tourData} 
           onSaveSuccess={() => {
              alert("Đã lưu thông tin cơ bản!");
-             fetchTourData(); // Reload để update các trường hiển thị nếu cần
+             fetchTourData(); 
           }}
         />
       </section>
@@ -87,7 +84,7 @@ const TourEditPage = () => {
         <TourImages 
           tourId={id} 
           existingImages={tourData?.images || []} 
-          onRefresh={fetchTourData} // Quan trọng: Reload lại data sau khi upload ảnh
+          onRefresh={fetchTourData} 
         />
       </section>
 
@@ -96,7 +93,7 @@ const TourEditPage = () => {
         <TourVersions 
           tourId={id} 
           versions={tourData?.versions || []} 
-          onRefresh={fetchTourData} // Quan trọng: Reload lại data sau khi thêm version/giá
+          onRefresh={fetchTourData} 
         />
       </section>
       

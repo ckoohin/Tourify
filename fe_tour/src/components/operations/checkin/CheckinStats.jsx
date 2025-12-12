@@ -24,9 +24,7 @@ const CheckinStats = ({ stats, loading }) => {
 
   return (
     <div className="space-y-4">
-      {/* 1. Stat Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Total Guests */}
         <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-bold text-slate-400 uppercase mb-1">Tổng lượt</p>
@@ -37,7 +35,6 @@ const CheckinStats = ({ stats, loading }) => {
           </div>
         </div>
 
-        {/* Checked In */}
         <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-bold text-green-500 uppercase mb-1">Đã có mặt</p>
@@ -48,7 +45,6 @@ const CheckinStats = ({ stats, loading }) => {
           </div>
         </div>
 
-        {/* Missed/Absent */}
         <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-bold text-red-500 uppercase mb-1">Vắng mặt</p>
@@ -59,7 +55,6 @@ const CheckinStats = ({ stats, loading }) => {
           </div>
         </div>
 
-        {/* Pending */}
         <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-bold text-orange-500 uppercase mb-1">Chưa điểm danh</p>
@@ -71,7 +66,6 @@ const CheckinStats = ({ stats, loading }) => {
         </div>
       </div>
 
-      {/* 2. Progress Bar Visualization */}
       <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
         <div className="flex justify-between items-end mb-2">
             <div className="flex items-center gap-2">
@@ -81,14 +75,12 @@ const CheckinStats = ({ stats, loading }) => {
             <span className="text-2xl font-bold text-slate-800">{stats.attendance_rate}%</span>
         </div>
         
-        {/* Multi-color Progress Bar */}
         <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden flex">
             <div style={{ width: `${getPercent(checkedIn)}%` }} className="h-full bg-green-500 transition-all duration-500" title="Đã check-in"/>
             <div style={{ width: `${getPercent(excused)}%` }} className="h-full bg-orange-400 transition-all duration-500" title="Có phép"/>
             <div style={{ width: `${getPercent(missed)}%` }} className="h-full bg-red-500 transition-all duration-500" title="Vắng mặt"/>
         </div>
 
-        {/* Legend */}
         <div className="flex gap-4 mt-3 text-xs text-slate-500 justify-end">
             <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-green-500"></div> Có mặt</div>
             <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-orange-400"></div> Có phép ({excused})</div>

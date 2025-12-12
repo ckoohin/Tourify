@@ -5,7 +5,6 @@ import { Download } from 'lucide-react';
 const QuoteQR = ({ value, size = 200, fileName = 'qrcode' }) => {
   const qrRef = useRef();
 
-  // Hàm xử lý tải ảnh QR về máy
   const downloadQR = () => {
     const canvas = qrRef.current.querySelector('canvas');
     if (canvas) {
@@ -21,14 +20,13 @@ const QuoteQR = ({ value, size = 200, fileName = 'qrcode' }) => {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* Khu vực hiển thị QR */}
       <div className="p-3 bg-white border-2 border-dashed border-indigo-200 rounded-xl" ref={qrRef}>
         <QRCodeCanvas
           value={value}
           size={size}
           bgColor={"#ffffff"}
           fgColor={"#000000"}
-          level={"H"} // Mức độ sửa lỗi cao nhất (cho phép chèn logo nếu muốn)
+          level={"H"} 
           includeMargin={true}
         />
       </div>

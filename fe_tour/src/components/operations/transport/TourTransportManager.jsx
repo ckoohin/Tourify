@@ -20,10 +20,9 @@ const TourTransportManager = ({ departureId }) => {
     const [transports, setTransports] = useState([]);
     const [loading, setLoading] = useState(false);
     
-    // Modal States
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingTransport, setEditingTransport] = useState(null);
-    const [assignmentModalData, setAssignmentModalData] = useState(null); // Lưu transport đang mở xếp chỗ
+    const [assignmentModalData, setAssignmentModalData] = useState(null); 
 
     const fetchTransports = async () => {
         setLoading(true);

@@ -15,7 +15,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     phone: '',
-    role: 'guide' // Mặc định là hướng dẫn viên vì đã bỏ customer
+    role: 'guide' 
   });
   const [loading, setLoading] = useState(false);
 

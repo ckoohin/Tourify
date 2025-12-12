@@ -1,11 +1,11 @@
 import React from 'react';
 
 /**
- * Component StatusBadge (Huy hiệu Trạng thái) có thể tái sử dụng.
+ * 
  *
  * @param {object} props
- * @param {string} props.text - Nội dung văn bản hiển thị.
- * @param {'success' | 'warning' | 'danger' | 'info' | 'primary' | 'purple' | 'orange'} [props.level='info'] - Mức độ màu sắc.
+ * @param {string} props.text 
+ * @param {'success' | 'warning' | 'danger' | 'info' | 'primary' | 'purple' | 'orange'} [props.level='info'] 
  * @param {string} [props.className] 
  */
 const StatusBadge = ({ text, level = 'info', className = '' }) => {

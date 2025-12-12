@@ -7,11 +7,10 @@ import BookingForm from '../../components/bookings/BookingForm';
 import Pagination from '../../components/ui/Pagination';
 
 const BookingList = () => {
-  const [bookings, setBookings] = useState([]); // Dữ liệu hiển thị
-  const [allBookings, setAllBookings] = useState([]); // Dữ liệu gốc
+  const [bookings, setBookings] = useState([]); 
+  const [allBookings, setAllBookings] = useState([]); 
   const [loading, setLoading] = useState(true);
   
-  // Filter State
   const [filters, setFilters] = useState({
     page: 1,
     limit: 10,
@@ -20,10 +19,8 @@ const BookingList = () => {
   });
   const [total, setTotal] = useState(0);
 
-  // Modal State
   const [formModal, setFormModal] = useState({ open: false, type: 'create', data: null });
 
-  // Fetch Data
   const fetchBookings = async () => {
     setLoading(true);
     try {

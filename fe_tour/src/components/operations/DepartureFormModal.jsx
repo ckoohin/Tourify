@@ -27,7 +27,6 @@ const DepartureFormModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         return_date: initialData.return_date ? initialData.return_date.split('T')[0] : '',
       });
     } else if (isOpen) {
-        // Reset form
         setFormData({
             tour_version_id: '',
             departure_date: '',
@@ -80,7 +79,6 @@ const DepartureFormModal = ({ isOpen, onClose, onSuccess, initialData }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Chọn Tour Version (Tạm thời là input, thực tế nên là Select) */}
           <div>
             <label className="block text-sm font-medium mb-1">Mã Phiên bản Tour (Version ID) <span className="text-red-500">*</span></label>
             <input 
@@ -90,7 +88,7 @@ const DepartureFormModal = ({ isOpen, onClose, onSuccess, initialData }) => {
                 onChange={handleChange}
                 className="w-full border rounded-lg px-3 py-2"
                 required
-                disabled={!!initialData} // Không sửa version khi đã tạo
+                disabled={!!initialData} 
             />
           </div>
 

@@ -1,13 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-// Nhận props toggleSidebar từ MainLayout
 export default function Header({ toggleSidebar }) {
   return (
     <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-10">
-      {/* Left: Mobile Menu Toggle & Search */}
       <div className="flex items-center gap-4 flex-1">
-        {/* Nút này sẽ gọi hàm toggleSidebar từ MainLayout */}
         <button onClick={toggleSidebar} className="md:hidden text-slate-500 hover:text-midnight">
           <i className="ri-menu-2-line text-2xl"></i>
         </button>
@@ -17,7 +14,6 @@ export default function Header({ toggleSidebar }) {
         </div>
       </div>
 
-      {/* Right: Actions */}
       <div className="flex items-center gap-4">
         <button className="relative w-10 h-10 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
           <i className="ri-notification-3-line text-xl"></i>

@@ -160,7 +160,6 @@ const CustomerList = () => {
         onDelete={handleDelete} 
       />
 
-      {/* Pagination & Footer Table */}
       <div className="bg-white rounded-b-xl shadow-sm border-x border-b border-gray-200 p-4">
           <Pagination 
             currentPage={filters.page}
@@ -177,7 +176,6 @@ const CustomerList = () => {
         name={noteModal.name}
       />
 
-      {/* Modal Form Thêm/Sửa */}
       <CustomerForm 
         isOpen={formModal.open}
         onClose={() => setFormModal({ ...formModal, open: false })}

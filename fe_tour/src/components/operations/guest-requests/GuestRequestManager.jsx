@@ -15,7 +15,6 @@ const GuestRequestManager = ({ departureId }) => {
     const [editingRequest, setEditingRequest] = useState(null);
     const [statusUpdating, setStatusUpdating] = useState(null); 
 
-    // Load Data
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -24,11 +23,9 @@ const GuestRequestManager = ({ departureId }) => {
                 departureService.getGuests(departureId, { limit: 100 }) 
             ]);
             
-            // Xử lý Requests
             const reqList = reqRes.data?.requests || reqRes.data?.data || reqRes.data || [];
             setRequests(Array.isArray(reqList) ? reqList : []);
             
-            // Xử lý Guests (Logic an toàn như cũ)
             let guestList = [];
             if (Array.isArray(guestRes.data)) {
                 guestList = guestRes.data;
@@ -52,7 +49,6 @@ const GuestRequestManager = ({ departureId }) => {
         if(departureId) fetchData();
     }, [departureId]);
 
-    // Handle Update Status
     const handleUpdateStatus = async (id, newStatus) => {
         const notes = newStatus === 'fulfilled' ? 'Đã xử lý xong' : 
                       newStatus === 'cannot_fulfill' ? prompt("Nhập lý do không thể đáp ứng:") : null;
@@ -71,7 +67,6 @@ const GuestRequestManager = ({ departureId }) => {
         }
     };
 
-    // Handle Delete
     const handleDelete = async (id) => {
         if (!window.confirm("Bạn chắc chắn muốn xóa yêu cầu này?")) return;
         try {
@@ -81,7 +76,6 @@ const GuestRequestManager = ({ departureId }) => {
         } catch (e) { toast.error("Lỗi xóa"); }
     };
 
-    // Render Card Item
     const RequestCard = ({ req }) => {
         const TypeConfig = REQUEST_TYPES[req.request_type] || REQUEST_TYPES.other;
         const PriorityConfig = PRIORITIES[req.priority] || PRIORITIES.medium;
@@ -161,9 +155,7 @@ const GuestRequestManager = ({ departureId }) => {
     };
 
     return (
-        // [UPDATE] Xóa h-full để content tự giãn
         <div className="flex flex-col bg-slate-50/50 p-4 rounded-xl border border-slate-200">
-            {/* Header Actions */}
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-2">
                     <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><MessageSquare size={20}/></div>
@@ -196,7 +188,6 @@ const GuestRequestManager = ({ departureId }) => {
                     <p className="text-slate-400 text-sm mt-1">Nhấn "Thêm yêu cầu" để tạo mới.</p>
                 </div>
             ) : (
-                // [UPDATE] Xóa overflow-y-auto, maxHeight và custom-scrollbar
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
                     {requests.map(req => <RequestCard key={req.id} req={req} />)}
                 </div>

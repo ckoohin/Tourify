@@ -192,7 +192,6 @@ const TourVersionManager = ({ tourId }) => {
                                         <DollarSign size={16} className="text-emerald-600"/>
                                         Cấu hình giá cho: <span className="font-bold text-blue-600">{ver.name}</span>
                                     </div>
-                                    {/* Nhúng Component quản lý giá vào đây */}
                                     <TourPriceManager tourVersionId={ver.id} />
                                 </div>
                             </div>

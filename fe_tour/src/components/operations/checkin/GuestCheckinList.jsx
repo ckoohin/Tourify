@@ -13,16 +13,13 @@ const GuestCheckinList = ({ activity, departureId, onUpdate }) => {
     const [selectedGuests, setSelectedGuests] = useState([]); 
     const [processing, setProcessing] = useState(false);
 
-    // --- FILTER LOGIC ---
     const filteredGuests = useMemo(() => {
         if (!activity?.checkins) return [];
         
         return activity.checkins.filter(g => {
-            // 1. Filter by Search Text
             const matchesSearch = g.guest_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                   (g.phone && g.phone.includes(searchTerm));
             
-            // 2. Filter by Status Tab
             const matchesStatus = filterStatus === 'all' 
                 ? true 
                 : (filterStatus === 'checked_in' 
@@ -33,7 +30,6 @@ const GuestCheckinList = ({ activity, departureId, onUpdate }) => {
         });
     }, [activity, searchTerm, filterStatus]);
 
-    // --- BULK ACTIONS ---
     const handleBulkCheckin = async () => {
         if (selectedGuests.length === 0) return;
         
@@ -48,7 +44,7 @@ const GuestCheckinList = ({ activity, departureId, onUpdate }) => {
             await checkinService.bulkCheckIn(departureId, activity.activity_id, guestIds);
             toast.success(`Đã check-in ${guestIds.length} khách thành công!`);
             setSelectedGuests([]);
-            onUpdate(); // Refresh data
+            onUpdate(); 
         } catch (error) {
             toast.error("Lỗi check-in hàng loạt");
         } finally {
@@ -64,7 +60,6 @@ const GuestCheckinList = ({ activity, departureId, onUpdate }) => {
 
     const toggleSelectAll = (e) => {
         if (e.target.checked) {
-            // Chỉ chọn những người chưa check-in (pending) trong danh sách đang hiển thị
             const pendingIds = filteredGuests
                 .filter(g => g.check_in_status === 'pending')
                 .map(g => g.id);
@@ -74,7 +69,6 @@ const GuestCheckinList = ({ activity, departureId, onUpdate }) => {
         }
     };
 
-    // --- RENDER HELPERS ---
     const FILTER_TABS = [
         { id: 'all', label: 'Tất cả' },
         { id: 'pending', label: 'Chưa điểm danh', color: 'text-orange-600 bg-orange-50' },
@@ -85,9 +79,7 @@ const GuestCheckinList = ({ activity, departureId, onUpdate }) => {
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-full flex flex-col overflow-hidden">
             
-            {/* 1. Toolbar Section */}
             <div className="p-4 border-b border-slate-100 bg-white space-y-4">
-                {/* Search & Bulk Action Row */}
                 <div className="flex justify-between items-center gap-4">
                     <div className="relative flex-1 max-w-md">
                         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
@@ -117,7 +109,6 @@ const GuestCheckinList = ({ activity, departureId, onUpdate }) => {
                     )}
                 </div>
 
-                {/* Filter Tabs Row */}
                 <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
                     {FILTER_TABS.map(tab => {
                         const isActive = filterStatus === tab.id;
@@ -138,7 +129,6 @@ const GuestCheckinList = ({ activity, departureId, onUpdate }) => {
                 </div>
             </div>
 
-            {/* 2. Table Section */}
             <div className="flex-1 overflow-y-auto relative">
                 {filteredGuests.length === 0 ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
@@ -226,7 +216,6 @@ const GuestCheckinList = ({ activity, departureId, onUpdate }) => {
                 )}
             </div>
             
-            {/* 3. Footer Stats (Optional - Quick view) */}
             <div className="bg-slate-50 border-t border-slate-200 p-2 px-4 text-xs text-slate-500 flex justify-between items-center">
                 <span>Hiển thị {filteredGuests.length} / {activity?.checkins?.length || 0} khách</span>
                 {selectedGuests.length > 0 && <span className="text-blue-600 font-medium">Đang chọn {selectedGuests.length} khách</span>}

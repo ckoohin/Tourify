@@ -8,7 +8,6 @@ const ProviderCreate = () => {
 
   return (
     <div className="p-6 max-w-5xl mx-auto min-h-screen bg-slate-50">
-      {/* Header Navigation */}
       <button 
         onClick={() => navigate('/providers')} 
         className="group flex items-center text-slate-500 hover:text-slate-800 mb-4 transition-colors font-medium"

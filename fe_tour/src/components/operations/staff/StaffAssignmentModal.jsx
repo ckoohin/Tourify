@@ -24,7 +24,6 @@ const StaffAssignmentModal = ({ isOpen, onClose, onSuccess, departureId, initial
     notes: ''
   });
 
-  // Load danh sách nhân viên khi mở modal
   useEffect(() => {
     if (isOpen) {
       const fetchStaff = async () => {
@@ -32,14 +31,12 @@ const StaffAssignmentModal = ({ isOpen, onClose, onSuccess, departureId, initial
         try {
           const res = await staffService.getAll({ status: 'active', limit: 100 });
           
-          // Xử lý linh hoạt dữ liệu trả về
           let list = [];
           if (Array.isArray(res.data)) {
             list = res.data;
           } else if (res.data?.data && Array.isArray(res.data.data)) {
             list = res.data.data;
           } else if (res.data?.staff && Array.isArray(res.data.staff)) {
-             // Trường hợp controller trả về { data: { staff: [] } }
              list = res.data.staff;
           }
           
@@ -79,12 +76,9 @@ const StaffAssignmentModal = ({ isOpen, onClose, onSuccess, departureId, initial
     setFormData(prev => {
         const newData = { ...prev, [name]: value };
 
-        // [TÍNH NĂNG MỚI] Tự động chọn Role tương ứng với Staff Type
         if (name === 'staff_id') {
             const selectedStaff = staffList.find(s => s.id == value);
             if (selectedStaff) {
-                // Map staff_type sang role
-                // Ví dụ: Staff type là 'driver' thì Role tự chuyển thành 'driver'
                 const matchingRole = ROLES.find(r => r.value === selectedStaff.staff_type);
                 if (matchingRole) {
                     newData.role = matchingRole.value;
@@ -107,7 +101,7 @@ const StaffAssignmentModal = ({ isOpen, onClose, onSuccess, departureId, initial
     try {
       const payload = {
         ...formData,
-        staff_id: parseInt(formData.staff_id), // Đảm bảo gửi số nguyên lên Backend
+        staff_id: parseInt(formData.staff_id), 
         tour_departure_id: departureId
       };
 
@@ -116,13 +110,12 @@ const StaffAssignmentModal = ({ isOpen, onClose, onSuccess, departureId, initial
         toast.success('Cập nhật phân công thành công');
       } else {
         await staffAssignmentService.create(payload);
-        toast.success('Đã gửi thông báo phân công cho nhân sự'); // Thông báo rõ ràng hơn
+        toast.success('Đã gửi thông báo phân công cho nhân sự'); 
       }
       onSuccess(); 
       onClose();
     } catch (error) {
       const message = error.response?.data?.message || 'Có lỗi xảy ra khi lưu';
-      // Hiển thị chi tiết lỗi từ Backend (ví dụ: Nhân sự bị trùng lịch)
       toast.error(message);
     } finally {
       setLoading(false);

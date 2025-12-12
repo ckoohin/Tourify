@@ -20,7 +20,6 @@ const TourPriceManager = ({ tourVersionId }) => {
             if (tourVersionId) {
                 data = data.filter(p => String(p.tour_version_id) === String(tourVersionId));
             }
-            // Sort: Adult -> Child -> Infant
             const order = { adult: 1, child: 2, infant: 3, senior: 4, group: 5 };
             data.sort((a, b) => (order[a.price_type] || 99) - (order[b.price_type] || 99));
             setPrices(data);

@@ -10,7 +10,6 @@ const StatusUpdateModal = ({ isOpen, onClose, onConfirm, booking, newStatus }) =
   
   const { uploadImage, uploading } = useCloudinaryUpload();
 
-  // Reset form khi mở modal
   useEffect(() => {
     if (isOpen) {
         setNotes('');
@@ -30,7 +29,6 @@ const StatusUpdateModal = ({ isOpen, onClose, onConfirm, booking, newStatus }) =
   const handleSubmit = async () => {
       let uploadedUrl = '';
 
-      // 1. Upload ảnh nếu có
       if (image) {
           const res = await uploadImage(image, 'booking-history');
           if (res.success) {
@@ -41,7 +39,6 @@ const StatusUpdateModal = ({ isOpen, onClose, onConfirm, booking, newStatus }) =
           }
       }
 
-      // 2. Gọi callback xác nhận
       onConfirm({
           notes,
           image_url: uploadedUrl

@@ -2,7 +2,6 @@ import React from 'react';
 import { Edit, Trash2, Star, Phone, Mail, Bus, User, Map } from 'lucide-react';
 import StatusBadge from '../ui/StatusBadge';
 
-// Thêm onEdit vào props
 const StaffTable = ({ staffList, onDelete, onEdit }) => {
   
   const getRoleIcon = (type) => {
@@ -108,7 +107,6 @@ const StaffTable = ({ staffList, onDelete, onEdit }) => {
 
               <td className="p-4 text-right">
                 <div className="flex justify-end gap-2">
-                  {/* SỬA Ở ĐÂY: Dùng button gọi onEdit thay vì Link */}
                   <button 
                     onClick={() => onEdit(staff)} 
                     className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"

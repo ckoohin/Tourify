@@ -14,7 +14,6 @@ export default function RBACPage() {
         </div>
       </div>
 
-      {/* Tab Switcher (Styled giống ảnh mẫu) */}
       <div className="flex gap-2">
         <button
           onClick={() => setActiveTab('roles')}
@@ -40,7 +39,6 @@ export default function RBACPage() {
         </button>
       </div>
 
-      {/* Content Area - Mount component tương ứng */}
       <div className="transition-all duration-300 ease-in-out animate-in fade-in slide-in-from-bottom-2">
         {activeTab === 'roles' ? <RoleList /> : <PermissionList />}
       </div>

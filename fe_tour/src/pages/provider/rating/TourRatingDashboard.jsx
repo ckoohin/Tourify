@@ -6,20 +6,17 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-// Import service đúng đường dẫn của bạn
 import departureService from '../../../services/api/departureService';
 
 const TourRatingDashboard = () => {
   const navigate = useNavigate();
   
-  // State quản lý dữ liệu và giao diện
   const [loading, setLoading] = useState(true);
   const [departures, setDepartures] = useState([]);
   const [stats, setStats] = useState({ total: 0, completed: 0, pending: 0 });
   
-  // State bộ lọc
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'incomplete', 'completed'
+  const [statusFilter, setStatusFilter] = useState('all'); 
 
   useEffect(() => {
     fetchData();
@@ -34,16 +31,10 @@ const TourRatingDashboard = () => {
       });
 
       if (res.data && res.data.data) {
-        // Xử lý dữ liệu trả về (tùy cấu trúc BE trả về mảng trực tiếp hay lồng trong data)
         const rawData = Array.isArray(res.data.data) ? res.data.data : res.data.data.data || [];
         
-        // --- BƯỚC ENRICH DATA (QUAN TRỌNG) ---
-        // Giả lập số liệu đánh giá để hiển thị UI Progress Bar
-        // (Sau này BE trả về field này thì xóa logic random đi)
         const enrichedData = rawData.map(item => {
-            // Random số lượng NCC từ 3 đến 8
             const total = Math.floor(Math.random() * 6) + 3; 
-            // Random số đã đánh giá (nhỏ hơn hoặc bằng total)
             const rated = Math.floor(Math.random() * (total + 1));
             
             return {
@@ -67,7 +58,6 @@ const TourRatingDashboard = () => {
     }
   };
 
-  // Tính toán số liệu thống kê nhanh cho Header
   const calculateStats = (data) => {
       const completed = data.filter(d => d.rating_stats.is_completed).length;
       setStats({
@@ -77,16 +67,13 @@ const TourRatingDashboard = () => {
       });
   };
 
-  // Logic lọc dữ liệu phía Client
   const filteredDepartures = departures.filter(dep => {
-    // 1. Tìm kiếm theo Mã hoặc Tên tour
     const searchLower = searchTerm.toLowerCase();
     const matchSearch = 
         (dep.departure_code && dep.departure_code.toLowerCase().includes(searchLower)) || 
         (dep.tour?.name && dep.tour.name.toLowerCase().includes(searchLower)) ||
-        (dep.name && dep.name.toLowerCase().includes(searchLower)); // Fallback nếu tên nằm ở root
+        (dep.name && dep.name.toLowerCase().includes(searchLower)); 
 
-    // 2. Lọc theo trạng thái đánh giá
     let matchStatus = true;
     if (statusFilter === 'completed') matchStatus = dep.rating_stats.is_completed;
     if (statusFilter === 'incomplete') matchStatus = !dep.rating_stats.is_completed;
@@ -94,7 +81,6 @@ const TourRatingDashboard = () => {
     return matchSearch && matchStatus;
   });
 
-  // Helper: Render Badge trạng thái dựa trên tiến độ
   const renderStatusBadge = (stats) => {
       if (stats.is_completed) {
           return (
@@ -117,7 +103,6 @@ const TourRatingDashboard = () => {
       );
   };
 
-  // Helper: Render nội dung Loading
   if (loading) {
       return (
         <div className="min-h-screen bg-slate-50 p-8">

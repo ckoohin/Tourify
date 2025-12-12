@@ -10,9 +10,9 @@ const FeedbackFormModal = ({ isOpen, onClose, initialData, onSuccess }) => {
   const [formData, setFormData] = useState({
     subject: '',
     content: '',
-    feedback_type: 'tour', // tour, service, supplier, staff, system
-    priority: 'medium',    // low, medium, high
-    status: 'open',        // open, in_progress, resolved, closed
+    feedback_type: 'tour', 
+    priority: 'medium',    
+    status: 'open',        
     tour_departure_id: '',
     supplier_id: '',
     staff_id: ''
@@ -32,7 +32,6 @@ const FeedbackFormModal = ({ isOpen, onClose, initialData, onSuccess }) => {
         staff_id: initialData.staff_id || ''
       });
     } else {
-        // Reset form for create mode
         setFormData({
             subject: '', content: '', feedback_type: 'tour', priority: 'medium', status: 'open',
             tour_departure_id: '', supplier_id: '', staff_id: ''
@@ -128,7 +127,7 @@ const FeedbackFormModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                         name="feedback_type" 
                         value={formData.feedback_type} 
                         onChange={handleChange}
-                        disabled={isEditMode} // Disable khi edit
+                        disabled={isEditMode} 
                         className={`w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 ${isEditMode ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : 'bg-white'}`}
                     >
                         <option value="tour">Tour</option>
@@ -155,7 +154,6 @@ const FeedbackFormModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                 </div>
             </div>
 
-            {/* Chỉ hiện Status khi Edit Mode */}
             {isEditMode && (
                 <div>
                     <label className="block text-sm font-bold text-slate-700 mb-1">Trạng thái xử lý</label>
@@ -173,7 +171,6 @@ const FeedbackFormModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                 </div>
             )}
 
-            {/* Các trường ID liên quan - Disable khi Edit Mode */}
             {formData.feedback_type === 'tour' && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-200">
                     <label className="block text-sm font-medium text-slate-700 mb-1">ID Tour Departure (Nếu có)</label>
@@ -202,7 +199,6 @@ const FeedbackFormModal = ({ isOpen, onClose, initialData, onSuccess }) => {
                     />
                 </div>
             )}
-            {/* THÊM LOGIC CHO STAFF ID - Trước đây bị thiếu */}
             {formData.feedback_type === 'staff' && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-200">
                     <label className="block text-sm font-medium text-slate-700 mb-1">ID Nhân viên (Nếu có)</label>

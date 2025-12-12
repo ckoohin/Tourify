@@ -11,7 +11,6 @@ const TransactionModal = ({ isOpen, onClose, onSuccess }) => {
     transaction_date: new Date().toISOString().split('T')[0],
     payment_method: 'cash',
     description: '',
-    // booking_id, tour_departure_id, supplier_id (cần thêm logic select nếu muốn liên kết)
   });
 
   const handleSubmit = async (e) => {

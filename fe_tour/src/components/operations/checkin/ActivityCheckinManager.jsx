@@ -35,7 +35,6 @@ const ActivityCheckinManager = ({ departureId, startDate }) => {
         fetchStats();
     }, [departureId]);
 
-    // Load hoạt động theo ngày
     const fetchActivities = () => {
         if (departureId && selectedDate) {
             setLoading(true);
@@ -86,8 +85,8 @@ const ActivityCheckinManager = ({ departureId, startDate }) => {
     };
 
     const handleUpdate = () => {
-        fetchStats();     // Cập nhật lại thống kê tổng
-        fetchActivities(); // Cập nhật lại danh sách chi tiết (để sync số lượng khách đã check)
+        fetchStats();     
+        fetchActivities(); 
     };
 
     const isNotInitialized = !statsLoading && stats && stats.total_checkins === 0;
@@ -147,14 +146,11 @@ const ActivityCheckinManager = ({ departureId, startDate }) => {
                 </button>
             </div>
 
-            {/* 2. [NEW] Stats Section - Tích hợp CheckinStats vào đây */}
             <div className="animate-in fade-in slide-in-from-top-4 duration-500">
                 <CheckinStats stats={stats} loading={statsLoading} />
             </div>
 
-            {/* 3. Main Content Grid */}
             <div className="grid grid-cols-12 gap-6 flex-1 min-h-[500px]">
-                {/* Left: Activity List */}
                 <div className="col-span-12 lg:col-span-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col overflow-hidden max-h-[600px]">
                     <div className="p-3 bg-slate-100 border-b border-slate-200 font-bold text-xs text-slate-500 uppercase flex justify-between items-center">
                         <span>Hoạt động</span>
@@ -209,7 +205,6 @@ const ActivityCheckinManager = ({ departureId, startDate }) => {
                     </div>
                 </div>
 
-                {/* Right: Guest List */}
                 <div className="col-span-12 lg:col-span-9 h-full min-h-[500px]">
                     {selectedActivity ? (
                         <GuestCheckinList 

@@ -3,7 +3,6 @@ import { X, Save, MessageSquare, Award, Clock, Smile, DollarSign, Layers, Star, 
 import supplierRatingService from '../../../services/api/supplierRatingService';
 import toast from 'react-hot-toast';
 
-// StarInput Component
 const StarInput = ({ value, onChange, size = 24 }) => {
   const [hoverVal, setHoverVal] = useState(0);
   return (
@@ -56,7 +55,6 @@ const RatingModal = ({ isOpen, onClose, supplier, tourDepartureId, onSuccess }) 
     try {
       const res = await supplierRatingService.getByTourAndSupplier(tourDepartureId, supplier.id);
       
-      // [FIX LOGIC] Xử lý linh hoạt cấu trúc response
       const data = res.data?.ratings || res.data?.data?.ratings;
 
       if (res.success && data && Array.isArray(data)) {

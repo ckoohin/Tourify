@@ -52,10 +52,7 @@ const FeedbackDetailModal = ({ isOpen, onClose, feedback, onUpdate }) => {
             <button onClick={onClose} className="p-2 hover:bg-white rounded-full text-slate-400 hover:text-slate-600 transition-colors border border-transparent hover:border-slate-200"><X size={20}/></button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            
-            {/* Main Content */}
             <div>
                 <h4 className="text-sm font-bold text-slate-900 mb-2 uppercase tracking-wide">Nội dung phản hồi</h4>
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-slate-700 text-sm leading-relaxed whitespace-pre-line">
@@ -82,7 +79,6 @@ const FeedbackDetailModal = ({ isOpen, onClose, feedback, onUpdate }) => {
                 </div>
             </div>
 
-            {/* Related Entity Info (Nếu có) */}
             {(feedback.tour_code || feedback.supplier_name || feedback.staff_name) && (
                 <div className="border-t border-slate-100 pt-4">
                     <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Thông tin liên quan</h4>

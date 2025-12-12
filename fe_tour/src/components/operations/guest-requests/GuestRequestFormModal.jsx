@@ -21,7 +21,6 @@ const GuestRequestFormModal = ({ isOpen, onClose, onSuccess, initialData, guests
     useEffect(() => {
         if (isOpen) {
             if (initialData) {
-                // Mode: Edit
                 setFormData({
                     booking_guest_id: initialData.booking_guest_id,
                     request_type: initialData.request_type,
@@ -32,10 +31,6 @@ const GuestRequestFormModal = ({ isOpen, onClose, onSuccess, initialData, guests
                     status: initialData.status
                 });
             } else {
-                // Mode: Create
-                // [LOGIC KHỚP VỚI GUEST LIST]
-                // Ưu tiên lấy booking_guest_id vì bảng guest_special_requests quan hệ với bảng booking_guests
-                // Trong danh sách tour_departure_guests, id thường là id của bảng trung gian, còn booking_guest_id mới là id khách
                 const firstGuest = guests.length > 0 ? guests[0] : null;
                 const firstGuestId = firstGuest ? (firstGuest.booking_guest_id || firstGuest.id) : '';
 
@@ -52,7 +47,6 @@ const GuestRequestFormModal = ({ isOpen, onClose, onSuccess, initialData, guests
         }
     }, [isOpen, initialData, guests]);
 
-    // Cập nhật bộ đếm ký tự
     useEffect(() => {
         setCharCount({
             title: formData.title.length,
@@ -90,11 +84,8 @@ const GuestRequestFormModal = ({ isOpen, onClose, onSuccess, initialData, guests
         }
     };
 
-    // Helper: Tìm tên khách hàng để hiển thị (cho mode Edit hoặc hiển thị trong dropdown)
     const getGuestLabel = (guest) => {
         if (!guest) return "";
-        // [LOGIC DISPLAY KHỚP VỚI GUEST LIST]
-        // Hiển thị: Tên - Booking Code - Số phòng (nếu có)
         const roomInfo = guest.room_number ? ` - P.${guest.room_number}` : '';
         const bookingInfo = guest.booking_code ? ` (${guest.booking_code})` : '';
         return `${guest.full_name}${bookingInfo}${roomInfo}`;
@@ -120,7 +111,6 @@ const GuestRequestFormModal = ({ isOpen, onClose, onSuccess, initialData, guests
                 {/* Body - Scrollable */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1">
                     
-                    {/* Chọn Khách */}
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
                             <User size={16} className="text-blue-600"/> Khách hàng <span className="text-red-500">*</span>
@@ -143,7 +133,6 @@ const GuestRequestFormModal = ({ isOpen, onClose, onSuccess, initialData, guests
                                         required
                                     >
                                         {guests.map(g => (
-                                            // [LOGIC ID] Sử dụng booking_guest_id nếu có (chuẩn), fallback về id
                                             <option key={g.id} value={g.booking_guest_id || g.id}>
                                                 {getGuestLabel(g)}
                                             </option>
@@ -161,7 +150,6 @@ const GuestRequestFormModal = ({ isOpen, onClose, onSuccess, initialData, guests
                         )}
                     </div>
 
-                    {/* Loại yêu cầu & Mức độ ưu tiên */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-1.5">Loại yêu cầu</label>

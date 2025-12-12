@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Edit, MapPin, Clock, Users, 
   Tag, Globe, Image as ImageIcon,
-  FileText, Layers, QrCode, Link as LinkIcon, Copy, ExternalLink, Download // [NEW] Import thêm icon
+  FileText, Layers, QrCode, Link as LinkIcon, Copy, ExternalLink, Download 
 } from 'lucide-react';
 import toast from 'react-hot-toast'; 
 import tourService from '../../services/api/tourService';
@@ -20,7 +20,6 @@ const TourDetail = () => {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState('');
   
-  // Tabs State
   const [activeTab, setActiveTab] = useState('overview'); 
   const [defaultVersionId, setDefaultVersionId] = useState(null);
 
@@ -29,7 +28,6 @@ const TourDetail = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [categories, setCategories] = useState([]);
 
-  // Fetch Categories & Tour Data
   const fetchData = async () => {
     try {
         const [catRes, tourRes] = await Promise.all([
@@ -83,7 +81,7 @@ const TourDetail = () => {
     return typeof imgItem === 'string' ? imgItem : imgItem.url;
   };
 
-  // [NEW] Helper Copy Link
+
   const handleCopyLink = (text) => {
       if(!text) return;
       navigator.clipboard.writeText(text);
@@ -93,7 +91,6 @@ const TourDetail = () => {
   if (loading) return <div className="flex justify-center items-center h-screen text-slate-500">Đang tải dữ liệu...</div>;
   if (!tour) return <div className="flex justify-center items-center h-screen text-slate-500">Không tìm thấy tour.</div>;
 
-  // [NEW] Lấy thông tin QR và URL
   const bookingUrl = tourService.getBookingUrl(tour);
   const qrCodeUrl = tourService.getQrCodeImageUrl(tour.qr_code);
 
@@ -245,7 +242,6 @@ const TourDetail = () => {
         {/* Sidebar Info */}
         <div className="space-y-6">
           
-          {/* [NEW] Box: Chia sẻ & QR Code */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <h3 className="font-bold text-slate-800 mb-4 pb-2 border-b flex items-center gap-2">
                 <QrCode size={18} className="text-purple-600"/> Chia sẻ Tour

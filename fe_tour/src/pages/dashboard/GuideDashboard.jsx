@@ -19,12 +19,10 @@ const GuideDashboard = ({ user }) => {
     completed: 0
   });
 
-  // 1. Fetch dữ liệu thật
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Lấy danh sách tour của tôi
         const res = await staffAssignmentService.getMyTours({ limit: 10 });
         
         let list = [];
@@ -36,7 +34,6 @@ const GuideDashboard = ({ user }) => {
 
         setTours(list);
 
-        // Tính toán thống kê nhanh
         const now = new Date();
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
@@ -56,7 +53,6 @@ const GuideDashboard = ({ user }) => {
 
       } catch (error) {
         console.error("Lỗi tải dashboard:", error);
-        // Không toast lỗi ở dashboard để tránh spam, chỉ log
       } finally {
         setLoading(false);
       }
@@ -65,10 +61,8 @@ const GuideDashboard = ({ user }) => {
     fetchData();
   }, []);
 
-  // 2. Logic tìm Tour quan trọng nhất (Đang đi > Sắp đi gần nhất)
   const heroTour = useMemo(() => {
     const now = new Date();
-    // Ưu tiên 1: Tour đang diễn ra (Ongoing)
     const ongoing = tours.find(t => {
         const start = new Date(t.departure_date);
         const end = new Date(t.return_date);
@@ -77,8 +71,6 @@ const GuideDashboard = ({ user }) => {
     
     if (ongoing) return { ...ongoing, highlightType: 'ongoing' };
 
-    // Ưu tiên 2: Tour sắp tới gần nhất (Upcoming)
-    // Giả sử API đã sort theo ngày, nếu chưa thì cần sort lại
     const upcoming = tours
         .filter(t => new Date(t.departure_date) > now && t.departure_status !== 'cancelled')
         .sort((a, b) => new Date(a.departure_date) - new Date(b.departure_date))[0];
@@ -88,7 +80,6 @@ const GuideDashboard = ({ user }) => {
     return null;
   }, [tours]);
 
-  // 3. Danh sách tour tiếp theo (loại trừ heroTour)
   const nextTours = useMemo(() => {
     if (!heroTour) return [];
     return tours
@@ -96,7 +87,6 @@ const GuideDashboard = ({ user }) => {
         .slice(0, 3);
   }, [tours, heroTour]);
 
-  // Format Helper
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -120,7 +110,6 @@ const GuideDashboard = ({ user }) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       
-      {/* 1. Header Section */}
       <div className="flex justify-between items-end px-1">
         <div>
             <p className="text-slate-500 text-sm font-medium mb-1">
@@ -135,7 +124,6 @@ const GuideDashboard = ({ user }) => {
         </Link>
       </div>
 
-      {/* 2. Stats Cards */}
       <div className="grid grid-cols-3 gap-3 sm:gap-6">
         <div className="bg-blue-600 rounded-2xl p-4 text-white shadow-lg shadow-blue-200">
             <div className="flex items-center gap-2 opacity-80 mb-1">
@@ -160,7 +148,6 @@ const GuideDashboard = ({ user }) => {
         </div>
       </div>
 
-      {/* 3. Hero Card: Tour Quan Trọng Nhất */}
       <div>
         <div className="flex justify-between items-center mb-4 px-1">
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">

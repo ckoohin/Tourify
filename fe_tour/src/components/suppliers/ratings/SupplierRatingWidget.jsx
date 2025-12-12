@@ -24,7 +24,7 @@ const SupplierRatingWidget = ({ supplierId }) => {
 
       if (statsRes.data.success) setStats(statsRes.data.data.stats);
       if (reviewsRes.data.success) {
-        setReviews(reviewsRes.data.data); // data là mảng ratings
+        setReviews(reviewsRes.data.data); 
         setPagination({
             page: reviewsRes.data.page,
             total: reviewsRes.data.total,
@@ -38,11 +38,9 @@ const SupplierRatingWidget = ({ supplierId }) => {
     }
   };
 
-  // Tính điểm trung bình tổng
   const overallStat = stats.find(s => s.rating_type === 'overall') || { avg_rating: 0, total_ratings: 0 };
   const avgRating = Number(overallStat.avg_rating).toFixed(1);
 
-  // Helper mapping tên
   const TYPE_MAP = {
       'service_quality': 'Chất lượng',
       'punctuality': 'Đúng giờ',
@@ -53,9 +51,9 @@ const SupplierRatingWidget = ({ supplierId }) => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      {/* Cột trái: Thống kê */}
+
       <div className="lg:col-span-1 space-y-6">
-        {/* Điểm tổng */}
+
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm text-center">
             <h4 className="text-slate-500 font-medium mb-2">Đánh giá tổng thể</h4>
             <div className="text-5xl font-black text-slate-800 mb-2">{avgRating}</div>
@@ -65,7 +63,6 @@ const SupplierRatingWidget = ({ supplierId }) => {
             <p className="text-sm text-slate-400">{overallStat.total_ratings} lượt đánh giá</p>
         </div>
 
-        {/* Chi tiết theo tiêu chí */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             <h4 className="font-bold text-slate-800 mb-4 border-b pb-2">Theo tiêu chí</h4>
             <div className="space-y-4">
@@ -87,7 +84,6 @@ const SupplierRatingWidget = ({ supplierId }) => {
         </div>
       </div>
 
-      {/* Cột phải: Danh sách Review */}
       <div className="lg:col-span-2">
         <h4 className="font-bold text-lg text-slate-800 mb-4">Nhận xét mới nhất</h4>
         
@@ -131,7 +127,6 @@ const SupplierRatingWidget = ({ supplierId }) => {
             </div>
         )}
 
-        {/* Pagination Simple */}
         {pagination.total > pagination.limit && (
             <div className="flex justify-center mt-6 gap-2">
                 <button 

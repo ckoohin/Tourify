@@ -3,19 +3,16 @@ import { Search, Filter, X, RotateCcw } from 'lucide-react';
 import tourCategoryService from '../../services/api/tourCategoryService';
 
 const TourFilter = ({ onFilterChange }) => {
-  // State lưu trữ các điều kiện lọc
+
   const [filters, setFilters] = useState({
     keyword: '',
     category_id: '',
-    status: '', // active, draft, inactive
-    // min_price: '',
-    // max_price: ''
+    status: '', 
   });
 
   const [categories, setCategories] = useState([]);
-  const [isExpanded, setIsExpanded] = useState(false); // Để mở rộng bộ lọc nâng cao nếu cần
+  const [isExpanded, setIsExpanded] = useState(false); 
 
-  // Load danh mục khi component được mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -32,7 +29,6 @@ const TourFilter = ({ onFilterChange }) => {
     fetchCategories();
   }, []);
 
-  // Xử lý khi người dùng thay đổi input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({
@@ -41,13 +37,11 @@ const TourFilter = ({ onFilterChange }) => {
     }));
   };
 
-  // Gửi dữ liệu lọc lên component cha
   const handleSubmit = (e) => {
     e.preventDefault();
     onFilterChange(filters);
   };
 
-  // Reset bộ lọc về mặc định
   const handleReset = () => {
     const defaultFilters = {
       keyword: '',

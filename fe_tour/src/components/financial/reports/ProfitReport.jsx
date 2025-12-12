@@ -6,7 +6,7 @@ import { Search } from 'lucide-react';
 const ProfitReport = () => {
   const [data, setData] = useState(null);
   const [dateRange, setDateRange] = useState({
-    start_date: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0], // Đầu năm
+    start_date: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0], 
     end_date: new Date().toISOString().split('T')[0]
   });
 
@@ -25,7 +25,6 @@ const ProfitReport = () => {
 
   return (
     <div className="p-6 space-y-8">
-      {/* Filter */}
       <div className="flex gap-4 items-end bg-slate-50 p-4 rounded-xl border border-slate-200">
         <div>
           <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Từ ngày</label>

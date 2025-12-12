@@ -30,7 +30,6 @@ const TourVersionForm = ({ isOpen, onClose, onSubmit, initialData, tours = [], f
             valid_to: initialData.valid_to ? initialData.valid_to.split('T')[0] : '',
         });
       } else {
-        // Reset form
         setFormData({
             tour_id: fixedTourId || '', 
             name: '',
@@ -81,7 +80,6 @@ const TourVersionForm = ({ isOpen, onClose, onSubmit, initialData, tours = [], f
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
             
-            {/* Chọn Tour (Chỉ hiện khi không có fixedTourId) */}
             {!fixedTourId && (
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Thuộc Tour <span className="text-red-500">*</span></label>

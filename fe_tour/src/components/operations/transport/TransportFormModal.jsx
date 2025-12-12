@@ -10,17 +10,17 @@ const TransportFormModal = ({ isOpen, onClose, initialData, departureId, onSucce
         route_from: '',
         route_to: '',
         departure_datetime: '',
-        arrival_datetime: '', // [New]
+        arrival_datetime: '', 
         total_seats: 45,
         vehicle_number: '',
         flight_number: '',
-        seat_class: '', // [New] (Economy, Business...)
-        driver_id: '', // [New]
-        unit_price: 0, // [New]
-        currency: 'VND', // [New]
-        booking_status: 'pending', // [New]
-        booking_reference: '', // [New] (PNR/Code)
-        notes: '' // [New]
+        seat_class: '', 
+        driver_id: '', 
+        unit_price: 0, 
+        currency: 'VND', 
+        booking_status: 'pending', 
+        booking_reference: '', 
+        notes: '' 
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +32,6 @@ const TransportFormModal = ({ isOpen, onClose, initialData, departureId, onSucce
                 departure_datetime: initialData.departure_datetime ? initialData.departure_datetime.slice(0, 16) : '',
                 arrival_datetime: initialData.arrival_datetime ? initialData.arrival_datetime.slice(0, 16) : '',
                 driver_id: initialData.driver_id || '',
-                // Đảm bảo các trường số không bị null
                 unit_price: initialData.unit_price || 0,
                 total_seats: initialData.total_seats || 45
             });
@@ -49,7 +48,6 @@ const TransportFormModal = ({ isOpen, onClose, initialData, departureId, onSucce
         setIsSubmitting(true);
         try {
             const payload = { ...formData, tour_departure_id: departureId };
-            // Xử lý dữ liệu rỗng trước khi gửi
             if (!payload.arrival_datetime) delete payload.arrival_datetime;
             if (!payload.driver_id) delete payload.driver_id;
 

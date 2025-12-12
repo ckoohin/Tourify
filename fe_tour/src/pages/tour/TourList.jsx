@@ -16,7 +16,6 @@ const TourList = () => {
   const [displayTours, setDisplayTours] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // [FIX 2] Thêm state categories
   const [categories, setCategories] = useState([]);
 
   const [filters, setFilters] = useState({ keyword: '', category_id: '', status: '' });
@@ -27,13 +26,11 @@ const TourList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTour, setSelectedTour] = useState(null);
 
-  // [FIX 3] Hàm lấy danh mục để truyền vào Form
   useEffect(() => {
     const fetchCategories = async () => {
         try {
             const res = await tourService.getCategories();
             if (res.success) {
-                // Xử lý tùy theo cấu trúc trả về của API (res.data.categories hoặc res.data)
                 const cats = res.data.categories || res.data || [];
                 setCategories(cats);
             }
@@ -123,16 +120,13 @@ const TourList = () => {
     const toastId = toast.loading("Đang xử lý...");
     try {
         if (selectedTour) {
-            // Cập nhật
             await tourService.updateTour(selectedTour.id, formData);
             toast.success("Cập nhật tour thành công");
         } else {
-            // Tạo mới
             await tourService.createTour(formData);
             toast.success("Tạo tour mới thành công");
         }
         
-        // Đóng modal và tải lại danh sách
         handleCloseModal();
         fetchTours();
         
@@ -212,7 +206,7 @@ const TourList = () => {
         onSuccess={handleSuccess}
         onSubmit={handleSubmitForm}
         initialData={selectedTour}
-        categories={categories} // Truyền categories đã fetch
+        categories={categories} 
         title={selectedTour ? `Cập nhật Tour: ${selectedTour.code}` : "Tạo Tour Mới"}
       />
     </div>

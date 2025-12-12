@@ -49,7 +49,6 @@ const RoleAssignmentModal = ({
           </button>
         </div>
 
-        {/* Body: Danh sách quyền */}
         <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
           {loading ? (
             <div className="flex justify-center items-center h-64">
@@ -63,7 +62,7 @@ const RoleAssignmentModal = ({
                 const isAdminOnly = ADMIN_ONLY_PERMISSIONS.includes(perm.slug);
                 
                 let isDisabled = false;
-                let forcedState = null; // null: ko ép, true: ép check, false: ép bỏ check
+                let forcedState = null; 
                 let noticeText = "";
                 let noticeColor = "text-orange-600";
 

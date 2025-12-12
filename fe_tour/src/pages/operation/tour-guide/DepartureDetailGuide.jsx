@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
-// --- REAL IMPORTS ---
 import staffAssignmentService from '../../../services/api/staffAssignmentService';
 import departureService from '../../../services/api/departureService';
 
@@ -23,21 +22,17 @@ import GuestRequestManager from '../../../components/operations/guest-requests/G
 import TourTransportManager from '../../../components/operations/transport/TourTransportManager';
 
 const DepartureDetailGuide = () => {
-  // Lấy departureId từ URL (khớp với route /my-assignments/:departureId)
   const { departureId } = useParams();
   const navigate = useNavigate();
-  
-  // State
+
   const [departure, setDeparture] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('guests');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // State cho dropdown trạng thái
   const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
   const statusMenuRef = useRef(null);
 
-  // Close status menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (statusMenuRef.current && !statusMenuRef.current.contains(event.target)) {
@@ -48,8 +43,6 @@ const DepartureDetailGuide = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 1. Hàm load dữ liệu chi tiết Departure
-  // Dùng API getMyAssignmentDetail để đảm bảo Guide có quyền truy cập
   const fetchDepartureDetail = useCallback(async () => {
     if (!departureId) return;
 
@@ -60,7 +53,6 @@ const DepartureDetailGuide = () => {
             setDeparture(res.data);
         } else {
             toast.error(res.message || "Không tải được thông tin chuyến đi");
-            // Nếu lỗi 403 (Forbidden), đẩy về trang danh sách
             if (res.status === 403) {
                 navigate('/departures_guide');
             }
@@ -73,19 +65,16 @@ const DepartureDetailGuide = () => {
     }
   }, [departureId, navigate]);
 
-  // Load dữ liệu khi mount
   useEffect(() => {
     setLoading(true);
     fetchDepartureDetail();
   }, [fetchDepartureDetail]);
 
-  // 2. Xử lý cập nhật trạng thái nhanh
   const handleStatusChange = async (newStatus) => {
       const statusLabel = STATUS_CONFIG[newStatus]?.label || newStatus;
       if(!window.confirm(`Bạn có muốn thay đổi trạng thái thành "${statusLabel}"?`)) return;
       
       try {
-          // Guide cập nhật trạng thái tour thông qua departureService
           await departureService.updateStatus(departureId, newStatus);
           toast.success(`Đã cập nhật trạng thái: ${statusLabel}`);
           fetchDepartureDetail();
@@ -120,7 +109,6 @@ const DepartureDetailGuide = () => {
       );
   }
 
-  // Guide có thể chỉnh sửa trạng thái và thông tin cơ bản
   const isReadOnly = false; 
 
   const currentGuests = departure.confirmed_guests || 0;
@@ -133,7 +121,6 @@ const DepartureDetailGuide = () => {
       return 'bg-blue-600'; 
   };
 
-  // --- CẤU HÌNH NHÓM TAB ---
   const CLIENT_TABS = [
       { id: 'guests', label: 'Danh sách Khách', icon: Users, count: departure.confirmed_guests },
       { id: 'requests', label: 'Yêu cầu', icon: MessageSquare, count: 0 },
@@ -160,7 +147,7 @@ const DepartureDetailGuide = () => {
       >
           <div className="relative">
               <tab.icon size={20} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} strokeWidth={isActive ? 2.5 : 2} />
-              {/* Badge số lượng (nếu có) */}
+
               {tab.count !== undefined && tab.count > 0 && (
                   <span className={`absolute -top-2 -right-3 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${
                       isActive ? 'bg-white text-blue-600 border-white' : 'bg-red-500 text-white border-white'
@@ -181,10 +168,8 @@ const DepartureDetailGuide = () => {
     <div className="min-h-screen bg-slate-50 pb-20 font-sans text-slate-800">
       <Toaster position="top-right" />
       
-      {/* 1. TOP HEADER */}
       <header className="bg-white border-b border-slate-200 pt-5 pb-5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm text-slate-500 mb-4">
                 <button onClick={() => navigate('/departures_guide')} className="hover:text-blue-600 flex items-center gap-1 transition-colors">
                     <ArrowLeft size={16}/> Danh sách nhiệm vụ
@@ -194,7 +179,6 @@ const DepartureDetailGuide = () => {
             </nav>
 
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-                {/* Title & Info */}
                 <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-3 mb-2">
                         <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{departure.tour_name}</h1>
@@ -218,17 +202,13 @@ const DepartureDetailGuide = () => {
                     </div>
                 </div>
 
-                {/* Right Side: Actions */}
                 <div className="flex flex-col items-start lg:items-end gap-4 min-w-[280px]">
                      {!isReadOnly && (
                         <div className="flex items-center gap-3">
-
-                            {/* Nút Sửa */}
     
                         </div>
                     )}
                     
-                    {/* Sales Progress */}
                     <div className="w-full bg-slate-50 p-3 rounded-xl border border-slate-100">
                         <div className="flex justify-between text-xs mb-1.5">
                             <span className="text-slate-500 font-medium">Khách đặt chỗ</span>
@@ -248,7 +228,6 @@ const DepartureDetailGuide = () => {
         </div>
       </header>
 
-      {/* 2. STICKY NAVIGATION */}
       <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

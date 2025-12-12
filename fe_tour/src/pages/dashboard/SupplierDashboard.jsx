@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 const SupplierDashboard = ({ user }) => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-slate-700 to-slate-900 rounded-2xl p-8 text-white shadow-xl">
         <h1 className="text-3xl font-bold mb-2">Kênh Đối tác - {user?.name}</h1>
         <p className="text-slate-300 text-lg">
@@ -13,7 +12,6 @@ const SupplierDashboard = ({ user }) => {
         </p>
       </div>
 
-      {/* Status Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl border border-l-4 border-l-orange-500 shadow-sm">
           <div className="flex justify-between items-start">

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, Loader2, UploadCloud } from 'lucide-react';
 import toast from 'react-hot-toast';
 import tourExpenseService from '../../../services/api/tourExpenseService';
-// Import hook của bạn
 import { useCloudinaryUpload } from '../../../hooks/useCloudinaryUpload'; 
 
 const PAYMENT_METHODS = [
@@ -13,7 +12,6 @@ const PAYMENT_METHODS = [
 ];
 
 const TourExpenseForm = ({ isOpen, onClose, onSuccess, initialData, departureId, budgetCategories = [] }) => {
-  // 1. Sử dụng hook useCloudinaryUpload
   const { uploadImage, uploading, progress } = useCloudinaryUpload();
   
   const [submitting, setSubmitting] = useState(false);
@@ -25,7 +23,7 @@ const TourExpenseForm = ({ isOpen, onClose, onSuccess, initialData, departureId,
     payment_method: 'cash',
     supplier_id: '',
     description: '',
-    receipt_url: '' // Đây là trường lưu link ảnh
+    receipt_url: '' 
   });
 
   useEffect(() => {
@@ -38,7 +36,6 @@ const TourExpenseForm = ({ isOpen, onClose, onSuccess, initialData, departureId,
                 receipt_url: initialData.receipt_url || ''
             });
         } else {
-            // Reset form
             setFormData({
                 expense_category: '',
                 expense_date: new Date().toISOString().split('T')[0],
@@ -58,16 +55,13 @@ const TourExpenseForm = ({ isOpen, onClose, onSuccess, initialData, departureId,
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // 2. Hàm xử lý upload ảnh
   const handleFileUpload = async (e) => {
       const file = e.target.files[0];
       if (!file) return;
       
-      // Gọi hàm uploadImage từ hook, upload vào folder 'expenses'
       const result = await uploadImage(file, 'expenses');
       
       if (result.success) {
-          // QUAN TRỌNG: Lưu URL trả về từ Cloudinary vào state formData
           setFormData(prev => ({ ...prev, receipt_url: result.url }));
           toast.success("Đã tải ảnh lên thành công");
       } else {
@@ -166,24 +160,20 @@ const TourExpenseForm = ({ isOpen, onClose, onSuccess, initialData, departureId,
                 <textarea name="description" rows="3" value={formData.description} onChange={handleChange} className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Chi tiết..."></textarea>
             </div>
 
-            {/* Phần hiển thị và upload ảnh */}
             <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Hóa đơn / Chứng từ</label>
                 <div className="flex items-center gap-4">
                     {formData.receipt_url ? (
-                        // Nếu đã có URL ảnh (từ Cloudinary hoặc từ DB), hiển thị ảnh preview
                         <div className="relative group w-24 h-24 border rounded-lg overflow-hidden bg-slate-50">
                             <img 
                                 src={formData.receipt_url} 
                                 alt="Receipt" 
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                    // Xử lý nếu ảnh lỗi thì hiện placeholder
                                     e.target.onerror = null; 
                                     e.target.src = "https://placehold.co/400?text=Error";
                                 }}
                             />
-                            {/* Nút xóa ảnh */}
                             <button 
                                 type="button" 
                                 onClick={() => setFormData({...formData, receipt_url: ''})} 
@@ -193,7 +183,6 @@ const TourExpenseForm = ({ isOpen, onClose, onSuccess, initialData, departureId,
                             </button>
                         </div>
                     ) : (
-                        // Nếu chưa có ảnh, hiện nút upload
                         <label className={`w-full border-2 border-dashed border-slate-300 rounded-lg p-4 flex flex-col items-center justify-center text-slate-500 cursor-pointer hover:bg-slate-50 hover:border-blue-400 transition-colors ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             {uploading ? (
                                 <>

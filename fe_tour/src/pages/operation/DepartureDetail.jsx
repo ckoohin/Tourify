@@ -27,17 +27,14 @@ const DepartureDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  // State
   const [departure, setDeparture] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('guests');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // State cho dropdown trạng thái
   const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
   const statusMenuRef = useRef(null);
 
-  // Close status menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (statusMenuRef.current && !statusMenuRef.current.contains(event.target)) {
@@ -48,7 +45,6 @@ const DepartureDetail = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 1. Hàm load dữ liệu chi tiết Departure
   const fetchDepartureDetail = useCallback(async () => {
     try {
         const res = await departureService.getById(id);
@@ -65,13 +61,11 @@ const DepartureDetail = () => {
     }
   }, [id]);
 
-  // Load dữ liệu khi mount
   useEffect(() => {
     setLoading(true);
     fetchDepartureDetail();
   }, [fetchDepartureDetail]);
 
-  // 2. Xử lý cập nhật trạng thái nhanh
   const handleStatusChange = async (newStatus) => {
       const statusLabel = STATUS_CONFIG[newStatus]?.label || newStatus;
       if(!window.confirm(`Bạn có muốn thay đổi trạng thái thành "${statusLabel}"?`)) return;
@@ -122,7 +116,6 @@ const DepartureDetail = () => {
       return 'bg-blue-600'; 
   };
 
-  // --- CẤU HÌNH NHÓM TAB (2 Cards x 4 Tabs) ---
   const CLIENT_TABS = [
       { id: 'guests', label: 'Danh sách Khách', icon: Users, count: departure.confirmed_guests },
       { id: 'requests', label: 'Yêu cầu', icon: MessageSquare, count: 0 },
@@ -150,7 +143,7 @@ const DepartureDetail = () => {
       >
           <div className="relative">
               <tab.icon size={20} className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} strokeWidth={isActive ? 2.5 : 2} />
-              {/* Badge số lượng (nếu có) */}
+
               {tab.count !== undefined && tab.count > 0 && (
                   <span className={`absolute -top-2 -right-3 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${
                       isActive ? 'bg-white text-blue-600 border-white' : 'bg-red-500 text-white border-white'
@@ -161,7 +154,6 @@ const DepartureDetail = () => {
           </div>
           <span className="text-[11px] font-bold uppercase tracking-wide">{tab.label}</span>
           
-          {/* Active Indicator Shape (Optional decoration) */}
           {isActive && (
               <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
           )}
@@ -171,7 +163,6 @@ const DepartureDetail = () => {
   return (
     <div className="min-h-screen bg-slate-50 pb-20 font-sans text-slate-800">
       
-      {/* 1. TOP HEADER (Thông tin cơ bản) */}
       <header className="bg-white border-b border-slate-200 pt-5 pb-5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Breadcrumb */}

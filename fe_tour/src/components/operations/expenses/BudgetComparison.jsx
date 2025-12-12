@@ -14,9 +14,7 @@ const BudgetComparison = ({ data, loading }) => {
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Card 1: Dự toán */}
         <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
             <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Tổng Dự Toán (Estimated)</p>
             <div className="text-2xl font-bold text-slate-800">
@@ -24,7 +22,6 @@ const BudgetComparison = ({ data, loading }) => {
             </div>
         </div>
 
-        {/* Card 2: Thực tế */}
         <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
             <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Tổng Thực Chi (Actual)</p>
             <div className="text-2xl font-bold text-blue-600">
@@ -32,7 +29,6 @@ const BudgetComparison = ({ data, loading }) => {
             </div>
         </div>
 
-        {/* Card 3: Chênh lệch */}
         <div className={`border p-4 rounded-xl shadow-sm ${isOverBudget ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'}`}>
             <p className={`text-xs font-semibold uppercase mb-1 ${isOverBudget ? 'text-red-600' : 'text-emerald-600'}`}>
                 {isOverBudget ? 'Vượt Ngân Sách' : 'Dư Ngân Sách'}
@@ -45,7 +41,6 @@ const BudgetComparison = ({ data, loading }) => {
         </div>
       </div>
 
-      {/* Detail Bars */}
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
           <div className="px-6 py-4 border-b bg-slate-50 font-semibold text-sm text-slate-700">
               Chi tiết theo hạng mục
@@ -78,7 +73,6 @@ const BudgetComparison = ({ data, loading }) => {
                               </div>
                           </div>
                           
-                          {/* Progress Bar */}
                           <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                               <div 
                                   className={`h-2 rounded-full ${barColor}`} 

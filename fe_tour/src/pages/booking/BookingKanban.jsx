@@ -19,16 +19,12 @@ const BookingKanban = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // State Drag & Drop
   const [draggedBooking, setDraggedBooking] = useState(null);
   
-  // State Modal Update
   const [modalInfo, setModalInfo] = useState({ open: false, targetStatus: null });
 
-  // [MỚI] State Modal Detail
   const [detailBooking, setDetailBooking] = useState(null);
 
-  // --- 1. Fetch Data ---
   const fetchBookings = async () => {
     setLoading(true);
     try {
@@ -47,7 +43,6 @@ const BookingKanban = () => {
     fetchBookings();
   }, []);
 
-  // --- 2. Drag & Drop Handlers ---
   const handleDragStart = (e, booking) => {
     setDraggedBooking(booking);
     e.dataTransfer.effectAllowed = "move";
@@ -64,7 +59,6 @@ const BookingKanban = () => {
     setModalInfo({ open: true, targetStatus: statusId });
   };
 
-  // --- 3. Update Handler ---
   const handleConfirmUpdate = async ({ notes, image_url }) => {
     if (!draggedBooking || !modalInfo.targetStatus) return;
 
@@ -79,7 +73,6 @@ const BookingKanban = () => {
             formattedDate = new Date(draggedBooking.departure_date).toISOString().split('T')[0];
         }
 
-        // [FIX ERROR 500 & 400] Chuẩn bị payload sạch sẽ và đầy đủ
         const payload = {
             booking_code: draggedBooking.booking_code, 
             customer_id: Number(draggedBooking.customer_id),
@@ -109,7 +102,6 @@ const BookingKanban = () => {
 
     } catch (error) {
         console.error(error);
-        // Hiển thị chi tiết lỗi validation từ backend nếu có
         let errorMsg = "Lỗi server";
         if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
             errorMsg = error.response.data.errors.map(e => e.msg).join(", ");

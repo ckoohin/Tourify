@@ -158,7 +158,6 @@ const FeedbackList = () => {
             <option value="low">Thấp</option>
         </select>
 
-        {/* Type Filter - Khớp với validation backend */}
         <select 
             value={filterType} 
             onChange={(e) => { setFilterType(e.target.value); setCurrentPage(1); }}
@@ -259,7 +258,6 @@ const FeedbackList = () => {
                     itemsPerPage={itemsPerPage}
                     onPageChange={(page) => {
                         setCurrentPage(page);
-                        // Cuộn lên đầu bảng khi chuyển trang
                         document.querySelector('table')?.scrollIntoView({ behavior: 'smooth' });
                     }}
                 />
@@ -269,7 +267,6 @@ const FeedbackList = () => {
 
       {/* 4. Modals */}
       
-      {/* Modal Tạo mới - Refresh list khi tạo thành công */}
       <FeedbackFormModal 
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
@@ -278,7 +275,6 @@ const FeedbackList = () => {
         }} 
       />
 
-      {/* Modal Chi tiết - Refresh list khi update status/assign */}
       <FeedbackDetailModal 
         isOpen={!!selectedFeedback}
         onClose={() => setSelectedFeedback(null)}

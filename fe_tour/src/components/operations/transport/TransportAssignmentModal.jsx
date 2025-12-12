@@ -15,21 +15,17 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
     const [guests, setGuests] = useState([]);
     const [loading, setLoading] = useState(true);
     
-    // --- STATE QUẢN LÝ ---
     const [detailFormOpen, setDetailFormOpen] = useState(false);
     const [editingAssignment, setEditingAssignment] = useState(null);
 
-    // Chế độ Single (Cũ)
     const [selectedSeat, setSelectedSeat] = useState(null);
     const [selectedGuestId, setSelectedGuestId] = useState(null);
 
-    // Chế độ Multi (Mới)
     const [isMultiMode, setIsMultiMode] = useState(false);
-    const [multiSelectedSeats, setMultiSelectedSeats] = useState([]); // Ghế TRỐNG được chọn để XẾP
-    const [multiSelectedGuests, setMultiSelectedGuests] = useState([]); // Khách được chọn để XẾP
-    const [multiSelectedAssignments, setMultiSelectedAssignments] = useState([]); // [NEW] Ghế CÓ NGƯỜI được chọn để HỦY
+    const [multiSelectedSeats, setMultiSelectedSeats] = useState([]); 
+    const [multiSelectedGuests, setMultiSelectedGuests] = useState([]);
+    const [multiSelectedAssignments, setMultiSelectedAssignments] = useState([]); 
 
-    // Form data (Dùng chung cho cả Single và Bulk)
     const [assignmentData, setAssignmentData] = useState({
         ticket_number: '',
         baggage_allowance: '20kg',
@@ -43,19 +39,17 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
         }
     }, [isOpen, transport, departureId]);
 
-    // Reset state khi chuyển chế độ
     useEffect(() => {
         setSelectedSeat(null);
         setSelectedGuestId(null);
         setMultiSelectedSeats([]);
         setMultiSelectedGuests([]);
-        setMultiSelectedAssignments([]); // Reset danh sách hủy
+        setMultiSelectedAssignments([]); 
     }, [isMultiMode]);
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            // Fetch Assignments & Guests (Sử dụng service thật)
             const [assignRes, guestRes] = await Promise.all([
                 transportService.getAssignmentsByTransport(transport.id),
                 departureService.getGuests(departureId, { limit: 100 })
@@ -69,21 +63,18 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                 seat_number_int: parseInt(a.seat_number, 10)
             }));
 
-            // Xử lý Guests
             let loadedGuests = guestRes.data?.data || guestRes.data || [];
 
             setAssignments(loadedAssignments);
             setGuests(loadedGuests);
         } catch (error) {
             console.error("Fetch Error:", error);
-            // Giữ nguyên toast.error ở đây
             toast.error("Lỗi tải dữ liệu xếp chỗ");
         } finally {
             setLoading(false);
         }
     };
 
-    // --- HELPER MEMOIZED ---
     const assignedGuestIds = useMemo(() => assignments.map(a => a.tour_departure_guest_id), [assignments]);
     const unassignedGuests = useMemo(() => guests.filter(g => !assignedGuestIds.includes(g.id)), [guests, assignedGuestIds]);
     const unassignedSeats = useMemo(() => {
@@ -91,22 +82,17 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
         return Array.from({ length: transport.total_seats })
                     .map((_, i) => i + 1)
                     .filter(seatNum => !assignedSeatNumbers.includes(seatNum))
-                    .map(String); // Chuyển về string để khớp với state
+                    .map(String); 
     }, [assignments, transport.total_seats]);
 
-
-    // --- LOGIC XỬ LÝ CLICK ---
 
     const handleSeatClick = (seatNumStr) => {
         const seatNumInt = parseInt(seatNumStr, 10);
         const assignment = assignments.find(a => a.seat_number_int === seatNumInt);
 
-        // --- TRƯỜNG HỢP GHẾ ĐÃ CÓ NGƯỜI ---
         if (assignment) {
             if (isMultiMode) {
-                // Chế độ Multi: Chọn để HỦY CHỖ
-                
-                // Nếu đang chọn ghế trống để xếp -> Clear hết để chuyển sang mode hủy
+
                 if (multiSelectedSeats.length > 0) {
                     setMultiSelectedSeats([]);
                     setMultiSelectedGuests([]);
@@ -117,17 +103,13 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                     return [...prev, assignment.id];
                 });
             } else {
-                // Chế độ Single: Sửa thông tin
                 handleEdit(assignment);
             }
             return;
         }
 
-        // --- TRƯỜNG HỢP GHẾ TRỐNG ---
         if (isMultiMode) {
-            // Chế độ Multi: Chọn để XẾP CHỖ
-            
-            // Nếu đang chọn ghế hủy -> Clear hết để chuyển sang mode xếp
+
             if (multiSelectedAssignments.length > 0) {
                 setMultiSelectedAssignments([]);
             }
@@ -137,33 +119,27 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                 return [...prev, seatNumStr];
             });
         } else {
-            // Chế độ Single
             setSelectedSeat(seatNumStr);
             if (selectedGuestId) openDetailForm();
         }
     };
 
     const handleGuestClick = (guestId) => {
-        // Khi click khách -> Chắc chắn là muốn XẾP CHỖ -> Clear danh sách hủy
         if (multiSelectedAssignments.length > 0) setMultiSelectedAssignments([]);
 
         if (isMultiMode) {
-            // Multi Mode: Toggle chọn khách
             setMultiSelectedGuests(prev => {
                 if (prev.includes(guestId)) return prev.filter(id => id !== guestId);
                 return [...prev, guestId];
             });
         } else {
-            // Single Mode
             setSelectedGuestId(guestId);
             if (selectedSeat) openDetailForm();
         }
     };
 
-    // --- HÀM CHỌN TẤT CẢ KHÁCH CHỜ ---
     const handleSelectAllUnassignedGuests = () => {
         if (!isMultiMode) return;
-        // Nếu đã chọn tất cả, thì hủy chọn tất cả
         if (multiSelectedGuests.length === unassignedGuests.length) {
             setMultiSelectedGuests([]);
         } else {
@@ -172,7 +148,6 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
         }
     };
     
-    // --- HÀM XẾP CHỖ TỰ ĐỘNG ---
     const handleAutoAssignSeats = () => {
         if (!isMultiMode) return;
 
@@ -198,19 +173,15 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
              count = availableSeats;
         }
         
-        // 1. Sắp xếp ghế trống theo số ghế (đảm bảo xếp ghế từ nhỏ đến lớn)
         const sortedSeats = unassignedSeats.sort((a, b) => parseInt(a) - parseInt(b));
         
-        // 2. Lấy danh sách ghế tự động gán (chỉ lấy số lượng cần thiết)
         const autoSelectedSeats = sortedSeats.slice(0, count);
         
-        // 3. Giữ lại số lượng khách tương ứng (nếu số ghế ít hơn số khách)
-        // (Khách đã được sắp xếp ngầm theo ID, nên sẽ chọn những ID nhỏ nhất)
         const guestsToKeep = [...multiSelectedGuests].sort((a, b) => a - b).slice(0, count);
 
 
         setMultiSelectedSeats(autoSelectedSeats);
-        setMultiSelectedGuests(guestsToKeep); // Cập nhật lại danh sách khách nếu bị cắt bớt
+        setMultiSelectedGuests(guestsToKeep); 
         
         toast.success(`Đã tự động chọn ${count} ghế trống gần nhất! Vui lòng bấm Xác nhận.`);
     };
@@ -219,7 +190,6 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
 
     const openDetailForm = () => {
         setEditingAssignment(null);
-        // Reset form data mặc định
         setAssignmentData({
             ticket_number: '',
             baggage_allowance: transport.transport_type === 'flight' ? '23kg' : '20kg',
@@ -242,24 +212,19 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
         setDetailFormOpen(true);
     };
 
-    // --- BULK UNASSIGN (HỦY HÀNG LOẠT) ---
    const handleBulkUnassign = async () => {
     if (multiSelectedAssignments.length === 0) return;
     
-    // --- THAY ĐỔI TẠI ĐÂY ---
-    // 1. Gọi hàm hiển thị dialog và đợi kết quả (await)
     const result = await showConfirmDialog({
         title: 'Xác nhận hủy chỗ',
         text: `Bạn có chắc chắn muốn hủy chỗ của ${multiSelectedAssignments.length} khách đã chọn?`,
         icon: 'warning',
         confirmText: 'Đồng ý hủy',
-        confirmColor: '#d33', // Nên dùng màu đỏ (#d33) vì đây là hành động xóa/hủy
+        confirmColor: '#d33', 
         cancelText: 'Không'
     });
 
-    // 2. Nếu người dùng KHÔNG bấm nút Đồng ý (bấm Hủy hoặc click ra ngoài), thì return
     if (!result.isConfirmed) return;
-    // -----------------------
 
     setLoading(true);
     const toastId = toast.loading(`Đang hủy ${multiSelectedAssignments.length} chỗ...`);
@@ -269,7 +234,6 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
         
         toast.success(`Đã hủy thành công ${multiSelectedAssignments.length} chỗ ngồi`, { id: toastId });
         
-        // Reset state
         setMultiSelectedAssignments([]);
         fetchData();
     } catch (error) {
@@ -285,16 +249,13 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
         
         try {
             if (isMultiMode) {
-                // --- LOGIC LƯU BULK ASSIGN ---
                 if (multiSelectedGuests.length !== multiSelectedSeats.length) {
                     toast.error("Số lượng khách và số ghế không khớp nhau! Vui lòng kiểm tra lại.", { id: toastId });
                     setLoading(false);
                     return;
                 }
                 
-                // Ghế đã được sắp xếp theo số ghế
                 const seatsToAssign = [...multiSelectedSeats].sort((a, b) => parseInt(a) - parseInt(b));
-                // Khách cũng được sắp xếp theo ID (để gán khách ID nhỏ nhất vào ghế số nhỏ nhất)
                 const guestsToAssign = [...multiSelectedGuests].sort((a, b) => a - b);
                 
 
@@ -302,16 +263,13 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                     tour_transport_id: transport.id,
                     tour_departure_guest_id: guestId,
                     seat_number: seatsToAssign[index],
-                    // Dùng assignmentData chung cho tất cả
                     ...assignmentData
                 }));
 
-                // API bulkAssign cần được BE hỗ trợ
                 await transportService.bulkAssign(bulkPayload);
                 toast.success(`Đã xếp thành công ${bulkPayload.length} khách`, { id: toastId });
 
             } else {
-                // --- LOGIC LƯU SINGLE ---
                 const payload = {
                     tour_transport_id: transport.id,
                     tour_departure_guest_id: selectedGuestId,
@@ -328,7 +286,6 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                 }
             }
 
-            // Reset
             setDetailFormOpen(false);
             setEditingAssignment(null);
             setSelectedSeat(null); setSelectedGuestId(null);
@@ -337,7 +294,6 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
 
         } catch (error) {
             console.error(error);
-            // Sử dụng toast.error với id để clear loading
             toast.error(error.response?.data?.message || "Lỗi lưu dữ liệu", { id: toastId });
             setLoading(false);
         }
@@ -359,7 +315,6 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
         }
     };
 
-    // Tên khách hàng đang chọn (cho phần hiển thị Summary)
     const getSelectedGuestsName = () => {
         if (isMultiMode) return `${multiSelectedGuests.length} khách đã chọn`;
         const g = guests.find(i => i.id == selectedGuestId);
@@ -368,7 +323,6 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
 
     if (!isOpen) return null;
 
-    // Check trạng thái Multi Mode trước khi render
     const isReadyForBulkAssign = isMultiMode && multiSelectedGuests.length > 0 && multiSelectedGuests.length === multiSelectedSeats.length;
 
     return (
@@ -438,13 +392,11 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                                         
                                         const assignment = assignments.find(a => a.seat_number_int === seatNumInt);
                                         
-                                        // Logic active
                                         let isSelected = false;
                                         let isUnassignSelected = false;
 
                                         if (isMultiMode) {
                                             isSelected = multiSelectedSeats.includes(seatNumStr);
-                                            // Check nếu assignment này được chọn để hủy
                                             if (assignment && multiSelectedAssignments.includes(assignment.id)) {
                                                 isUnassignSelected = true;
                                             }
@@ -452,7 +404,6 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                                             isSelected = selectedSeat == seatNumStr; 
                                         }
                                         
-                                        // Kiểm tra xem ghế này có nằm trong danh sách ghế trống đang được chọn (isMultiMode) hay không
                                         const isGuestAssignedToSeat = assignment && assignment.tour_departure_guest_id === selectedGuestId;
 
                                         return (
@@ -483,14 +434,12 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                                                     <Armchair size={22} strokeWidth={1.5} />
                                                 )}
                                                 
-                                                {/* Badge số thứ tự chọn trong Multi Mode (Xếp) */}
                                                 {isMultiMode && isSelected && (
                                                     <div className="absolute -top-2 -right-2 w-5 h-5 bg-white text-purple-600 border border-purple-600 rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm">
                                                         {multiSelectedSeats.indexOf(seatNumStr) + 1}
                                                     </div>
                                                 )}
 
-                                                {/* Badge Checkmark cho Hủy */}
                                                 {isMultiMode && isUnassignSelected && (
                                                     <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-sm">
                                                         <Trash2 size={10} />
@@ -503,12 +452,10 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                             </div>
                         )}
                         
-                        {/* BULK ACTION BAR (Floating) */}
                         {isMultiMode && (
                             <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 bg-white px-6 py-3 rounded-full shadow-xl border border-slate-200 flex items-center gap-6 animate-in slide-in-from-bottom-4 z-20 transition-all ${multiSelectedAssignments.length > 0 ? 'ring-2 ring-red-100' : ''}`}>
                                 
                                 {multiSelectedAssignments.length > 0 ? (
-                                    // Giao diện HỦY CHỖ
                                     <>
                                         <div className="flex gap-4 text-sm font-medium text-red-700 items-center">
                                             <AlertCircle size={18}/>
@@ -523,7 +470,6 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                                         </button>
                                     </>
                                 ) : (
-                                    // Giao diện XẾP CHỖ
                                     <>
                                         <div className="flex gap-4 text-sm font-medium">
                                             <div className={multiSelectedGuests.length > 0 ? "text-purple-700" : "text-slate-400"}>
@@ -556,13 +502,11 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                         )}
                     </div>
 
-                    {/* RIGHT: List & Action Panel */}
                     <div className="w-96 bg-white flex flex-col border-l border-slate-200 shrink-0">
                         {/* Status Bar */}
                         <div className="p-4 bg-slate-50 border-b border-slate-200">
                             <h4 className="font-bold text-slate-700 text-sm mb-1">Danh sách khách chờ ({unassignedGuests.length})</h4>
                             
-                            {/* [NEW] Auto Assign & Select All Buttons */}
                             {isMultiMode && (
                                 <div className="flex gap-2 mb-2">
                                      <button 
@@ -600,12 +544,9 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                                 <div className="text-center py-10 text-slate-400 text-sm">Tất cả khách đã được xếp chỗ.</div>
                             ) : (
                                 unassignedGuests.map(guest => {
-                                    // Logic active guest
                                     const isGuestSelected = isMultiMode 
                                         ? multiSelectedGuests.includes(guest.id)
                                         : selectedGuestId == guest.id;
-                                    
-                                    // Disable chọn khách khi đang ở mode Hủy
                                     const isDisabled = isMultiMode && multiSelectedAssignments.length > 0;
 
                                     return (
@@ -629,7 +570,6 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                                                 </div>
                                             </div>
                                             
-                                            {/* Checkbox for Multi Mode */}
                                             {isMultiMode && (
                                                 <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${isGuestSelected ? 'bg-purple-600 border-purple-600' : 'border-slate-300 bg-white'}`}>
                                                     {isGuestSelected && <Check size={12} className="text-white"/>}
@@ -646,7 +586,6 @@ const TransportAssignmentModal = ({ isOpen, onClose, transport, departureId }) =
                     </div>
                 </div>
 
-                {/* MODAL CON: NHẬP CHI TIẾT VÉ / HÀNH LÝ */}
                 {detailFormOpen && (
                     <div className="absolute inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in zoom-in-95">
                         <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">

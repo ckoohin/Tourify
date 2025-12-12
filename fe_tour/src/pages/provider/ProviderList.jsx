@@ -4,7 +4,7 @@ import supplierService from '../../services/api/supplierService';
 import SupplierTable from '../../components/suppliers/SupplierTable';
 import SupplierFilter from '../../components/suppliers/SupplierFilter';
 import Pagination from '../../components/ui/Pagination';
-import Modal from '../../components/ui/Modal'; // Import Modal
+import Modal from '../../components/ui/Modal'; 
 import SupplierForm from '../../components/suppliers/SupplierForm';
 import toast from 'react-hot-toast';
 
@@ -17,7 +17,6 @@ const ProviderList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  // --- STATE CHO MODAL ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSupplierId, setSelectedSupplierId] = useState(null);
   const [selectedSupplierData, setSelectedSupplierData] = useState(null);
@@ -29,7 +28,7 @@ const ProviderList = () => {
       const res = await supplierService.getAll();
       if (res.success) {
         setSuppliers(res.data.suppliers || []);
-        setFilteredSuppliers(res.data.suppliers || []); // Reset filter khi load mới
+        setFilteredSuppliers(res.data.suppliers || []); 
       }
     } catch (error) {
       console.error("Lỗi:", error);
@@ -43,7 +42,6 @@ const ProviderList = () => {
     fetchSuppliers();
   }, []);
 
-  // Filter logic Client-side (Nếu BE chưa hỗ trợ filter params)
   useEffect(() => {
     let result = suppliers;
     if (filters.type) result = result.filter(s => s.type === filters.type);
@@ -64,14 +62,12 @@ const ProviderList = () => {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentItems = filteredSuppliers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  // --- HÀM MỞ MODAL CREATE ---
   const handleOpenCreate = () => {
     setSelectedSupplierId(null);
     setSelectedSupplierData(null);
     setIsModalOpen(true);
   };
 
-  // --- HÀM MỞ MODAL EDIT ---
   const handleOpenEdit = async (supplier) => {
     if (!supplier || !supplier.id) return;
 
@@ -82,13 +78,11 @@ const ProviderList = () => {
     try {
         const res = await supplierService.getById(supplier.id);
         if (res.success) {
-            // Xử lý format trả về của API (array hoặc object)
             const data = Array.isArray(res.data.supplier) ? res.data.supplier[0] : res.data.supplier;
             setSelectedSupplierData(data);
         }
     } catch (error) {
         console.error(error);
-        // Nếu 404 -> Xóa khỏi list
         if (error.response && error.response.status === 404) {
             toast.error("Nhà cung cấp không tồn tại.");
             fetchSuppliers();
@@ -200,7 +194,7 @@ const ProviderList = () => {
                 initialData={selectedSupplierData} 
                 onSuccess={handleSuccess}
                 onClose={handleCloseModal}
-                isInModal={true} // Prop mới để chỉnh UI
+                isInModal={true} 
             />
         )}
       </Modal>

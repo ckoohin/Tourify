@@ -9,16 +9,13 @@ import serviceBookingService from '../../../services/api/serviceBookingService';
 import supplierService from '../../../services/api/supplierService';
 
 const ServiceBookingManager = ({ departureId }) => {
-  // --- STATE QUẢN LÝ DANH SÁCH ---
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // --- STATE QUẢN LÝ MODAL FORM ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBooking, setEditingBooking] = useState(null);
   const [suppliers, setSuppliers] = useState([]);
   
-  // --- STATE FORM DATA ---
   const initialFormState = {
     tour_departure_id: departureId,
     supplier_id: '',
@@ -29,21 +26,17 @@ const ServiceBookingManager = ({ departureId }) => {
     currency: 'VND',
     notes: '',
     confirmation_number: '',
-    status: 'pending' // [NEW] Thêm trạng thái mặc định
+    status: 'pending' 
   };
   const [formData, setFormData] = useState(initialFormState);
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ==========================================
-  // 1. LOGIC XỬ LÝ DANH SÁCH (LIST VIEW)
-  // ==========================================
-
   const fetchServices = async () => {
     setLoading(true);
     try {
       const res = await serviceBookingService.getByDepartureId(departureId);
-      // Xử lý linh hoạt cấu trúc response
+
       const data = res.data?.data || res.data || [];
       setServices(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -91,10 +84,6 @@ const ServiceBookingManager = ({ departureId }) => {
     return date.toLocaleDateString('vi-VN');
   };
 
-  // ==========================================
-  // 2. LOGIC XỬ LÝ FORM (MODAL)
-  // ==========================================
-
   const openCreateModal = () => {
     setEditingBooking(null);
     setFormData({ ...initialFormState, tour_departure_id: departureId });
@@ -109,7 +98,7 @@ const ServiceBookingManager = ({ departureId }) => {
       ...booking,
       service_date: booking.service_date ? booking.service_date.split('T')[0] : '',
       supplier_id: booking.supplier_id,
-      status: booking.status || 'pending' // [NEW] Load trạng thái hiện tại
+      status: booking.status || 'pending' 
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -156,15 +145,11 @@ const ServiceBookingManager = ({ departureId }) => {
         ...formData,
         quantity: Number(formData.quantity),
         unit_price: Number(formData.unit_price),
-        // status đã có trong formData
       };
 
       if (editingBooking) {
-        // 1. Cập nhật thông tin cơ bản
         await serviceBookingService.update(editingBooking.id, payload);
-        
-        // 2. [FIX] Gọi thêm API updateStatus nếu trạng thái thay đổi
-        // Vì API update thường không cho phép đổi status
+
         if (formData.status !== editingBooking.status) {
            await serviceBookingService.updateStatus(editingBooking.id, formData.status, formData.confirmation_number);
         }
@@ -187,10 +172,6 @@ const ServiceBookingManager = ({ departureId }) => {
   const estimatedTotal = useMemo(() => {
     return (Number(formData.quantity) || 0) * (Number(formData.unit_price) || 0);
   }, [formData.quantity, formData.unit_price]);
-
-  // ==========================================
-  // 3. RENDER UI
-  // ==========================================
 
   const getStatusBadge = (status) => {
     const config = {
@@ -301,9 +282,6 @@ const ServiceBookingManager = ({ departureId }) => {
         )}
       </div>
 
-      {/* ==========================================
-          MODAL OVERLAY (FORM) 
-         ========================================== */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden border border-slate-200">

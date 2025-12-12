@@ -10,35 +10,29 @@ import DebtPaymentModal from './DebtPaymentModal';
 import Pagination from '../../ui/Pagination';
 
 const DebtList = () => {
-  // --- STATE ---
   const [debts, setDebts] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // State bộ lọc
   const [filters, setFilters] = useState({
-    debtType: 'receivable', // 'receivable' | 'payable'
+    debtType: 'receivable', 
     status: '',             
     dueFromDate: '',
     dueToDate: '',
     page: 1,
-    limit: 9 // Số lượng item mỗi trang (Nên chia hết cho 3 để đẹp grid)
+    limit: 9 
   });
 
-  // State thống kê
   const [summary, setSummary] = useState({
     totalOriginal: 0,
     totalRemaining: 0,
     count: 0
   });
   
-  // State phân trang
   const [totalItems, setTotalItems] = useState(0);
 
-  // State Modal
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDebt, setSelectedDebt] = useState(null);
 
-  // --- HELPERS ---
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
   };
@@ -55,7 +49,6 @@ const DebtList = () => {
     return 'bg-amber-400';
   };
 
-  // --- API CALLS ---
   const fetchDebts = useCallback(async () => {
     setLoading(true);
     try {
@@ -71,13 +64,12 @@ const DebtList = () => {
       const res = await debtService.getAll(params);
       const data = res.data || res; 
 
-      // Xử lý response linh hoạt
       if (data.debts) {
         setDebts(data.debts);
         setTotalItems(data.total || 0);
       } else if (Array.isArray(data)) {
          setDebts(data);
-         setTotalItems(data.length); // Fallback nếu API trả về mảng
+         setTotalItems(data.length); 
       } else {
         setDebts([]);
         setTotalItems(0);
@@ -93,7 +85,7 @@ const DebtList = () => {
 
   const fetchSummary = useCallback(async () => {
     try {
-      const res = await debtService.getSummary({ debtType: filters.debtType });
+      const res = await debtService.getgSummary({ debtType: filters.debtType });
       const data = res.data || res;
       
       if (Array.isArray(data)) {
@@ -156,7 +148,6 @@ const DebtList = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Card: Phải thu */}
             <button 
                 onClick={() => handleTypeChange('receivable')}
                 className={`relative overflow-hidden p-6 rounded-2xl border transition-all duration-300 text-left group ${
@@ -185,7 +176,6 @@ const DebtList = () => {
                 </div>
             </button>
 
-            {/* Card: Phải trả */}
             <button 
                 onClick={() => handleTypeChange('payable')}
                 className={`relative overflow-hidden p-6 rounded-2xl border transition-all duration-300 text-left group ${
@@ -216,10 +206,10 @@ const DebtList = () => {
         </div>
       </div>
 
-      {/* 2. Filters Toolbar */}
+
       <div className="max-w-7xl mx-auto bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-8 flex flex-col lg:flex-row gap-4 justify-between items-center sticky top-2 z-30">
         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-          {/* Status Filter */}
+
           <div className="relative group min-w-[220px]">
             <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-blue-500 transition-colors pointer-events-none" />
             <select 
@@ -235,7 +225,7 @@ const DebtList = () => {
             </select>
           </div>
 
-          {/* Date Range */}
+
           <div className="flex items-center gap-0 border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
              <div className="relative group">
                 <input 
@@ -259,7 +249,6 @@ const DebtList = () => {
           </div>
         </div>
         
-        {/* Pagination Summary (Small) */}
         {!loading && totalItems > 0 && (
             <div className="text-sm text-slate-500 hidden xl:block">
                 Hiển thị <b>{debts.length}</b> kết quả
@@ -267,7 +256,6 @@ const DebtList = () => {
         )}
       </div>
 
-      {/* 3. Grid Card List */}
       <div className="max-w-7xl mx-auto">
         {loading ? (
           <div className="py-32 flex flex-col items-center justify-center text-slate-400">
@@ -292,7 +280,6 @@ const DebtList = () => {
                 const isOverdue = debt.status === 'overdue';
                 const isPaid = debt.status === 'paid';
                 
-                // Mã tham chiếu
                 const refCode = debt.booking_code 
                     ? { label: 'Booking', val: debt.booking_code } 
                     : (debt.invoice_number ? { label: 'Hóa đơn', val: debt.invoice_number } : null);
@@ -422,7 +409,6 @@ const DebtList = () => {
           </div>
         )}
 
-        {/* 4. Pagination (Tích hợp từ file của bạn) */}
         <div className="mt-8 mb-12">
             <Pagination 
                 currentPage={filters.page}
@@ -434,7 +420,6 @@ const DebtList = () => {
         </div>
       </div>
 
-      {/* 5. Modal */}
       <DebtPaymentModal 
         isOpen={modalOpen} 
         onClose={() => setModalOpen(false)} 

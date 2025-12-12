@@ -10,7 +10,6 @@ import tourService from '../../services/api/tourService';
 import toast from 'react-hot-toast';
 import { useCloudinaryUpload } from '../../hooks/useCloudinaryUpload';
 
-// --- SUB-COMPONENT: Input Group ---
 const InputGroup = ({ label, name, value, onChange, error, type = "text", required = false, disabled = false, className="", ...props }) => (
     <div className={`mb-4 ${className}`}>
         <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -29,7 +28,6 @@ const InputGroup = ({ label, name, value, onChange, error, type = "text", requir
     </div>
 );
 
-// --- MAIN COMPONENT ---
 const TourForm = ({ 
     isOpen = true, 
     onClose = () => {}, 
@@ -46,24 +44,20 @@ const TourForm = ({
 
   const { uploadMultipleImages, uploading, progress } = useCloudinaryUpload();
 
-  // Initial State
   const initialFormState = {
     code: '', name: '', slug: '', category_id: '', description: '', highlights: '',
     duration_days: 1, duration_nights: 0, departure_location: '', destination: '',
     min_group_size: 1, max_group_size: 20, is_customizable: '0', qr_code: '',
     booking_url: '', status: 'draft', created_by: currentUserId || 1,
     images: [],
-    // Extended Arrays for Unified Form
     itineraries: [], 
     policies: []
   };
 
   const [formData, setFormData] = useState(initialFormState);
 
-  // Helper: Generate Code
   const generateTourCode = () => `TOUR-${Math.floor(100000 + Math.random() * 900000)}`;
 
-  // --- EFFECT: LOAD DATA ---
   useEffect(() => {
     if (isOpen) {
       setErrors({});
@@ -72,7 +66,6 @@ const TourForm = ({
 
       const loadFullData = async () => {
         if (initialData) {
-            // Load Basic Info
             let baseData = {
                 ...initialData,
                 is_customizable: String(initialData.is_customizable ?? '0'),
@@ -82,9 +75,7 @@ const TourForm = ({
                 policies: []
             };
 
-            // Fetch Itineraries & Policies để hiển thị
             try {
-                // 1. Get Default Version ID to fetch Itineraries
                 const verRes = await tourService.getVersions(initialData.id);
                 const versions = verRes.data?.tourVersions || verRes.data?.versions || [];
                 const defaultVer = versions.find(v => v.is_default) || versions[0];
@@ -99,7 +90,6 @@ const TourForm = ({
                     })).sort((a, b) => a.day_number - b.day_number);
                 }
 
-                // 2. Get Policies
                 const polRes = await tourService.getPolicies(initialData.id);
                 baseData.policies = (polRes.data?.policies || []).sort((a, b) => a.display_order - b.display_order);
 
@@ -120,11 +110,10 @@ const TourForm = ({
   
   useEffect(() => {
     if (!isOpen) {
-        setIsCloneMode(false); // reset khi đóng modal
+        setIsCloneMode(false); 
     }
 }, [isOpen]);
 
-  // --- HANDLERS: BASIC FORM ---
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'name') {
@@ -132,7 +121,6 @@ const TourForm = ({
         setFormData(prev => ({
             ...prev,
             name: value,
-            // Giữ nguyên logic: tự động tạo slug nếu là tạo mới/clone hoặc slug cũ là rỗng
             slug: (!initialData || isCloneMode || !prev.slug) ? newSlug : prev.slug
         }));
     } else {
@@ -141,7 +129,6 @@ const TourForm = ({
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: null }));
   };
 
-  // --- HANDLERS: IMAGES ---
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
@@ -152,7 +139,6 @@ const TourForm = ({
     }
   };
 
-  // --- HANDLERS: ITINERARY ---
   const addItineraryDay = () => {
     const nextDay = formData.itineraries.length + 1;
     setFormData(prev => ({
@@ -184,7 +170,6 @@ const TourForm = ({
     setFormData(prev => ({ ...prev, itineraries: reordered }));
   };
 
-  // --- HANDLERS: POLICY ---
   const addPolicy = () => {
     setFormData(prev => ({
         ...prev,
@@ -212,12 +197,10 @@ const TourForm = ({
     setFormData(prev => ({ ...prev, policies: newPolicies }));
   };
 
-  // --- [QUAN TRỌNG] MAIN SUBMIT HANDLER ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // 1. Validate Form (Kiểm tra dữ liệu đầu vào)
     const validationErrors = validateTour(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -228,7 +211,6 @@ const TourForm = ({
     }
 
     try {
-        // 2. Prepare Standard Payload (Dữ liệu cho Update/Create)
         const tourPayload = {
             ...formData,
             category_id: Number(formData.category_id),
@@ -242,7 +224,6 @@ const TourForm = ({
 
         let tourId = null;
 
-        // 3. LOGIC XỬ LÝ: CLONE vs UPDATE vs CREATE
         if (isCloneMode && initialData) {
             const clonePayload = {
                 new_code: formData.code,
@@ -250,24 +231,19 @@ const TourForm = ({
                 new_slug: formData.slug || slugify(formData.name)
             };
 
-            // Backend sẽ clone toàn bộ: tour + version + itineraries + policies + images
             const res = await tourService.cloneTour(initialData.id, clonePayload);
 
             toast.success("Sao chép tour thành công!");
             onSuccess();
             onClose();
-            return; // QUAN TRỌNG: DỪNG LUÔN, KHÔNG chạy tiếp các bước update/itinerary/policy
+            return; 
         }
 
         if (!tourId) throw new Error("Không xác định được ID Tour để lưu dữ liệu chi tiết.");
-
-        // 4. XỬ LÝ VERSION MẶC ĐỊNH & LỊCH TRÌNH
-        // (Chúng ta cần ID version để lưu lịch trình)
         const verRes = await tourService.getVersions(tourId);
         const versions = verRes.data?.tourVersions || verRes.data?.versions || [];
         let defaultVersionId = versions.find(v => v.is_default)?.id;
 
-        // Nếu chưa có version (trường hợp tạo mới hoặc clone không copy version), tạo mới
         if (!defaultVersionId) {
             const verPayload = { 
                 tour_id: tourId, 
@@ -280,13 +256,9 @@ const TourForm = ({
             defaultVersionId = newVerRes.data?.tourVersion?.id || newVerRes.data?.id;
         }
 
-        // 5. LƯU LỊCH TRÌNH (ITINERARIES)
-        // Chiến lược: Xóa hết cũ -> Thêm mới từ Form để đảm bảo đồng bộ 100%
         if (defaultVersionId) {
-            // Xóa tất cả lịch trình cũ (quan trọng khi Clone để tránh duplicate hoặc rác)
             await tourService.deleteAllItineraries(defaultVersionId);
             
-            // Thêm mới từng ngày
             if (formData.itineraries.length > 0) {
                 await Promise.all(formData.itineraries.map(it => 
                     tourService.createItinerary({
@@ -303,18 +275,14 @@ const TourForm = ({
             }
         }
 
-        // 6. LƯU CHÍNH SÁCH (POLICIES)
-        // Chiến lược: Xóa hết cũ -> Thêm mới
         if (tourId) {
              const existingPolicies = await tourService.getPolicies(tourId);
              const pList = existingPolicies.data?.policies || [];
-             
-             // Xóa cũ
+
              if (pList.length > 0) {
                  await Promise.all(pList.map(p => tourService.deletePolicy(p.id)));
              }
 
-             // Thêm mới
              if (formData.policies.length > 0) {
                  await Promise.all(formData.policies.map((p, idx) => 
                     tourService.createPolicy({

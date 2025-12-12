@@ -26,16 +26,14 @@ const SupplierForm = ({ supplierId, initialData, onClose, onSuccess, isInModal =
     rating: 5.0,
     status: 'active',
     notes: '',
-    total_bookings: 0 // Thêm trường này để giữ giá trị khi update
+    total_bookings: 0 
   });
 
-  // Reset form khi có dữ liệu ban đầu
   useEffect(() => {
     if (initialData) {
       setFormData(prev => ({
         ...prev,
         ...initialData,
-        // Đảm bảo các trường không bị null/undefined
         tax_code: initialData.tax_code || '',
         website: initialData.website || '',
         contact_person: initialData.contact_person || '',
@@ -47,7 +45,7 @@ const SupplierForm = ({ supplierId, initialData, onClose, onSuccess, isInModal =
         notes: initialData.notes || '',
         credit_limit: Number(initialData.credit_limit) || 0,
         rating: Number(initialData.rating) || 5.0,
-        total_bookings: Number(initialData.total_bookings) || 0 // Giữ lại số lượng booking
+        total_bookings: Number(initialData.total_bookings) || 0 
       }));
     }
   }, [initialData]);
@@ -59,7 +57,6 @@ const SupplierForm = ({ supplierId, initialData, onClose, onSuccess, isInModal =
 
     setFormData(prev => ({ ...prev, [name]: finalValue }));
     
-    // Validate realtime
     const error = validateSupplierField(name, finalValue);
     setErrors(prev => {
         const newErrors = { ...prev };
@@ -72,7 +69,6 @@ const SupplierForm = ({ supplierId, initialData, onClose, onSuccess, isInModal =
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 1. VALIDATE DỮ LIỆU
     const validationErrors = validateSupplier(formData);
     if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
@@ -84,25 +80,17 @@ const SupplierForm = ({ supplierId, initialData, onClose, onSuccess, isInModal =
     const toastId = toast.loading('Đang lưu dữ liệu...');
 
     try {
-      // 2. CHUẨN HÓA PAYLOAD (QUAN TRỌNG)
       const payload = { ...formData };
-
-      // --- XỬ LÝ DỮ LIỆU THỪA ---
-      // Xóa các trường hệ thống không được phép gửi trong body (ID đã có trên URL)
       delete payload.id;              
       delete payload.created_at;      
       delete payload.updated_at;
-      
-      // --- XỬ LÝ KIỂU DỮ LIỆU ---
-      // Backend yêu cầu số, nếu gửi chuỗi rỗng hoặc string số sẽ gây lỗi
+
       payload.credit_limit = Number(payload.credit_limit) || 0;
       payload.rating = Number(payload.rating) || 0;
-      payload.total_bookings = Number(payload.total_bookings) || 0; // Quan trọng: Giữ nguyên số đơn hàng
+      payload.total_bookings = Number(payload.total_bookings) || 0; 
 
       let res;
       if (isEdit) {
-        // Update: Backend của bạn dùng: UPDATE suppliers SET ... total_bookings=? ...
-        // Nên bắt buộc phải gửi total_bookings lên, nếu không nó sẽ về null
         res = await supplierService.update(supplierId, payload);
         toast.success("Cập nhật thành công!", { id: toastId });
       } else {

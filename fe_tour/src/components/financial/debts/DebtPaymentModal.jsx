@@ -27,7 +27,7 @@ const DebtPaymentModal = ({ isOpen, onClose, debt, onSuccess }) => {
     try {
       await debtService.pay(debt.id, payAmount);
       toast.success('Thanh toán thành công');
-      onSuccess(); // Reload list
+      onSuccess(); 
       onClose();
       setAmount('');
     } catch (error) {

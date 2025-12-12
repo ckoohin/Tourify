@@ -9,7 +9,6 @@ const CustomerExportButton = ({ filters }) => {
     try {
       const toastId = toast.loading("Đang chuẩn bị dữ liệu...");
       
-      // Gọi API lấy dữ liệu với limit lớn để lấy hết
       const res = await customerService.getAll({
         ...filters,
         page: 1,
@@ -19,7 +18,6 @@ const CustomerExportButton = ({ filters }) => {
       if (res.success && res.data.customers.length > 0) {
         const data = res.data.customers;
 
-        // Chuẩn bị dữ liệu cho Excel
         const excelData = data.map(item => ({
             'Mã KH': item.customer_code,
             'Họ tên': item.full_name,
@@ -31,10 +29,8 @@ const CustomerExportButton = ({ filters }) => {
             'Địa chỉ': item.address || ''
         }));
 
-        // Tạo Worksheet
         const worksheet = XLSX.utils.json_to_sheet(excelData);
         
-        // Tùy chỉnh độ rộng cột
         worksheet['!cols'] = [
             { wch: 15 }, // Mã KH
             { wch: 25 }, // Họ tên
@@ -46,11 +42,9 @@ const CustomerExportButton = ({ filters }) => {
             { wch: 30 }  // Địa chỉ
         ];
 
-        // Tạo Workbook
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "DanhSachKhachHang");
 
-        // Xuất file
         const fileName = `DS_KhachHang_${new Date().toISOString().slice(0,10)}.xlsx`;
         XLSX.writeFile(workbook, fileName);
         

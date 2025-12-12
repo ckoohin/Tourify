@@ -9,7 +9,7 @@ const Modal = ({
   children,
   confirmText = "Xác nhận",
   cancelText = "Hủy bỏ",
-  maxWidth = "max-w-md", // 1. Thêm giá trị mặc định
+  maxWidth = "max-w-md", 
   confirmLevel = 'primary'
 }) => {
   if (!isOpen) return null;
@@ -30,10 +30,8 @@ const Modal = ({
     >
       <div
         onClick={handleModalContentClick}
-        // 2. Thay thế class cứng 'max-w-md' bằng biến 'maxWidth'
         className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} flex flex-col max-h-[90vh] transition-all duration-300 transform ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
           <h3 className="text-xl font-bold text-slate-800">{title}</h3>
           <button
@@ -48,8 +46,6 @@ const Modal = ({
         <div className="p-6 overflow-y-auto custom-scrollbar">
           {children}
         </div>
-
-        {/* Footer (Chỉ hiện nếu có onConfirm - dùng cho các modal xác nhận) */}
         {onConfirm && (
           <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 rounded-b-2xl border-t border-slate-200 shrink-0">
             <button

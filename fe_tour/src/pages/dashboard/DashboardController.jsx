@@ -7,13 +7,11 @@ import SupplierDashboard from './SupplierDashboard';
 import { Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
-  // Lấy thêm biến loading từ AuthContext
   const { user, getUserRole, loading } = useAuth();
   
   const roleSlug = getUserRole(); 
 
   useEffect(() => {
-    // Log chỉ chạy khi loading = false để đảm bảo user đã load xong
     if (!loading) {
       console.log("=== DASHBOARD DEBUG ===");
       console.log("User object:", user);
@@ -22,7 +20,6 @@ const Dashboard = () => {
     }
   }, [user, roleSlug, loading]);
 
-  // 1. Hiển thị Loading nếu AuthContext đang tải user
   if (loading) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -31,7 +28,6 @@ const Dashboard = () => {
     );
   }
 
-  // 2. Render Dashboard theo Role
   switch (roleSlug) {
     case ROLES.ADMIN: 
       return <AdminDashboard user={user} />;
@@ -43,7 +39,6 @@ const Dashboard = () => {
       return <SupplierDashboard user={user} />;
       
     default:
-      // Fallback
       return (
         <div className="p-10 text-center animate-in fade-in">
           <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 inline-block max-w-lg">

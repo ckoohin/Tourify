@@ -22,12 +22,10 @@ const ServiceBookingForm = ({ isOpen, onClose, onSuccess, initialData, departure
     confirmation_number: ''
   });
 
-  // Load Suppliers & Init Data
   useEffect(() => {
     if (isOpen) {
       const fetchSuppliers = async () => {
         try {
-            // Lấy tất cả supplier active
             const res = await supplierService.getAll({ status: 'active', limit: 100 });
             if (res.success) {
                 setSuppliers(res.data.suppliers || res.data || []);
@@ -176,7 +174,6 @@ const ServiceBookingForm = ({ isOpen, onClose, onSuccess, initialData, departure
                 </span>
             </div>
 
-            {/* Confirmation Number (Nếu sửa) */}
             {initialData && (
                  <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Mã xác nhận (Supplier Ref)</label>

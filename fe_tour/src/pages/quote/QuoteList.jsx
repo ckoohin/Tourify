@@ -14,19 +14,16 @@ const QuoteList = () => {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ status: '' });
 
-  // --- PAGINATION STATE ---
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
 
-  // Modal States
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [detailQuote, setDetailQuote] = useState(null);
 
   const fetchQuotes = async () => {
     setLoading(true);
     try {
-      // Truyền thêm params phân trang
       const params = {
           ...filters,
           page: currentPage,
@@ -37,7 +34,6 @@ const QuoteList = () => {
       
       if (res.success) {
         setQuotes(res.data.quotes || []);
-        // Cập nhật tổng số bản ghi
         const total = res.data.total || res.data.pagination?.totalItems || 0;
         setTotalItems(total);
       }
@@ -49,14 +45,13 @@ const QuoteList = () => {
     }
   };
 
-  // Reload khi filter hoặc page thay đổi
   useEffect(() => {
     fetchQuotes();
   }, [filters, currentPage]);
 
   const handleFilterChange = (e) => {
       setFilters(prev => ({...prev, status: e.target.value}));
-      setCurrentPage(1); // Reset về trang 1 khi lọc
+      setCurrentPage(1); 
   };
 
   const handlePageChange = (page) => {
@@ -126,10 +121,8 @@ const QuoteList = () => {
                 quotes={quotes} 
                 onView={(q) => setDetailQuote(q)} 
                 onUpdateStatus={handleUpdateStatus}
-                // Đã bỏ các props phân trang truyền vào Table vì giờ Pagination nằm ở ngoài
               />
               
-              {/* [NEW] Component Pagination được tích hợp trực tiếp */}
               {totalItems > 0 && (
                 <div className="bg-white px-6 py-4 rounded-xl border border-slate-200 shadow-sm">
                     <Pagination

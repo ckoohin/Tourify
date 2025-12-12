@@ -76,7 +76,6 @@ const Breadcrumbs = () => {
   );
 };
 
-// --- COMPONENT NAVBAR CHÍNH ---
 
 export default function Navbar({ toggleSidebar }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -99,7 +98,6 @@ export default function Navbar({ toggleSidebar }) {
   return (
     <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-10 shadow-sm">
       
-      {/* Bên trái: Menu toggle + Breadcrumbs */}
       <div className="flex items-center gap-4">
         <button
           onClick={toggleSidebar}
@@ -110,14 +108,12 @@ export default function Navbar({ toggleSidebar }) {
         <Breadcrumbs />
       </div>
 
-      {/* Bên phải: Noti + Profile */}
       <div className="flex items-center gap-4">
         <button className="relative w-10 h-10 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
           <Bell className="w-5 h-5" />
           <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 border-2 border-white rounded-full"></span>
         </button>
 
-        {/* Profile Dropdown */}
         <div className="relative">
           <button
             onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -130,7 +126,6 @@ export default function Navbar({ toggleSidebar }) {
               className="w-8 h-8 rounded-full object-cover border border-slate-200 group-hover:border-blue-300 transition-colors"
             />
             
-            {/* HIỂN THỊ LỜI CHÀO */}
             <div className="hidden md:flex flex-col items-start text-left">
                 <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider leading-none mb-0.5">
                   Xin chào,
@@ -147,7 +142,6 @@ export default function Navbar({ toggleSidebar }) {
             />
           </button>
 
-          {/* Menu thả xuống */}
           {isProfileOpen && (
             <div className="absolute top-14 right-0 z-50 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
               <div className="px-4 py-3 border-b border-slate-100">

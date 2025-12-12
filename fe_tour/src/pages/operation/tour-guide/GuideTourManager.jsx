@@ -15,30 +15,23 @@ const GuideTourManager = () => {
     const [filter, setFilter] = useState('all'); 
     const [confirmingId, setConfirmingId] = useState(null);
 
-    // Load dữ liệu
     const fetchMyTours = async () => {
         setLoading(true);
         try {
-            // Gọi API: GET /staff-assignments/my-assignments
-            const res = await staffAssignmentService.getMyTours({ limit: 50 }); // Lấy 50 tour gần nhất
-            
-            // [FIX] Xử lý linh hoạt cấu trúc dữ liệu trả về để tránh lỗi mảng rỗng
+            const res = await staffAssignmentService.getMyTours({ limit: 50 }); 
+
             let list = [];
             if (res.data && Array.isArray(res.data.data)) {
-                // Trường hợp chuẩn: { data: { data: [...] } }
                 list = res.data.data;
             } else if (res.data && Array.isArray(res.data)) {
-                // Trường hợp API trả về mảng trong data: { data: [...] }
                 list = res.data;
             } else if (Array.isArray(res.data)) {
-                // Trường hợp axios interceptor trả về body là mảng
                 list = res.data;
             } else if (res.data?.tours && Array.isArray(res.data.tours)) {
-                // Trường hợp custom key: { data: { tours: [...] } }
                 list = res.data.tours;
             }
 
-            console.log("Guide Tours Loaded:", list); // Debug log
+            console.log("Guide Tours Loaded:", list); 
             setTours(list);
         } catch (error) {
             console.error(error);
@@ -52,7 +45,6 @@ const GuideTourManager = () => {
         fetchMyTours();
     }, []);
 
-    // Xử lý Xác nhận nhận tour
     const handleConfirmAssignment = async (assignmentId) => {
         if (!window.confirm("Bạn xác nhận sẽ nhận nhiệm vụ này?")) return;
         
@@ -61,7 +53,6 @@ const GuideTourManager = () => {
             await staffAssignmentService.confirmAssignment(assignmentId);
             toast.success("Đã xác nhận nhiệm vụ");
             
-            // Cập nhật UI ngay lập tức
             setTours(prev => prev.map(t => 
                 t.assignment_id === assignmentId ? { ...t, confirmed: 1 } : t
             ));
@@ -72,7 +63,6 @@ const GuideTourManager = () => {
         }
     };
 
-    // Filter Logic
     const getFilteredTours = () => {
         const now = new Date();
         now.setHours(0,0,0,0);
@@ -83,18 +73,15 @@ const GuideTourManager = () => {
             const depDate = new Date(tour.departure_date);
             const retDate = tour.return_date ? new Date(tour.return_date) : depDate;
 
-            // Logic lọc theo tab
             if (filter === 'upcoming') return depDate > now && tour.departure_status !== 'cancelled';
             if (filter === 'ongoing') return depDate <= now && retDate >= now && tour.departure_status !== 'cancelled';
             if (filter === 'completed') return retDate < now || tour.departure_status === 'completed';
-            // 'all' hiển thị tất cả
             return true;
         });
     };
 
     const filteredTours = getFilteredTours();
 
-    // Helper: Badge màu sắc cho trạng thái Tour
     const getStatusInfo = (status, date, retDate) => {
         const now = new Date();
         const start = new Date(date);
@@ -113,7 +100,6 @@ const GuideTourManager = () => {
         return { color: 'bg-gray-100 text-gray-500 border-gray-200', label: 'Kết thúc' };
     };
 
-    // Mapping Role Name sang tiếng Việt
     const getRoleName = (role) => {
         if (!role) return 'Nhân viên';
         const map = {
@@ -192,7 +178,6 @@ const GuideTourManager = () => {
                                         !isConfirmed ? 'border-amber-300 shadow-md shadow-amber-100 ring-1 ring-amber-200' : 'border-slate-200 shadow-sm hover:shadow-md'
                                     }`}
                                 >
-                                    {/* Badge "Mới" nếu chưa confirm */}
                                     {!isConfirmed && (
                                         <div className="absolute top-0 right-0 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10 shadow-sm">
                                             NHIỆM VỤ MỚI
@@ -224,7 +209,7 @@ const GuideTourManager = () => {
                                                     #{tour.departure_code}
                                                 </span>
                                                 <span className="flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-100">
-                                                    {/* [FIX] Thêm ?. để tránh crash nếu role null */}
+
                                                     <Briefcase size={12}/> {getRoleName(tour.role)?.toUpperCase()}
                                                 </span>
                                             </div>

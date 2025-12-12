@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Calendar, User, DollarSign, MapPin, FileText, Clock, Image as ImageIcon } from 'lucide-react';
-import StatusBadge from '../../ui/StatusBadge'; // Đảm bảo bạn đã có component này hoặc xóa dòng này nếu không dùng
+import StatusBadge from '../../ui/StatusBadge'; 
 
 const BookingDetailModal = ({ isOpen, onClose, booking }) => {
   if (!isOpen || !booking) return null;
@@ -63,7 +63,6 @@ const BookingDetailModal = ({ isOpen, onClose, booking }) => {
           </button>
         </div>
 
-        {/* Body - Có thanh cuộn */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-slate-200">
             
             {/* 1. Thông tin chính */}
@@ -91,7 +90,6 @@ const BookingDetailModal = ({ isOpen, onClose, booking }) => {
                 </div>
             </div>
 
-            {/* 2. Timeline Lịch sử & Ảnh */}
             <div>
                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 pb-2 border-b border-slate-100">
                     <Clock size={18} className="text-blue-600"/> Lịch sử xử lý & Minh chứng
@@ -109,12 +107,11 @@ const BookingDetailModal = ({ isOpen, onClose, booking }) => {
                                 <div className="absolute -left-[7px] top-0 w-3.5 h-3.5 rounded-full bg-white border-2 border-blue-400 ring-2 ring-blue-50"></div>
                                 
                                 <div className="text-sm">
-                                    {/* Nội dung text */}
+
                                     <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-sm text-slate-700 leading-relaxed">
                                         {item.text}
                                     </div>
                                     
-                                    {/* Hiển thị ảnh nếu có */}
                                     {item.imgUrl && (
                                         <div className="mt-3">
                                             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">

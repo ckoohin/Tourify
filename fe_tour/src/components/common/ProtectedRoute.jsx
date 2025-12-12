@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; // Sửa lại đường dẫn import nếu cần
+import { useAuth } from '../../context/AuthContext'; 
 import toast from 'react-hot-toast';
 import { Loader2 } from 'lucide-react';
 
@@ -25,21 +25,15 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     );
   }
 
-  // 1. Kiểm tra đăng nhập
+
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-
-  // 2. Kiểm tra quyền (Role)
-  // Logic: Nếu route có yêu cầu allowedRoles VÀ user không có quyền đó -> Chặn
-  // Lưu ý: Đảm bảo object 'user' từ AuthContext có chứa field 'role' là object hoặc string slug
-  // Ví dụ structure mong đợi: user = { id: 1, name: '...', role: { slug: 'admin' } }
   
   if (allowedRoles && allowedRoles.length > 0) {
-    const userRoleSlug = user?.role?.slug || user?.role; // Support cả object hoặc string
+    const userRoleSlug = user?.role?.slug || user?.role; 
 
     if (!userRoleSlug || !allowedRoles.includes(userRoleSlug)) {
-      // Có thể redirect về trang 403 hoặc trang chủ
       return <Navigate to="/unauthorized" replace />;
     }
   }
