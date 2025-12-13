@@ -1,8 +1,8 @@
 import React from 'react';
-import { Edit, Trash2, Star, Phone, MapPin, Hotel, Utensils, Bus, Map as MapIcon, ShieldCheck, FileText } from 'lucide-react';
+import { Edit, Trash2, Star, Phone, MapPin, Hotel, Utensils, Bus, Map as MapIcon, ShieldCheck, FileText, Eye } from 'lucide-react';
 import StatusBadge from '../ui/StatusBadge';
 
-const SupplierTable = ({ suppliers, onDelete, onEdit }) => {
+const SupplierTable = ({ suppliers, onDelete, onEdit, onViewDetail }) => {
   
   const getTypeIcon = (type) => {
     switch(type) {
@@ -94,8 +94,16 @@ const SupplierTable = ({ suppliers, onDelete, onEdit }) => {
                 <td className="p-4 text-right">
                     <div className="flex justify-end gap-2">
                     <button 
+                        onClick={() => onViewDetail && onViewDetail(sup)} 
+                        className="p-2 text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
+                        title="Xem chi tiết"
+                    >
+                        <Eye size={18} />
+                    </button>
+                    <button 
                         onClick={() => onEdit(sup)} 
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title="Chỉnh sửa"
                     >
                         <Edit size={18} />
                     </button>

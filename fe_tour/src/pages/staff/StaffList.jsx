@@ -7,6 +7,7 @@ import Pagination from '../../components/ui/Pagination';
 import Modal from '../../components/ui/Modal'; 
 import StaffForm from '../../components/staff/StaffForm';
 import StaffSchedule from '../../components/staff/StaffSchedule'; 
+import StaffDetailModal from '../../components/staff/StaffDetailModal'; 
 import toast from 'react-hot-toast';
 
 const StaffList = () => {
@@ -27,6 +28,10 @@ const StaffList = () => {
   const [stats, setStats] = useState(null); 
   const [isFetchingDetail, setIsFetchingDetail] = useState(false);
 
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [viewStaffData, setViewStaffData] = useState(null);
+  const [viewStaffStats, setViewStaffStats] = useState(null);
+
   const fetchStaff = async () => {
     setLoading(true);
     try {
@@ -43,7 +48,6 @@ const StaffList = () => {
             setTotalPages(res.pagination.totalPages);
             setTotalItems(res.pagination.total || res.pagination.totalItems || 0);
         } else if (res.total) {
-
             setTotalItems(res.total);
             setTotalPages(Math.ceil(res.total / ITEMS_PER_PAGE));
         }
@@ -83,10 +87,26 @@ const StaffList = () => {
             setStats(res.data.stats);
         }
     } catch (error) {
-        toast.error("Lỗi tải chi tiết nhân viên",error);
+        toast.error("Lỗi tải chi tiết nhân viên");
         setIsModalOpen(false);
     } finally {
         setIsFetchingDetail(false);
+    }
+  };
+
+  const handleViewDetail = async (staff) => {
+    setDetailModalOpen(true);
+    setViewStaffData(staff); 
+    setViewStaffStats(null);
+    
+    try {
+        const res = await staffService.getById(staff.id);
+        if (res.success) {
+            setViewStaffData(res.data.staff);
+            setViewStaffStats(res.data.stats);
+        }
+    } catch (error) {
+        console.error(error);
     }
   };
 
@@ -124,7 +144,12 @@ const StaffList = () => {
          <div className="flex justify-center p-12"><Loader2 className="animate-spin w-8 h-8 text-blue-600"/></div>
       ) : (
          <>
-            <StaffTable staffList={staffList} onDelete={handleDelete} onEdit={handleOpenEdit} />
+            <StaffTable 
+                staffList={staffList} 
+                onDelete={handleDelete} 
+                onEdit={handleOpenEdit} 
+                onViewDetail={handleViewDetail} 
+            />
             
             <div className="mt-6 bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
                 <Pagination 
@@ -214,6 +239,13 @@ const StaffList = () => {
             </>
         )}
       </Modal>
+
+      <StaffDetailModal 
+        isOpen={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        staff={viewStaffData}
+        stats={viewStaffStats}
+      />
     </div>
   );
 };

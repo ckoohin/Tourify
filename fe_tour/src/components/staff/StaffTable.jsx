@@ -1,8 +1,8 @@
 import React from 'react';
-import { Edit, Trash2, Star, Phone, Mail, Bus, User, Map } from 'lucide-react';
+import { Edit, Trash2, Star, Phone, Mail, Bus, User, Map, Eye } from 'lucide-react';
 import StatusBadge from '../ui/StatusBadge';
 
-const StaffTable = ({ staffList, onDelete, onEdit }) => {
+const StaffTable = ({ staffList, onDelete, onEdit, onViewDetail }) => {
   
   const getRoleIcon = (type) => {
     switch(type) {
@@ -108,12 +108,26 @@ const StaffTable = ({ staffList, onDelete, onEdit }) => {
               <td className="p-4 text-right">
                 <div className="flex justify-end gap-2">
                   <button 
+                    onClick={() => onViewDetail && onViewDetail(staff)} 
+                    className="p-2 text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
+                    title="Xem chi tiết"
+                  >
+                    <Eye size={18} />
+                  </button>
+                  <button 
                     onClick={() => onEdit(staff)} 
                     className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                    title="Chỉnh sửa"
                   >
                     <Edit size={18} />
                   </button>
-                  <button onClick={() => onDelete(staff.id)} className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"><Trash2 size={18} /></button>
+                  <button 
+                    onClick={() => onDelete(staff.id)} 
+                    className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                    title="Xóa"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
               </td>
             </tr>

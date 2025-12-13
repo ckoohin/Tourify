@@ -1,8 +1,8 @@
 import React from 'react';
-import { Phone, Mail, Eye, MoreHorizontal, FileText, Edit, Trash2 } from 'lucide-react';
+import { Phone, Mail, Eye, Edit, Trash2, FileText } from 'lucide-react';
 import StatusBadge from '../ui/StatusBadge';
 
-const CustomerTable = ({ customers, loading, onViewNote, onEdit, onDelete }) => {
+const CustomerTable = ({ customers, loading, onViewDetail, onEdit, onDelete }) => {
   
   const getTypeConfig = (type) => {
     const map = {
@@ -44,8 +44,8 @@ const CustomerTable = ({ customers, loading, onViewNote, onEdit, onDelete }) => 
                       {cust.company_name && (
                         <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">🏢 {cust.company_name}</div>
                       )}
-                      {cust.is_vip === 1 && <span className="ml-2 text-[10px] bg-yellow-100 text-yellow-800 px-1.5 rounded border border-yellow-200">VIP</span>}
-                      {cust.is_blacklist === 1 && <span className="ml-2 text-[10px] bg-red-100 text-red-800 px-1.5 rounded border border-red-200">Blacklist</span>}
+                      {String(cust.is_vip) === '1' && <span className="ml-2 text-[10px] bg-yellow-100 text-yellow-800 px-1.5 rounded border border-yellow-200">VIP</span>}
+                      {String(cust.is_blacklist) === '1' && <span className="ml-2 text-[10px] bg-red-100 text-red-800 px-1.5 rounded border border-red-200">Blacklist</span>}
                     </td>
                     <td className="p-4">
                       <div className="flex flex-col gap-1.5">
@@ -64,20 +64,28 @@ const CustomerTable = ({ customers, loading, onViewNote, onEdit, onDelete }) => 
                     </td>
                     <td className="p-4 text-center">
                       {cust.notes ? (
-                        <button 
-                          onClick={() => onViewNote(cust)}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800 rounded-md text-xs font-medium transition-all border border-amber-200/50"
-                          title="Xem ghi chú đặc biệt"
+                        <div 
+                          className="inline-flex items-center gap-1 text-xs text-amber-600 font-medium cursor-help"
+                          title={cust.notes}
                         >
                           <FileText size={14} /> 
-                          <span>Chi tiết</span>
-                        </button>
+                          <span className="max-w-[100px] truncate">{cust.notes}</span>
+                        </div>
                       ) : (
                         <span className="text-gray-300">-</span>
                       )}
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end gap-2">
+                        {/* Nút Xem chi tiết */}
+                        <button 
+                          onClick={() => onViewDetail(cust)}
+                          className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-transparent hover:border-emerald-100" 
+                          title="Xem chi tiết"
+                        >
+                          <Eye size={18} />
+                        </button>
+
                         {/* Nút Sửa */}
                         <button 
                           onClick={() => onEdit(cust)}

@@ -6,6 +6,7 @@ import SupplierFilter from '../../components/suppliers/SupplierFilter';
 import Pagination from '../../components/ui/Pagination';
 import Modal from '../../components/ui/Modal'; 
 import SupplierForm from '../../components/suppliers/SupplierForm';
+import SupplierDetailModal from '../../components/suppliers/SupplierDetailModal'; 
 import toast from 'react-hot-toast';
 
 const ProviderList = () => {
@@ -21,6 +22,9 @@ const ProviderList = () => {
   const [selectedSupplierId, setSelectedSupplierId] = useState(null);
   const [selectedSupplierData, setSelectedSupplierData] = useState(null);
   const [isFetchingDetail, setIsFetchingDetail] = useState(false);
+
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [viewSupplierData, setViewSupplierData] = useState(null);
 
   const fetchSuppliers = async () => {
     setLoading(true);
@@ -95,6 +99,21 @@ const ProviderList = () => {
     }
   };
 
+  const handleViewDetail = async (supplier) => {
+    setDetailModalOpen(true);
+    setViewSupplierData(supplier); 
+    
+    try {
+        const res = await supplierService.getById(supplier.id);
+        if (res.success) {
+            const data = Array.isArray(res.data.supplier) ? res.data.supplier[0] : res.data.supplier;
+            setViewSupplierData(data);
+        }
+    } catch (error) {
+        console.error("Lỗi tải chi tiết xem:", error);
+    }
+  };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setTimeout(() => {
@@ -164,7 +183,12 @@ const ProviderList = () => {
          <div className="flex justify-center p-12"><Loader2 className="animate-spin w-8 h-8 text-blue-600"/></div>
       ) : (
          <>
-            <SupplierTable suppliers={currentItems} onDelete={handleDelete} onEdit={handleOpenEdit} />
+            <SupplierTable 
+                suppliers={currentItems} 
+                onDelete={handleDelete} 
+                onEdit={handleOpenEdit} 
+                onViewDetail={handleViewDetail} 
+            />
             
             <div className="mt-6">
                 <Pagination 
@@ -177,7 +201,6 @@ const ProviderList = () => {
          </>
       )}
 
-      {/* --- MODAL --- */}
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
@@ -198,6 +221,12 @@ const ProviderList = () => {
             />
         )}
       </Modal>
+
+      <SupplierDetailModal 
+        isOpen={detailModalOpen}
+        onClose={() => setDetailModalOpen(false)}
+        supplier={viewSupplierData}
+      />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import CustomerTable from '../../components/customers/CustomerTable';
 import CustomerNoteModal from '../../components/customers/CustomerNoteModal';
 import CustomerExportButton from '../../components/customers/CustomerExportButton';
 import CustomerForm from '../../components/customers/CustomerForm';
+import CustomerDetailModal from '../../components/customers/CustomerDetailModal'; 
 import Pagination from '../../components/ui/Pagination';
 
 const CustomerList = () => {
@@ -23,6 +24,8 @@ const CustomerList = () => {
   });
 
   const [noteModal, setNoteModal] = useState({ open: false, content: '', name: '' });
+  
+  const [detailModal, setDetailModal] = useState({ open: false, data: null });
 
   const [formModal, setFormModal] = useState({ open: false, type: 'create', data: null });
 
@@ -135,6 +138,10 @@ const CustomerList = () => {
     setNoteModal({ open: true, content: customer.notes, name: customer.full_name });
   };
 
+  const handleViewDetail = (customer) => {
+    setDetailModal({ open: true, data: customer });
+  };
+
   const handleCloseNoteModal = () => {
     setNoteModal(prev => ({ ...prev, open: false }));
   };
@@ -155,6 +162,7 @@ const CustomerList = () => {
       <CustomerTable 
         customers={customers} 
         loading={loading} 
+        onViewDetail={handleViewDetail} 
         onViewNote={handleViewNote}
         onEdit={handleEdit} 
         onDelete={handleDelete} 
@@ -169,11 +177,18 @@ const CustomerList = () => {
           />
       </div>
 
+      {/* Các Modal */}
       <CustomerNoteModal 
         isOpen={noteModal.open}
         onClose={handleCloseNoteModal}
         content={noteModal.content}
         name={noteModal.name}
+      />
+
+      <CustomerDetailModal 
+        isOpen={detailModal.open}
+        onClose={() => setDetailModal({ ...detailModal, open: false })}
+        customer={detailModal.data}
       />
 
       <CustomerForm 

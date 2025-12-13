@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Plus, Loader2, ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -48,8 +48,6 @@ const TourList = () => {
       if (res.success) {
         const data = res.data?.tours || [];
         setAllTours(data);
-        setTotalPages(Math.ceil(data.length / ITEMS_PER_PAGE));
-        setCurrentPage(1);
       }
     } catch (error) {
       console.error("Lỗi tải danh sách tour:", error);
@@ -63,13 +61,42 @@ const TourList = () => {
     fetchTours();
   }, [filters]);
 
+  const filteredTours = useMemo(() => {
+    return allTours.filter(tour => {
+      const matchKeyword = !filters.keyword || 
+        (tour.name?.toLowerCase().includes(filters.keyword.toLowerCase()) || 
+         tour.code?.toLowerCase().includes(filters.keyword.toLowerCase()));
+
+      const matchCategory = !filters.category_id || 
+        tour.category_id == filters.category_id;
+
+      const matchStatus = !filters.status || 
+        tour.status === filters.status;
+
+      return matchKeyword && matchCategory && matchStatus;
+    });
+  }, [allTours, filters]);
+
+  useEffect(() => {
+    const total = Math.ceil(filteredTours.length / ITEMS_PER_PAGE) || 1;
+    setTotalPages(total);
+    
+    if (currentPage > total) {
+      setCurrentPage(1);
+    }
+  }, [filteredTours.length, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
+
   useEffect(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    const slicedData = allTours.slice(startIndex, endIndex);
+    const slicedData = filteredTours.slice(startIndex, endIndex);
     setDisplayTours(slicedData);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentPage, allTours]);
+  }, [currentPage, filteredTours]);
 
   const handleFilterChange = (newFilters) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
@@ -144,7 +171,7 @@ const TourList = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Danh sách Tour</h1>
-          <p className="text-slate-500 mt-1 text-sm">Quản lý {allTours.length} tour du lịch trong hệ thống</p>
+          <p className="text-slate-500 mt-1 text-sm">Quản lý {filteredTours.length} tour du lịch trong hệ thống</p>
         </div>
         <div className="flex gap-3">
           <button 

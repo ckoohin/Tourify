@@ -11,7 +11,6 @@ const TourFilter = ({ onFilterChange }) => {
   });
 
   const [categories, setCategories] = useState([]);
-  const [isExpanded, setIsExpanded] = useState(false); 
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -19,7 +18,7 @@ const TourFilter = ({ onFilterChange }) => {
         const res = await tourCategoryService.getAll(); 
         
         if (res.success && res.data?.categories) {
-          const activeCategories = res.data.categories.filter(cat => cat.is_active === 1);
+          const activeCategories = res.data.categories.filter(cat => cat.is_active === 1 || cat.is_active === true);
           setCategories(activeCategories);
         }
       } catch (error) {
@@ -31,10 +30,17 @@ const TourFilter = ({ onFilterChange }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFilters(prev => ({
-      ...prev,
+    
+    const newFilters = {
+      ...filters,
       [name]: value
-    }));
+    };
+
+    setFilters(newFilters);
+
+    if (name === 'category_id' || name === 'status') {
+      onFilterChange(newFilters);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -73,7 +79,11 @@ const TourFilter = ({ onFilterChange }) => {
               {filters.keyword && (
                 <button 
                   type="button"
-                  onClick={() => handleChange({ target: { name: 'keyword', value: '' } })}
+                  onClick={() => {
+                    const newFilters = { ...filters, keyword: '' };
+                    setFilters(newFilters);
+                    onFilterChange(newFilters); 
+                  }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 >
                   <X className="w-3 h-3" />
@@ -89,7 +99,7 @@ const TourFilter = ({ onFilterChange }) => {
               name="category_id" 
               value={filters.category_id}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer"
             >
               <option value="">Tất cả danh mục</option>
               {categories.map(cat => (
@@ -105,7 +115,7 @@ const TourFilter = ({ onFilterChange }) => {
               name="status" 
               value={filters.status}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer"
             >
               <option value="">Tất cả</option>
               <option value="active">Đang hoạt động</option>

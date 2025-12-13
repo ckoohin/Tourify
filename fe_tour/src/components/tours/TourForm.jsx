@@ -95,7 +95,6 @@ const TourForm = ({
 
             } catch (error) {
                 console.error("Lỗi load dữ liệu mở rộng:", error);
-                toast.error("Không thể tải đầy đủ thông tin chi tiết");
             }
             
             setFormData(baseData);
@@ -224,6 +223,7 @@ const TourForm = ({
 
         let tourId = null;
 
+        // TRƯỜNG HỢP 1: Sao chép Tour (Clone)
         if (isCloneMode && initialData) {
             const clonePayload = {
                 new_code: formData.code,
@@ -232,14 +232,29 @@ const TourForm = ({
             };
 
             const res = await tourService.cloneTour(initialData.id, clonePayload);
-
             toast.success("Sao chép tour thành công!");
             onSuccess();
             onClose();
             return; 
         }
 
+        if (initialData && !isCloneMode) {
+            await tourService.updateTour(initialData.id, tourPayload);
+            tourId = initialData.id;
+        } 
+        else {
+            const res = await tourService.createTour(tourPayload);
+            if (res.data && res.data.id) {
+                tourId = res.data.id;
+            } else if (res.data && res.data.tour && res.data.tour.id) {
+                tourId = res.data.tour.id;
+            } else if (res.data && res.data.insertId) {
+                tourId = res.data.insertId;
+            }
+        }
+
         if (!tourId) throw new Error("Không xác định được ID Tour để lưu dữ liệu chi tiết.");
+
         const verRes = await tourService.getVersions(tourId);
         const versions = verRes.data?.tourVersions || verRes.data?.versions || [];
         let defaultVersionId = versions.find(v => v.is_default)?.id;
@@ -253,7 +268,7 @@ const TourForm = ({
                 is_active: true 
             };
             const newVerRes = await tourService.createVersion(verPayload);
-            defaultVersionId = newVerRes.data?.tourVersion?.id || newVerRes.data?.id;
+            defaultVersionId = newVerRes.data?.tourVersion?.id || newVerRes.data?.id || newVerRes.data?.insertId;
         }
 
         if (defaultVersionId) {
@@ -439,7 +454,7 @@ const TourForm = ({
                     </div>
                 </div>
 
-                {/* 2. ITINERARY TAB (Unified) */}
+                {/* 2. ITINERARY TAB */}
                 <div className={activeTab === 'itinerary' ? 'block space-y-6' : 'hidden'}>
                     {formData.itineraries.length === 0 ? (
                         <div className="text-center py-16 bg-white rounded-xl border border-dashed border-slate-300">
@@ -545,7 +560,7 @@ const TourForm = ({
                     </div>
                 </div>
 
-                {/* 4. POLICY TAB (Unified) */}
+                {/* 4. POLICY TAB */}
                 <div className={activeTab === 'policy' ? 'block space-y-4' : 'hidden'}>
                     {formData.policies.map((policy, idx) => (
                         <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 flex gap-4 items-start">

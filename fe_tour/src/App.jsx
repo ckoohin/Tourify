@@ -18,7 +18,6 @@ import TourEdit from './pages/tour/TourEdit';
 import CategoryList from './pages/categories/CategoryList';
 import BookingList from './pages/booking/BookingList';
 import CustomerList from './pages/customer/CustomerList';
-import CustomerDetail from './pages/customer/CustomerDetail';
 import StaffList from './pages/staff/StaffList';
 import StaffCreate from './pages/staff/StaffCreate';
 import StaffEdit from './pages/staff/StaffEdit';
@@ -79,17 +78,14 @@ function App() {
             <Route path="/bookings-services" element={<ServiceList />} />
             
 
-            {/* MODULE ĐIỀU HÀNH (OPERATION) */}
             <Route path="/departures" element={<DepartureList />} />
         
-            {/* Trang chi tiết (Chứa ServiceList, ExpenseList trong các Tabs) */}
             <Route path="/departures/:id" element={<DepartureDetail />} />
         
             {/* Trang báo cáo chi phí riêng biệt */}
             
             {/* Customer Management */}
             <Route path="/customers" element={<CustomerList />} />
-            <Route path="/customers/:id" element={<CustomerDetail />} />
             
             {/* Staff Management */}
             <Route path="/staff" element={<StaffList />} />  
